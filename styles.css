@@ -106,16 +106,6 @@ main h2 { font-size: clamp(32px, 5vw, 50px); font-weight: 800; letter-spacing: -
 .lead { margin: var(--s-3) 0 0; max-width: 60ch; font: italic 400 20px/1.5 var(--f-display); color: var(--ink-soft); }
 
 /* ---------- três contextos: post-its ---------- */
-.uses { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--s-5) var(--s-4); }
-.uses section { position: relative; padding: 18px 18px 16px; background: var(--note-2); border: 2px solid var(--edge); border-radius: 4px 10px 6px 12px; box-shadow: var(--hard); transition: transform .2s ease, box-shadow .2s ease; }
-.uses section::before { content: ""; position: absolute; top: -11px; left: 50%; width: 76px; height: 20px; margin-left: -38px; background: color-mix(in srgb, var(--wheat) 55%, transparent); transform: rotate(-3deg); border-radius: 2px; }
-.uses section:nth-child(1) { background: var(--note-1); transform: rotate(-1.4deg); }
-.uses section:nth-child(2) { background: var(--note-2); transform: rotate(.9deg); }
-.uses section:nth-child(3) { background: var(--note-3); transform: rotate(-.6deg); }
-.uses section:hover { transform: rotate(0) translateY(-4px); box-shadow: 6px 8px 0 var(--shadow); }
-.uses h3 { font: 700 27px/1 var(--f-hand); color: var(--area-ink); margin-bottom: 6px; }
-.uses p { margin: 0; font-size: 16px; }
-.uses section.me h3 { color: var(--water); }
 
 /* ---------- laboratório ---------- */
 .lab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 310px); gap: var(--s-4); align-items: start; }
@@ -207,8 +197,6 @@ main > .head, main > div:first-child { animation: enterUp .45s ease both; }
 .extra { animation: enterDrop .55s .26s cubic-bezier(.3, 1.4, .5, 1) both; }
 .ctx { animation: enterUp .5s .3s ease both; }
 .pywrap, main > div:last-child:not(.extra):not(.head) { animation: enterWipe .6s .38s ease both; }
-.uses section { animation: enterUp .5s ease both; }
-.uses section:nth-child(2) { animation-delay: .08s; } .uses section:nth-child(3) { animation-delay: .16s; }
 
 /* ---------- layout didático ---------- */
 .gancho { margin: var(--s-3) 0 0; max-width: 24ch; font: 800 clamp(24px, 3.6vw, 34px)/1.15 var(--f-display); font-style: italic; color: var(--terra); font-variation-settings: "SOFT" 100, "WONK" 1; }

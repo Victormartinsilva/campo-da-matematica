@@ -123,15 +123,9 @@ const det3 = A => A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) - A[0][1] * 
 const MODS = [];
 
 MODS.push({id: "funcao", grupo: "Cálculo", nome: "Funções",
-  lead: "Uma função é uma regra que transforma uma entrada em uma saída. Todo o resto do cálculo conversa com ela.",
   campo: "Toda recomendação técnica é uma função: dose de adubo vira produtividade, lâmina de água vira produção, temperatura vira ritmo de desenvolvimento. Sem a função você só tem uma tabela de pontos soltos.",
   dia: "Frete por quilômetro, conta de energia e parcela de financiamento são funções. Conhecer o domínio evita extrapolar: uma dose de 1.000 kg/ha não rende 1.000 sacas.",
-  python: `def produtividade(x):          # x em kg de N por hectare
-    return 80 + 0.30*x - 0.0009*x**2
-
-for dose in (0, 100, 200, 300):
-    print(dose, produtividade(dose))`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const FN = [
       {nome: "Frete: custo por distância (linear)", f: x => 120 + 3.5 * x, a: 0, b: 200, xu: "km", yu: "R$", eq: "C(x) = 120 + 3,5·x", xl: "distância (km)", yl: "custo (R$)"},
       {nome: "Adubação: produtividade (quadrática)", f: x => 80 + 0.30 * x - 0.0009 * x * x, a: 0, b: 300, xu: "kg N/ha", yu: "sc/ha", eq: "y(x) = 80 + 0,30·x − 0,0009·x²", xl: "dose de N (kg/ha)", yl: "produtividade (sc/ha)"},
@@ -149,20 +143,22 @@ for dose in (0, 100, 200, 300):
         <div>Domínio mostrado: de ${F.a} a ${F.b} ${F.xu}.</div>
         <div>Se a entrada subir 1 ${F.xu}, a saída muda cerca de <b>${fmt(F.f(x + 1) - y, 3)} ${F.yu}</b>. Medir essa mudança é o trabalho da derivada.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("funcao", extra, {
+      state: () => { const F = FN[k], x = F.a + xs.get() * (F.b - F.a); return {k, x, y: F.f(x)}; },
+      goals: [
+        {t: "Na adubação, ache uma dose em que a produtividade passe de 104 sc/ha.", ok: s => s.k === 1 && s.y > 104, win: () => "Achou o topo da curva: depois dele, mais adubo não ajuda."},
+        {t: "No frete, deixe o custo abaixo de R$ 300.", ok: s => s.k === 0 && s.y < 300, win: () => "Custo baixo: o frete cresce em linha reta com a distância."}
+      ],
+      react: s => s.k === 2 ? ["A praga explode: cada dia multiplica a população.", "worried"] : s.k === 1 && s.y > 100 ? ["Está perto do topo da curva de produtividade.", "happy"] : ["Mude a entrada e acompanhe a saída.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "limite", grupo: "Cálculo", nome: "Limites",
-  lead: "O limite responde para onde a função está indo quando você chega perto de um ponto, mesmo que ela nem exista nele.",
   campo: "O que acontece com a produtividade quando a dose cresce sem parar? Ela satura em um platô. Concentração de nutriente na solução, temperatura de equilíbrio e tamanho de amostra grande também são perguntas de limite.",
   dia: "É a forma rigorosa de lidar com o 0/0 e com o “tende a”. Derivada e integral são definidas como limites. Também mostra quando um modelo quebra, como em degraus de tarifa ou divisão por zero.",
-  python: `import numpy as np
-
-f = lambda x: (x**2 - 1)/(x - 1)     # indefinida em x = 1
-for p in range(1, 7):
-    h = 10**-p
-    print(h, f(1 - h), f(1 + h))     # os dois lados chegam em 2`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const CS = [
       {nome: "(x² − 1)/(x − 1) perto de x = 1", f: x => (x * x - 1) / (x - 1), a: 1, y0: 0, y1: 4, hole: 2},
       {nome: "sen(x)/x perto de x = 0", f: x => Math.sin(x) / x, a: 0, y0: -0.4, y1: 1.3, hole: 1},
@@ -186,20 +182,22 @@ for p in range(1, 7):
       R.innerHTML = `<div>pela esquerda: f(${fmt(a - h, 4)}) = <b>${fmt(L, 4)}</b></div><div>pela direita: f(${fmt(a + h, 4)}) = <b>${fmt(Rr, 4)}</b></div>
         <div>no ponto: f(${a}) ${fin ? "= <b>" + fmt(fa, 3) + "</b>" : "é <b>indefinida</b>"}</div><div>${verdict}</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("limite", extra, {
+      state: () => ({k, h: Math.pow(10, -hs.get())}),
+      goals: [
+        {t: "Em (x² − 1)/(x − 1), leve h abaixo de 0,001: os dois lados chegam em 2.", ok: s => s.k === 0 && s.h < 0.001, win: () => "Os dois lados chegam em 2. O buraco não atrapalha o limite."},
+        {t: "No 1/x, leve h abaixo de 0,01 e veja os lados irem para lugares diferentes.", ok: s => s.k === 2 && s.h < 0.01, win: () => "Um lado vai para menos infinito e o outro para mais infinito. Sem limite."}
+      ],
+      react: s => s.h < 0.01 ? (s.k >= 2 ? ["Os lados discordam: aqui o limite não existe.", "worried"] : ["Os dois lados se encontram: o limite existe.", "happy"]) : ["Diminua h para chegar mais perto do ponto.", "thinking"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
-  lead: "A derivada é a inclinação da reta que encosta na curva num ponto. Ela mede quão rápido a saída muda quando a entrada muda.",
   campo: "Quanto cada kg extra de nitrogênio rende (produto marginal). Quão rápido a planta cresce hoje. Vazão é a derivada do volume no tempo. Taxa de infiltração é a derivada da lâmina infiltrada.",
   dia: "O velocímetro é a derivada da posição. Em inteligência artificial, treinar um modelo é descer uma ladeira guiado por derivadas. A reta tangente é a melhor aproximação linear perto do ponto.",
-  python: `import sympy as sp
-
-x = sp.symbols('x')
-y = 80 + 0.30*x - 0.0009*x**2
-dy = sp.diff(y, x)                  # 0.3 - 0.0018*x
-print(dy.subs(x, 100))              # 0.12 sc/ha por kg de N`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const DF = [
       {nome: "Produtividade × adubo", f: x => 80 + 0.30 * x - 0.0009 * x * x, df: x => 0.30 - 0.0018 * x, a: 0, b: 300, xu: "kg N/ha", yu: "sc/ha", x0: 100},
       {nome: "Altura da planta × dias", f: t => 200 / (1 + Math.exp(-0.25 * (t - 20))), df: t => { const e = Math.exp(-0.25 * (t - 20)); return 50 * e / ((1 + e) ** 2); }, a: 0, b: 40, xu: "dia", yu: "cm", x0: 20},
@@ -225,22 +223,22 @@ print(dy.subs(x, 100))              # 0.12 sc/ha por kg de N`,
       const [dl, dh] = range(F.df, F.a, F.b), dp = (dh - dl) * 0.15 || 1, q = plane(c2, F.a, F.b, dl - dp, dh + dp, F.xu || "x", "f′(x): taxa de variação");
       q.curve(F.df, css("--amber")); q.line(F.a, 0, F.b, 0, css("--axis"), 1, [4, 4]); q.line(x0, 0, x0, mt, css("--good"), 1.5, [4, 4]); q.dot(x0, mt, css("--good"));
     }
-    draw(); return draw;
+    draw();
+    kit("derivada", extra, {
+      state: () => { const F = DF[k], w = F.b - F.a, x0 = F.a + xs.get() * w, h = w * Math.pow(10, -hs.get()); return {k, x0, diff: Math.abs((F.f(x0 + h) - F.f(x0)) / h - F.df(x0))}; },
+      goals: [
+        {t: "Diminua h até a secante e a tangente diferirem menos que 0,001.", ok: s => s.diff < 0.001, win: () => "A secante virou tangente. Esse é o limite que define a derivada."},
+        {t: "Na altura da planta, ponha o ponto onde ela cresce mais rápido (perto de 20 dias).", ok: s => s.k === 1 && Math.abs(s.x0 - 20) < 1, win: () => "Aí está o pico de crescimento: a tangente é a mais inclinada."}
+      ],
+      react: s => s.diff < 0.001 ? ["Secante e tangente coladas.", "happy"] : s.diff > 1 ? ["Com h grande, a secante engana. Diminua h.", "worried"] : ["A secante está chegando perto da tangente.", "thinking"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "maxmin", grupo: "Cálculo", nome: "Máximos e mínimos",
-  lead: "Onde a derivada vale zero, a curva para de subir ou de descer. É assim que se acha o melhor valor de uma decisão.",
   campo: "A dose de adubo que dá mais lucro não é a que dá mais produção: depois de certo ponto, o último quilo custa mais do que rende. O mesmo vale para ração, lâmina de irrigação e dimensionamento de canais.",
   dia: "Qualquer decisão do tipo “até onde vale a pena” é um problema de otimização. O botão abaixo faz o que algoritmos de aprendizado de máquina fazem: seguir a derivada, passo a passo.",
-  python: `B, C2 = 0.30, 0.0009
-p, c = 60, 6                         # preço da saca e custo do kg de N
-dL = lambda x: p*(B - 2*C2*x) - c    # derivada do lucro
-
-x = 40.0
-for passo in range(10):
-    x += 0.5 * dL(x) / (2*p*C2)      # sobe a ladeira
-print(x, (B - c/p)/(2*C2))           # numérico x analítico`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const A0 = 80, B = 0.30, C2 = 0.0009; const y = x => A0 + B * x - C2 * x * x;
     const c = canvas(stage); const R = readout(panel); let x = 40;
     const ps = ctl(panel, "Preço do milho", 30, 120, 1, 60, v => "R$ " + v + " / saca", draw);
@@ -263,19 +261,22 @@ print(x, (B - c/p)/(2*C2))           # numérico x analítico`,
         <div>Parar na dose de lucro economiza <b>${fmt(xm - xo, 0)} kg de N/ha</b> e perde só <b>${fmt(y(xm) - y(xo), 1)} sc/ha</b>.</div>
         <div>Modelo ilustrativo: y = 80 + 0,30x − 0,0009x².</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("maxmin", extra, {
+      state: () => { const p = ps.get(), q = cs.get(); return {p, x, xo: clamp((B - q / p) / (2 * C2), 0, 300)}; },
+      goals: [
+        {t: "Leve a dose testada até o ponto de lucro máximo (a até 3 kg/ha).", ok: s => Math.abs(s.x - s.xo) <= 3, win: () => "Topo do lucro. Aí a derivada vale zero."},
+        {t: "Suba o preço do milho acima de R$ 100 e ache a nova dose ótima.", ok: s => s.p > 100 && Math.abs(s.x - s.xo) <= 3, win: () => "Com milho mais caro, vale adubar mais. A dose ótima subiu."}
+      ],
+      react: s => Math.abs(s.x - s.xo) <= 3 ? ["Esse é o topo do lucro!", "happy"] : s.x > s.xo ? ["Passou da dose ótima: o último quilo custa mais do que rende.", "worried"] : ["Ainda dá para ganhar adubando mais.", "thinking"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "integral", grupo: "Cálculo", nome: "Integrais",
-  lead: "A integral soma uma quantidade que varia. Geometricamente é a área sob a curva, calculada com retângulos cada vez mais finos.",
   campo: "Chuva acumulada a partir da intensidade, volume irrigado a partir da vazão, carga de sedimentos, graus-dia acumulados ao longo da safra. O equipamento mede a taxa e a integral entrega o total.",
   dia: "Distância percorrida a partir da velocidade, energia em kWh a partir da potência, lucro acumulado a partir do fluxo de caixa. Taxa em um eixo, total na área.",
-  python: `import numpy as np
-
-t = np.linspace(0, 6, 1000)
-i = 12*np.exp(-t/2)                 # intensidade da chuva (mm/h)
-print(np.trapz(i, t))               # chuva total em mm  → ≈ 22.8`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const PR = [
       {nome: "Chuva: intensidade (mm/h) em 6 h", f: t => 12 * Math.exp(-t / 2), F: t => -24 * Math.exp(-t / 2), a: 0, b: 6, xl: "tempo (h)", yl: "mm/h", u: "mm"},
       {nome: "Irrigação: vazão pulsante (L/min) em 10 min", f: t => 30 + 10 * Math.sin(t), F: t => 30 * t - 10 * Math.cos(t), a: 0, b: 10, xl: "tempo (min)", yl: "L/min", u: "L"}
@@ -300,22 +301,22 @@ print(np.trapz(i, t))               # chuva total em mm  → ≈ 22.8`,
       R.innerHTML = `<div>soma dos ${n} retângulos: <b>${fmt(S, 3)} ${P.u}</b></div><div class="ok">integral exata: <b>${fmt(E, 3)} ${P.u}</b></div>
         <div>erro: <b>${fmt(Math.abs(S - E) / E * 100, 3)}%</b>. Mais retângulos, menos erro; o limite dessa soma é a integral.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("integral", extra, {
+      state: () => ({k, n: ns.get(), mt}),
+      goals: [
+        {t: "Chegue a 40 retângulos ou mais e veja o erro quase sumir.", ok: s => s.n >= 40, win: () => "Mais faixas, menos erro. No limite, a soma vira a integral."},
+        {t: "Com no máximo 8 faixas, troque para trapézios e compare o erro.", ok: s => s.mt === 3 && s.n <= 8, win: () => "Trapézios acompanham melhor a curva do que retângulos com poucas faixas."}
+      ],
+      react: s => s.n >= 40 ? ["Bem fininho: o erro é bem pequeno.", "happy"] : s.n <= 4 ? ["Poucas faixas: a soma ainda erra bastante.", "worried"] : ["Mais faixas deixam a soma mais fiel.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "multiplas", grupo: "Cálculo", nome: "Integrais duplas e triplas",
-  lead: "Somar sobre uma região em vez de uma linha: a dupla acha volumes sob uma superfície, a tripla acha massas quando a densidade varia no espaço.",
   campo: "Um pluviômetro mede a chuva em um ponto, mas a lavoura recebe chuva desigual. O volume sobre o talhão é uma integral dupla. A massa de solo em uma camada, com densidade que muda com a profundidade, é uma integral tripla.",
   dia: "Volume de terra em terraplenagem, probabilidade conjunta de duas variáveis, massa de um objeto com densidade irregular. É a mesma ideia dos retângulos, agora em células e cubinhos.",
-  python: `import numpy as np
-
-n = 200; L = 100
-x = (np.arange(n) + .5) * L/n
-X, Y = np.meshgrid(x, x)
-r = 5 + 20*np.exp(-((X-30)**2 + (Y-65)**2)/(2*22**2))   # mm
-V = (r/1000).sum() * (L/n)**2                           # m³
-print(V)                                                # ≈ 110 m³`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const rf = (x, y) => 5 + 20 * Math.exp(-((x - 30) ** 2 + (y - 65) ** 2) / (2 * 22 * 22));
     const vol = n => { let s = 0; const d = 100 / n; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) s += rf((i + .5) * d, (j + .5) * d); return s / 1000 * d * d; };
     const ref = vol(300), c = canvas(stage, 360); const R = readout(panel);
@@ -339,21 +340,22 @@ print(V)                                                # ≈ 110 m³`,
       T.innerHTML = `<div class="cl">Integral tripla: massa de solo em 1 ha</div><div>∭ ρ dV com ρ(z) = 1,15 + 0,5·z (Mg/m³)</div>
         <div>camada de 0 a ${fmt(Z * 100, 0)} cm: <b>${fmt(10000 * m, 0)} Mg/ha</b></div><div>densidade média: ${fmt(m / Z, 3)} Mg/m³</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("multiplas", extra, {
+      state: () => ({n: ns.get(), z: zs.get()}),
+      goals: [
+        {t: "Use 20 × 20 células ou mais e veja o erro cair.", ok: s => s.n >= 20, win: () => "Com muitas células a soma chega bem perto da integral."},
+        {t: "Escolha uma camada de solo de 30 cm ou mais e veja a massa por hectare.", ok: s => s.z >= 30, win: () => "Quanto mais fundo, mais massa e maior a densidade média."}
+      ],
+      react: s => s.n === 1 ? ["Uma célula só é o pluviômetro único: erra feio.", "worried"] : s.n >= 20 ? ["Muitas células: a soma acompanha a chuva real.", "happy"] : ["Mais células, menos erro.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "matrizes", grupo: "Álgebra linear", nome: "Matrizes e sistemas",
-  lead: "Um sistema de equações vira A·x = b. Se a matriz A tem inversa, a solução é x = A⁻¹·b.",
   campo: "Formular adubo ou ração é um sistema linear: quanto de cada produto comercial entrega os nutrientes-alvo? Cada coluna é um produto, cada linha é um nutriente, e a inversa devolve as quantidades.",
   dia: "Orçamentos, redes elétricas, gráficos 3D e redes neurais usam matrizes. Uma matriz sem inversa (singular) indica informação redundante: dois ingredientes que fazem o mesmo papel.",
-  python: `import numpy as np
-
-A = np.array([[.45, .11, 0],         # N  de cada produto
-              [0,   .52, 0],         # P2O5
-              [0,   0,   .60]])      # K2O
-b = np.array([100, 80, 60])          # kg de nutriente por ha
-print(np.linalg.solve(A, b))         # kg de ureia, MAP, KCl`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const A0 = [[45, 11, 0], [0, 52, 0], [0, 0, 60]], b0 = [100, 80, 60], prod = ["Ureia", "MAP", "KCl"], nut = ["N", "P₂O₅", "K₂O"];
     stage.innerHTML = `<div class="mxwrap"><h4>A: teor de nutriente (%) em cada produto</h4><table class="mx" id="mxA"></table><h4>b: meta (kg de nutriente por ha)</h4><table class="mx" id="mxB"></table></div>`;
     const tA = $("#mxA", stage), tB = $("#mxB", stage); let n = 0;
@@ -372,21 +374,22 @@ print(np.linalg.solve(A, b))         # kg de ureia, MAP, KCl`,
         x.map((v, i) => `<div>${prod[i]}: <b class="${v < 0 ? "no" : ""}">${fmt(v, 1)} kg</b>${v < 0 ? " (negativo: inviável)" : ""}<div class="bar"><i style="width:${clamp(Math.abs(v) / mx * 100, 0, 100)}%"></i></div></div>`).join("") +
         `<div>Total de produto: <b>${fmt(tot, 1)} kg/ha</b></div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("matrizes", extra, {
+      state: () => { const f = (i, j) => stage.querySelector('[data-i="' + i + '"][data-j="' + j + '"]').value, A = [0, 1, 2].map(i => [0, 1, 2].map(j => (+f(i, j) || 0) / 100)), b = [0, 1, 2].map(i => +stage.querySelector('[data-b="' + i + '"]').value || 0), I = inv(A), x = I ? I.map(r => r.reduce((a, v, j) => a + v * b[j], 0)) : null; return {sing: !I, b0: b[0], neg: !!x && x.some(v => v < 0)}; },
+      goals: [
+        {t: "Torne a matriz singular e veja a receita perder a solução única.", ok: s => s.sing, win: () => "Dois produtos iguais: sem inversa, sem receita única."},
+        {t: "Peça 150 kg de N ou mais e ainda ache uma receita viável, sem valores negativos.", ok: s => !s.sing && s.b0 >= 150 && !s.neg, win: () => "Receita viável com a meta mais alta."}
+      ],
+      react: s => s.sing ? ["Matriz singular: não existe inversa.", "worried"] : s.neg ? ["Valor negativo: essa receita é impossível.", "worried"] : ["A inversa existe: a receita sai direto.", "happy"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "estatistica", grupo: "Estatística", nome: "Experimentos de campo",
-  lead: "Dois tratamentos dão resultados diferentes. A pergunta é se a diferença é do tratamento ou do acaso do solo e do clima.",
   campo: "Comparar cultivares, doses e manejos exige repetições. Cada parcela varia por razões que você não controla. Mais repetições ou menos variação deixam o efeito real mais fácil de enxergar.",
   dia: "É o mesmo raciocínio do teste A/B de um site e do controle de qualidade de uma fábrica. O poder do teste diz a chance de enxergar uma diferença que realmente existe.",
-  python: `import numpy as np
-from scipy import stats
-
-rng = np.random.default_rng()
-a = rng.normal(60, 6, 5)             # cultivar A: 5 repetições
-b = rng.normal(64, 6, 5)             # cultivar B: +4 sc/ha de verdade
-print(stats.ttest_ind(a, b, equal_var=False))`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const c = canvas(stage); const R = readout(panel); let A = [], B = [];
     const ds = ctl(panel, "Diferença real entre cultivares", 0, 15, 0.5, 4, v => fmt(v, 1) + " sc/ha", () => run());
     const ss = ctl(panel, "Variação entre parcelas (desvio)", 1, 15, 0.5, 6, v => fmt(v, 1) + " sc/ha", () => run());
@@ -409,22 +412,22 @@ print(stats.ttest_ind(a, b, equal_var=False))`,
         <div class="${sig ? "ok" : "no"}">${sig ? "Diferença detectada (p < 0,05)." : "Diferença não detectada neste experimento."}</div>
         ${power ? `<div>${power}</div>` : ""}<div>Linha cheia = média; tracejada = ± 1 desvio.</div>`;
     }
-    run(); return draw;
+    run();
+    kit("estatistica", extra, {
+      state: () => ({d: ds.get(), s: ss.get(), n: ns.get(), p: A.length ? welch(A, B).p : 1}),
+      goals: [
+        {t: "Com diferença real de pelo menos 3 sc/ha, rode experimentos até o teste detectar (p < 0,05).", ok: s => s.d >= 3 && s.p < 0.05, win: () => "Detectou! Com efeito maior, o teste enxerga mais fácil."},
+        {t: "Suba as repetições para 15 ou mais e veja o resultado variar menos.", ok: s => s.n >= 15, win: () => "Mais repetições, mais poder: o acaso pesa menos."}
+      ],
+      react: s => s.p < 0.05 ? ["Diferença detectada neste experimento.", "happy"] : s.n <= 3 ? ["Poucas repetições: fica difícil separar efeito de acaso.", "worried"] : ["Não detectou. Rode de novo ou aumente as repetições.", "thinking"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "jogos", grupo: "Decisão", nome: "Teoria dos jogos",
-  lead: "Quando o resultado de cada um depende da escolha dos outros, a melhor jogada muda. O equilíbrio de Nash é o ponto onde ninguém ganha mudando sozinho.",
   campo: "Duas cooperativas decidindo se baixam o preço, vizinhos que dividem silo ou maquinário, produtor e fiscalização. Em todos, a sua melhor escolha depende do que o outro faz.",
   dia: "Negociação, leilão, trânsito, preço de concorrentes. Marcar a melhor resposta em cada coluna e em cada linha já revela os equilíbrios.",
-  python: `import numpy as np
-
-A = np.array([[5, 1], [7, 3]])       # ganhos da linha
-B = np.array([[5, 7], [1, 3]])       # ganhos da coluna
-for i in range(2):
-    for j in range(2):
-        if A[i, j] == A[:, j].max() and B[i, j] == B[i, :].max():
-            print("Nash:", i, j)`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const PS = [
       {nome: "Cooperativas: dilema dos preços", L: ["Manter preço", "Baixar preço"], C: ["Manter preço", "Baixar preço"], P: [[[5, 5], [1, 7]], [[7, 1], [3, 3]]], t: "Cada uma ganha mais baixando o preço, qualquer que seja a outra. Resultado: ambas baixam e ficam pior do que se mantivessem."},
       {nome: "Vizinhos: qual cultura plantar", L: ["Soja", "Milho"], C: ["Soja", "Milho"], P: [[[4, 4], [0, 0]], [[0, 0], [3, 3]]], t: "Os dois só ganham se plantarem a mesma coisa (silo e frete compartilhados). Há dois equilíbrios e é preciso combinar."},
@@ -457,27 +460,25 @@ for i in range(2):
       R.innerHTML = `<div>${G.t}</div><div class="${ne.length ? "ok" : "no"}">${ne.length ? "Equilíbrio de Nash puro: <b>" + ne.join("; ") + "</b>" : "Não há equilíbrio puro."}</div>${mixed}
         <div>Números em verde são a melhor resposta daquele jogador. Célula com borda verde: as duas são melhores respostas. Edite os ganhos e veja o equilíbrio mudar.</div>`;
     }
-    build(); return draw;
+    build();
+    kit("jogos", extra, {
+      state: () => ({k, ne: gm.querySelectorAll("td.ne").length}),
+      goals: [
+        {t: "Visite as três situações: preços, culturas e produtor contra fiscal.", ok: (s, memo) => { memo[s.k] = 1; return Object.keys(memo).length === 3; }, win: () => "Três jogos, três tipos de equilíbrio."},
+        {t: "No dilema dos preços, edite os ganhos até haver dois equilíbrios de Nash.", ok: s => s.k === 0 && s.ne >= 2, win: () => "Dois equilíbrios: agora é preciso combinar qual deles."}
+      ],
+      react: s => s.ne === 0 ? ["Nenhum equilíbrio puro: precisa misturar as jogadas.", "thinking"] : s.ne >= 2 ? ["Dois equilíbrios: coordenação.", "happy"] : ["Um equilíbrio: ninguém ganha mudando sozinho.", "neutral"]
+    });
+    return draw;
   }});
 
 /* ---------- machine learning ---------- */
 const mulberry = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 
 MODS.push({id: "regressao", grupo: "Machine learning", nome: "Regressão linear e gradiente",
-  lead: "Ajustar uma reta aos dados é achar os parâmetros que minimizam o erro. O gradiente descendente chega lá andando contra a derivada da perda.",
   campo: "Prever a produtividade a partir da chuva do ciclo, da temperatura ou da dose de adubo é regressão. É a base de quase todo modelo de previsão: ajustar parâmetros para errar o mínimo possível.",
   dia: "O treino de uma rede neural repete este laço: calcular o erro, calcular a derivada, andar na direção que reduz o erro. A taxa de aprendizado é o tamanho do passo.",
-  python: `import numpy as np
-
-x = np.linspace(-2, 2, 24)
-y = 60 + 8*x + np.random.normal(0, 6, 24)
-w, b, lr = 0.0, 40.0, 0.3
-for _ in range(100):
-    e = b + w*x - y                       # erro de cada ponto
-    w -= lr * np.mean(2*e*x)              # derivada da perda em w
-    b -= lr * np.mean(2*e)                # derivada da perda em b
-print(w, b)                               # perto de 8 e 60`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const rnd = mulberry(7), gz = () => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
     const D = Array.from({length: 24}, (_, i) => { const x = -2 + 4 * (i + .5) / 24 + (rnd() - .5) * .1; return [x, 60 + 8 * x + 6 * gz()]; });
     const n = D.length, mx = mean(D.map(d => d[0])), my = mean(D.map(d => d[1]));
@@ -502,21 +503,22 @@ print(w, b)                               # perto de 8 e 60`,
         <div>gradiente: dw = <b>${fmt(gw, 2)}</b>, db = <b>${fmt(gb, 2)}</b> (zero no mínimo)</div><div class="ok">solução exata: w = ${fmt(wO, 2)}, b = ${fmt(bO, 2)}</div>
         <div>Tracejado = resíduos; verde = mínimos quadrados.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("regressao", extra, {
+      state: () => { const f = (a, c) => D.reduce((t, [x, y]) => t + (y - (c + a * x)) ** 2, 0) / n, mse = f(w, b); return {mse, opt: f(wO, bO), bad: !Number.isFinite(mse) || mse > 1e9, lr: +lrs.value}; },
+      goals: [
+        {t: "Leve o erro quadrático médio a menos de 10% acima do ótimo.", ok: s => !s.bad && s.mse < s.opt * 1.1, win: () => "Quase o ótimo: a reta está bem ajustada."},
+        {t: "Use a taxa 0,9 e deixe o erro explodir. Depois reinicie com a taxa boa.", ok: s => s.bad && s.lr === 2, win: () => "O passo grande demais passou do vale. A taxa boa é 0,3."}
+      ],
+      react: s => s.bad ? ["O erro explodiu: taxa grande demais.", "worried"] : s.mse < s.opt * 1.1 ? ["Reta bem ajustada!", "happy"] : ["Mexa em w e b, ou use o gradiente.", "thinking"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "embeddings", grupo: "Machine learning", nome: "Vetores, embeddings e busca",
-  lead: "Um texto vira um ponto num espaço. Perguntas parecidas com um documento ficam perto dele, e buscar vira medir distância ou ângulo.",
   campo: "Achar, em milhares de laudos e boletins técnicos, o trecho sobre o problema que o produtor descreveu. A busca por palavra falha quando o produtor usa outros termos; a busca por significado funciona.",
   dia: "É o que acontece por trás de recomendação de filmes, busca semântica e detecção de duplicatas. Aqui o espaço tem 2 dimensões; os modelos reais usam centenas ou milhares.",
-  python: `import numpy as np
-
-docs = np.array([[.8, -.4], [.45, -.22], [.4, .85], [.2, .5]])
-q = np.array([.5, .3])
-cos = docs @ q / (np.linalg.norm(docs, axis=1) * np.linalg.norm(q))
-dist = np.linalg.norm(docs - q, axis=1)
-print(np.argsort(-cos), np.argsort(dist))   # rankings diferentes`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const DOCS = [
       {t: "Adubação nitrogenada em milho", s: "Adubação N", v: [-0.8, 0.45]}, {t: "Irrigação por gotejamento", s: "Irrigação", v: [-0.35, 0.2]},
       {t: "Tabelas Delta no Databricks", s: "Delta", v: [0.8, -0.4]}, {t: "Modelo semântico do Power BI", s: "Power BI", v: [0.45, -0.22]},
@@ -539,21 +541,22 @@ print(np.argsort(-cos), np.argsort(dist))   # rankings diferentes`,
         rk.map((x, j) => `<div class="${top.has(x.i) ? "ok" : ""}">${j + 1}. ${x.d.t} · <b>${fmt(metric === 1 ? -x.s : x.s, 3)}</b></div>`).join("") +
         `<div>Troque a métrica: documentos curtos e longos na mesma direção mudam de posição entre cosseno e distância. Por isso a métrica deve combinar com a do modelo de embedding.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("embeddings", extra, {
+      state: () => { const rk = DOCS.map((d, i) => ({i, s: score(d)})).sort((a, b) => b.s - a.s); return {metric, top: rk[0].i}; },
+      goals: [
+        {t: "Mova a pergunta até o documento sobre RAG ficar em primeiro no cosseno.", ok: s => s.metric === 0 && s.top === 5, win: () => "O RAG é o mais parecido em direção com a pergunta."},
+        {t: "Troque a métrica e faça o primeiro colocado mudar.", ok: (s, memo) => { memo[s.metric] = s.top; return new Set(Object.values(memo)).size >= 2; }, win: () => "Métricas diferentes, rankings diferentes."}
+      ],
+      react: s => s.metric === 1 ? ["Distância: o tamanho do vetor pesa.", "thinking"] : s.top === 5 ? ["O RAG é o primeiro: perguntas parecidas ficam na mesma direção.", "happy"] : ["Clique no gráfico para mover a pergunta.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "atencao", grupo: "Machine learning", nome: "Softmax e atenção",
-  lead: "Atenção é uma média ponderada: cada token mede a similaridade com os outros, converte em pesos com softmax e mistura as informações.",
   campo: "Na frase “o milho precisa de nitrogênio”, entender “precisa” exige olhar para “milho” e “nitrogênio”. A atenção aprende quais palavras importam para cada uma.",
   dia: "É o bloco central do Transformer, repetido em várias cabeças e camadas. Os vetores abaixo são valores de brinquedo, escolhidos à mão. Em um modelo real eles vêm do treino.",
-  python: `import numpy as np
-
-E = np.array([[.1,.1],[1,.2],[.3,.9],[.1,.2],[.9,.5],[-.2,0]])
-S = E @ E.T / np.sqrt(E.shape[1])        # similaridades escaladas
-W = np.exp(S - S.max(1, keepdims=True))
-W /= W.sum(1, keepdims=True)             # softmax por linha
-saida = W @ E                            # média ponderada`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const T = [["o", [0.1, 0.1]], ["milho", [1, 0.2]], ["precisa", [0.3, 0.9]], ["de", [0.1, 0.2]], ["nitrogênio", [0.9, 0.5]], [".", [-0.2, 0]]];
     const c = canvas(stage, 380); const R = readout(panel); let qi = 1;
     const qs = sel(panel, "Token que pergunta", T.map(t => t[0]), v => { qi = v; draw(); }); qs.value = 1;
@@ -573,24 +576,22 @@ saida = W @ E                            # média ponderada`,
       R.innerHTML = `<div class="cl">“${T[qi][0]}” presta atenção em</div>` + row.map((v, j) => ({v, j})).sort((a, b) => b.v - a.v).map(x => `<div>${T[x.j][0]}: <b>${fmt(x.v * 100, 0)}%</b><div class="bar"><i style="width:${x.v * 100}%"></i></div></div>`).join("") +
         `<div>vetor de saída: <b>(${fmt(out[0], 2)}; ${fmt(out[1], 2)})</b>, a média ponderada dos tokens.</div><div>Temperatura baixa concentra a atenção; alta espalha igualmente. A divisão por √d já está aplicada.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("atencao", extra, {
+      state: () => { const T = ts.get(), M = W(T); return {T, mx: Math.max(...M[qi])}; },
+      goals: [
+        {t: "Leve a temperatura ao mínimo (abaixo de 0,15) e veja a atenção se concentrar.", ok: s => s.T < 0.15 && s.mx > 0.5, win: () => "Temperatura baixa concentra a atenção num token."},
+        {t: "Suba a temperatura acima de 2,5 e veja a atenção se espalhar: nenhum peso acima de 25%.", ok: s => s.T > 2.5 && s.mx < 0.25, win: () => "Temperatura alta espalha: todo token pesa quase igual."}
+      ],
+      react: s => s.mx > 0.5 ? ["Quase tudo num token só.", "thinking"] : s.mx < 0.25 ? ["Tudo igual: a atenção se espalhou.", "neutral"] : ["Troque o token que pergunta e compare as linhas.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "overfit", grupo: "Machine learning", nome: "Overfitting, viés e variância",
-  lead: "Um modelo flexível demais decora o ruído dos dados de treino e falha em dados novos. Um simples demais não captura o padrão. O ponto bom está no meio.",
   campo: "Ajustar uma curva de resposta da cultura com poucas parcelas é o caso clássico. Um polinômio de grau alto passa por todos os pontos e prevê absurdos entre eles.",
   dia: "Toda a prática de ML gira em torno disso: separar treino e teste, validação cruzada, regularização, parar o treino cedo. O erro no treino sempre melhora com mais complexidade. O erro no teste, não.",
-  python: `import numpy as np
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import Ridge
-
-for grau in range(0, 11):
-    m = make_pipeline(PolynomialFeatures(grau), Ridge(alpha=1e-3))
-    m.fit(x_treino.reshape(-1, 1), y_treino)
-    erro_t = np.sqrt(np.mean((m.predict(x_teste.reshape(-1, 1)) - y_teste)**2))
-    print(grau, erro_t)               # cai e depois sobe`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const rnd = mulberry(21), gz = () => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd()), f0 = x => Math.sin(2.2 * x);
     const tr = Array.from({length: 14}, () => { const x = rnd() * 2 - 1; return [x, f0(x) + 0.25 * gz()]; }), te = Array.from({length: 80}, () => { const x = rnd() * 2 - 1; return [x, f0(x) + 0.25 * gz()]; });
     const LAM = [0, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10];
@@ -615,25 +616,25 @@ for grau in range(0, 11):
       R.innerHTML = `<div class="am">erro de treino: <b>${fmt(etr, 3)}</b></div><div style="color:var(--curve)">erro de teste: <b>${fmt(ete, 3)}</b></div><div>${diag}</div>
         <div>Verde = função verdadeira · laranja = 14 pontos de treino · cinza = 80 pontos de teste. O ruído dos dados é 0,25, então nenhum modelo vai abaixo disso no teste.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("overfit", extra, {
+      state: () => { const d = ds.get(), lam = LAM[ls.get()], w = fit(d, lam), w9 = fit(9, 0); return {d, lam, ete: w ? rmse(w, te) : NaN, base: w9 ? rmse(w9, te) : NaN}; },
+      goals: [
+        {t: "Ache um grau entre 3 e 5 com erro de teste abaixo de 0,45.", ok: s => s.d >= 3 && s.d <= 5 && s.ete < 0.45, win: () => "Grau médio, erro de teste baixo: o ponto bom."},
+        {t: "No grau 9 ou mais, use regularização para derrubar o erro de teste à metade do que era sem ela.", ok: s => s.d >= 9 && s.lam > 0 && s.ete < s.base / 2, win: () => "A regularização domou o modelo flexível."}
+      ],
+      react: s => s.d <= 1 ? ["Simples demais: não pega a curva.", "worried"] : s.d >= 8 && s.lam === 0 ? ["Flexível demais: ele decora o ruído.", "worried"] : s.d >= 3 && s.d <= 5 ? ["Parece o ponto bom.", "happy"] : ["Compare o erro de treino com o de teste.", "thinking"]
+    });
+    return draw;
   }});
 
 const erf = x => { const s = Math.sign(x); x = Math.abs(x); const t = 1 / (1 + 0.3275911 * x); return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x)); };
 const Phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
 
 MODS.push({id: "logistica", grupo: "Machine learning", nome: "Classificação, limiar e guardrails",
-  lead: "Um classificador devolve um score. Você escolhe o limiar que transforma o score em decisão, e cada limiar troca um tipo de erro por outro.",
   campo: "Detectar doença em folhas por imagem: chamar uma planta sadia de doente custa uma visita. Deixar passar uma doente custa a safra. Os dois erros têm preços diferentes.",
   dia: "Spam, fraude e exame médico seguem a mesma lógica. A regressão logística é o modelo mais simples que gera esse score: a sigmoide transforma uma soma ponderada em probabilidade.",
-  python: `import numpy as np
-from sklearn.metrics import roc_auc_score, precision_recall_curve
-
-ok  = np.random.normal(0.35, 0.15, 9900)      # pedidos legítimos
-atk = np.random.normal(0.65, 0.15, 100)       # ataques: 1% do tráfego
-y = np.r_[np.zeros(9900), np.ones(100)]; s = np.r_[ok, atk]
-print(roc_auc_score(y, s))
-p, r, t = precision_recall_curve(y, s)        # a precisão cai com poucos ataques`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const PI = [0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], S = 0.15, M0 = 0.35; let t = 0.5;
     const c1 = canvas(stage, 220), c2 = canvas(stage, 250); const R = readout(panel);
     const sp = ctl(panel, "Separação entre os grupos", 0, 0.6, 0.01, 0.3, v => fmt(v, 2), draw), ps = ctl(panel, "Taxa real de ataques", 0, 7, 1, 2, v => fmt(PI[v] * 100, 1) + "%", draw);
@@ -654,24 +655,22 @@ p, r, t = precision_recall_curve(y, s)        # a precisão cai com poucos ataqu
         <div>recall: <b>${fmt(tpr * 100, 1)}%</b> · precisão: <b>${fmt(prec * 100, 1)}%</b> · F1: <b>${fmt(f1 * 100, 1)}%</b></div><div>AUC: <b>${fmt(Phi(sp.get() / (S * Math.SQRT2)), 3)}</b> · custo esperado por 1.000 pedidos: <b>${fmt(cost(t), 1)}</b></div>
         <div>Diminua a taxa de ataques: a precisão despenca mesmo com o mesmo classificador, porque os legítimos são muito mais numerosos.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("logistica", extra, {
+      state: () => { let bt = 0, bc = Infinity; for (let v = 0; v <= 1; v += 0.01) { const c = cost(v); if (c < bc) { bc = c; bt = v; } } return {t, bt, pi: PI[ps.get()]}; },
+      goals: [
+        {t: "Ache o limiar de menor custo, a no máximo 0,03 do ótimo.", ok: s => Math.abs(s.t - s.bt) <= 0.03, win: () => "Esse limiar equilibra os dois erros pelo custo."},
+        {t: "Baixe a taxa de ataques para 0,5% ou menos e veja a precisão despencar.", ok: s => s.pi <= 0.005, win: () => "Com ataques raros, quase todo bloqueio é alarme falso."}
+      ],
+      react: s => Math.abs(s.t - s.bt) <= 0.03 ? ["Esse é o limiar de menor custo.", "happy"] : s.pi <= 0.01 ? ["Ataques raros: cuidado com a precisão.", "worried"] : ["Mexa no limiar e olhe os dois erros.", "thinking"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "rede", grupo: "Machine learning", nome: "Redes neurais e backpropagation",
-  lead: "Uma rede é uma função composta de camadas simples. O treino calcula o erro, propaga a derivada de trás para frente com a regra da cadeia e ajusta cada peso.",
   campo: "Separar áreas de solo por duas medidas (por exemplo, argila e matéria orgânica) quando a fronteira não é uma reta. Uma rede com poucos neurônios já desenha fronteiras curvas.",
   dia: "É a mesma máquina de redes de visão e de linguagem, em escala minúscula. Aqui há 2 entradas, uma camada oculta e 1 saída. Os pesos são treinados ao vivo no seu navegador.",
-  python: `import torch, torch.nn as nn
-
-net = nn.Sequential(nn.Linear(2, 6), nn.Tanh(), nn.Linear(6, 1))
-opt = torch.optim.SGD(net.parameters(), lr=0.5)
-loss_fn = nn.BCEWithLogitsLoss()
-for epoca in range(500):
-    opt.zero_grad()
-    loss = loss_fn(net(X).squeeze(), y)   # X: (n, 2), y: (n,) float
-    loss.backward()                       # backpropagation
-    opt.step()`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const LR = [0.1, 0.5, 1.5]; let ds = 1, h = 6, lri = 1, epoch = 0, hist = [], timer = null, pts, W1, b1, W2, b2;
     const cm = canvas(stage, 320), cl = canvas(stage, 150); const R = readout(panel);
     function data() { const r = mulberry(11 + ds), P = []; for (let i = 0; i < 160; i++) { const x = r() * 2 - 1, y = r() * 2 - 1; P.push([x, y, ds === 0 ? (0.8 * x + 0.6 * y > 0 ? 1 : 0) : ds === 1 ? (Math.hypot(x, y) > 0.6 ? 1 : 0) : (x * y > 0 ? 1 : 0)]); } return P; }
@@ -700,24 +699,22 @@ for epoca in range(500):
       R.innerHTML = `<div>passos: <b>${epoch}</b> · parâmetros: <b>${4 * h + 1}</b></div><div>perda: <b>${fmt(hist[hist.length - 1] ?? NaN, 4)}</b> · acerto: <b>${fmt(ok / pts.length * 100, 1)}%</b></div>
         <div>Com poucos neurônios a fronteira é rígida: tente 1 neurônio no círculo e veja o acerto travar. Taxa 1,5 pode oscilar.</div>`;
     }
-    init(); draw(); return draw;
+    init(); draw();
+    kit("rede", extra, {
+      state: () => { let ok = 0; for (const [x, y, t] of pts) if ((fwd(x, y).p > 0.5) === !!t) ok++; return {ds, h, epoch, acc: ok / pts.length}; },
+      goals: [
+        {t: "No círculo dentro de círculo, treine até passar de 95% de acerto.", ok: s => s.ds === 1 && s.acc >= 0.95, win: () => "A rede dobrou a fronteira em volta do círculo."},
+        {t: "Com 1 neurônio no círculo, treine 300 passos e veja o acerto travar abaixo de 80%.", ok: s => s.ds === 1 && s.h === 1 && s.epoch >= 300 && s.acc < 0.8, win: () => "Um neurônio só faz uma fronteira simples: não cerca o círculo."}
+      ],
+      react: s => s.epoch === 0 ? ["Aperte Treinar e acompanhe a fronteira se mexendo.", "thinking"] : s.acc >= 0.95 ? ["Fronteira certinha!", "happy"] : s.h === 1 ? ["Um neurônio só: fronteira rígida.", "worried"] : ["Continue treinando.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "token", grupo: "Machine learning", nome: "Do logit ao próximo token",
-  lead: "A última etapa de um modelo de linguagem dá um número (logit) para cada palavra possível. Temperatura, top-k e top-p decidem como sortear a próxima.",
   campo: "Para a frase “o milho precisa de ___”, o modelo pontua cada candidato. O mais provável é “nitrogênio”, mas “água” está logo atrás, e “carro” é quase impossível.",
   dia: "Os logits abaixo são valores de brinquedo escolhidos à mão. Em um modelo real há dezenas de milhares de candidatos, mas a conta é exatamente esta.",
-  python: `import numpy as np
-
-def amostrar(logits, T=0.7, k=5, p=0.9):
-    z = np.array(logits) / T
-    pr = np.exp(z - z.max()); pr /= pr.sum()          # softmax com temperatura
-    ordem = np.argsort(-pr)[:k]                       # top-k
-    cum = np.cumsum(pr[ordem])
-    ordem = ordem[:np.searchsorted(cum, p) + 1]       # top-p
-    q = np.zeros_like(pr); q[ordem] = pr[ordem]
-    return np.random.choice(len(pr), p=q / q.sum())`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const TK = [["nitrogênio", 4.2], ["água", 3.9], ["luz", 3.1], ["fósforo", 2.9], ["sol", 2.0], [".", 0.5], ["carro", -1], ["banco", -2]]; let counts = null;
     stage.innerHTML = `<div class="mxwrap" id="tk"></div>`; const box = $("#tk", stage), R = readout(panel);
     const Ts = ctl(panel, "Temperatura", 0.1, 2, 0.05, 0.8, v => fmt(v, 2), () => { counts = null; draw(); }), ks = ctl(panel, "top-k", 1, 8, 1, 8, v => v, () => { counts = null; draw(); }), ps = ctl(panel, "top-p", 0.1, 1, 0.05, 1, v => fmt(v, 2), () => { counts = null; draw(); });
@@ -734,19 +731,21 @@ def amostrar(logits, T=0.7, k=5, p=0.9):
       R.innerHTML = `<div>candidatos mantidos: <b>${n}</b> de ${TK.length}</div><div>entropia: <b>${fmt(H, 2)} bits</b> (0 = sempre a mesma resposta)</div>
         <div>Temperatura baixa e top-k 1 dão sempre “${TK[ord[0]][0]}”. Temperatura alta espalha a probabilidade. Barras apagadas foram cortadas por top-k ou top-p.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("token", extra, {
+      state: () => ({T: Ts.get(), k: ks.get(), kept: q.filter(v => v > 0).length}),
+      goals: [
+        {t: "Deixe só 1 candidato (top-k = 1): a resposta fica sempre igual.", ok: s => s.k === 1, win: () => "Top-k 1 é o modo determinístico: sempre a palavra mais provável."},
+        {t: "Ajuste temperatura e top-p até sobrarem 3 ou 4 candidatos.", ok: s => s.kept >= 3 && s.kept <= 4, win: () => "Variedade controlada: poucos candidatos plausíveis."}
+      ],
+      react: s => s.kept === 1 ? ["Um candidato só: sem variedade.", "thinking"] : s.T > 1.5 ? ["Temperatura alta: até as palavras improváveis ganham chance.", "worried"] : ["Veja quantos candidatos sobraram.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "trilha", grupo: "Machine learning", nome: "Trilha e ferramentas",
-  lead: "Uma ordem de estudo que reaproveita a matemática de cada etapa, com a ferramenta típica e um exercício para fazer com dados do seu ambiente.",
   campo: "A graduação treinou o hábito mais importante: formular o problema, modelar, resolver e conferir se o resultado faz sentido no mundo real.",
   dia: "Estudar modelos sem aplicar em algo concreto não fixa. Cada etapa abaixo termina em um exercício que dá para guardar como projeto.",
-  python: `# Ambiente mínimo para a trilha
-# pip install numpy pandas scikit-learn torch transformers mlflow
-import mlflow
-with mlflow.start_run():
-    mlflow.log_param("modelo", "regressao_linear")
-    mlflow.log_metric("rmse", 4.2)          # registre cada experimento`,
   build(stage, panel) {
     const T = [
       ["Regressão linear e logística", "derivadas, matrizes, probabilidade", "scikit-learn, statsmodels", "Prever um indicador do seu negócio e comparar com a média simples."],
@@ -779,16 +778,9 @@ function arrow(g, x1, y1, x2, y2, color, w = 2) {
 }
 
 MODS.push({id: "ideia", grupo: "Cálculo", nome: "A grande ideia do cálculo",
-  lead: "Derivar e integrar são operações inversas. Uma taxa (vazão) e um total (volume) contam a mesma história de dois jeitos. Mova o instante e veja os dois gráficos andarem juntos.",
   campo: "O hidrômetro mede a vazão agora. A conta de água cobra o volume acumulado. O pluviômetro registra mm/h, mas a lavoura sente os mm do total da chuva.",
   dia: "Velocímetro e hodômetro. Uma mostra a taxa, o outro soma tudo. O teorema fundamental diz que a inclinação do acumulado em cada instante é a taxa daquele instante.",
-  python: `import numpy as np
-
-t = np.linspace(0, 10, 1001); dt = t[1] - t[0]
-q = 30 + 10*np.sin(t)                 # vazão em L/min
-V = np.cumsum(q) * dt                 # integral: volume acumulado
-q_de_volta = np.gradient(V, dt)       # derivada: recupera a vazão`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const SC = [
       {nome: "Reservatório: vazão e volume", q: t => 30 + 10 * Math.sin(t), V: t => 30 * t - 10 * Math.cos(t) + 10, a: 0, b: 10, xl: "tempo (min)", ql: "vazão q(t) em L/min", Vl: "volume acumulado V(t) em L", u: "L", ur: "L/min", tu: "min"},
       {nome: "Chuva: intensidade e acumulado", q: t => 12 * Math.exp(-t / 2), V: t => 24 * (1 - Math.exp(-t / 2)), a: 0, b: 6, xl: "tempo (h)", ql: "intensidade i(t) em mm/h", Vl: "chuva acumulada em mm", u: "mm", ur: "mm/h", tu: "h"}
@@ -808,21 +800,22 @@ q_de_volta = np.gradient(V, dt)       # derivada: recupera a vazão`,
       R.innerHTML = `<div class="cl">Em t = ${fmt(t, 2)} ${S.tu}</div><div style="color:var(--curve)">área sombreada em cima: <b>${fmt(S.V(t), 2)} ${S.u}</b></div><div class="ok">altura do gráfico de baixo: <b>${fmt(S.V(t), 2)} ${S.u}</b></div>
         <div class="am">inclinação da tangente embaixo: <b>${fmt(sl, 2)} ${S.ur}</b> = altura da curva de cima</div><div>As duas leituras coincidem em qualquer t: integrar a taxa dá o total, e derivar o total devolve a taxa.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("ideia", extra, {
+      state: () => ({k, t: ts.get()}),
+      goals: [
+        {t: "Leve o instante até o fim e veja o volume fechar o total.", ok: s => s.t >= 0.98, win: () => "Fechou: a área até o fim é o volume total."},
+        {t: "Na chuva, pare perto de 3 h e compare a área sombreada com a altura do gráfico de baixo.", ok: s => s.k === 1 && Math.abs(s.t * 6 - 3) < 0.15, win: () => "As duas leituras batem: área em cima, altura embaixo."}
+      ],
+      react: s => s.t > 0.9 ? ["Quase no fim: o volume está chegando ao total.", "happy"] : s.t < 0.1 ? ["No começo quase nada se acumulou.", "thinking"] : ["Veja: a área sombreada em cima é a altura do gráfico de baixo.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "regras", grupo: "Cálculo", nome: "Regras de derivação",
-  lead: "Quase toda derivada que você precisa sai de poucas regras. Escolha duas funções, combine por soma, produto, quociente ou composição, e veja a regra produzir a curva derivada.",
   campo: "Respostas reais são combinações: produtividade vezes preço, uma função de dose dentro de outra de clima, uma razão custo por área. A regra certa evita derivar tudo na unha.",
   dia: "Soma e produto são fáceis. A regra do quociente aparece em razões e médias. A regra da cadeia, função dentro de função, é a mais usada em ciência de dados.",
-  python: `import sympy as sp
-
-x = sp.symbols('x')
-g, h = sp.sin(x), x**2
-print(sp.diff(g*h, x))                # regra do produto
-print(sp.diff(g/h, x))                # regra do quociente
-print(sp.diff(g.subs(x, h), x))       # cadeia: 2*x*cos(x**2)`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const LB = [
       ["x", x => x, x => 1, "x", "1"], ["x²", x => x * x, x => 2 * x, "x²", "2x"], ["x³", x => x ** 3, x => 3 * x * x, "x³", "3x²"], ["eˣ", Math.exp, Math.exp, "eˣ", "eˣ"],
       ["sen x", Math.sin, Math.cos, "sen x", "cos x"], ["cos x", Math.cos, x => -Math.sin(x), "cos x", "−sen x"], ["ln(1+x²)", x => Math.log(1 + x * x), x => 2 * x / (1 + x * x), "ln(1+x²)", "2x/(1+x²)"]
@@ -855,22 +848,22 @@ print(sp.diff(g.subs(x, h), x))       # cadeia: 2*x*cos(x**2)`,
       R.innerHTML = `<div class="ok"><b>${RT[op]}</b></div><div>g = ${G[3]} → g′ = ${G[4]}</div><div>h = ${H[3]} → h′ = ${H[4]}</div><div>em x₀ = ${fmt(x0, 2)}: ${sub}</div>
         <div>regra: <b>${n(m)}</b></div><div>conferência numérica (diferença finita): <b>${n(nd)}</b></div><div>Em cima, a tangente com essa inclinação. Embaixo, a curva derivada inteira.</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("regras", extra, {
+      state: () => { const x = xs.get(); return {op, x, m: mk().d(x)}; },
+      goals: [
+        {t: "Visite as quatro combinações: soma, produto, quociente e composição.", ok: (s, memo) => { memo[s.op] = 1; return Object.keys(memo).length === 4; }, win: () => "As quatro regras visitadas. A cadeia é a mais usada em redes neurais."},
+        {t: "No produto de sen x por x², ache um x longe do zero onde a derivada vale quase zero.", ok: s => s.op === 1 && gi === 4 && hj === 1 && Math.abs(s.x) > 0.3 && Math.abs(s.m) < 0.1, win: () => "Derivada zero: a curva muda de direção aqui."}
+      ],
+      react: s => Math.abs(s.m) < 0.1 ? ["Inclinação perto de zero: a curva vira por aqui.", "happy"] : ["Compare a curva de cima com a derivada de baixo.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "gradiente", grupo: "Cálculo", nome: "Gradientes e curvas de nível",
-  lead: "Com duas variáveis, a derivada vira um vetor: o gradiente aponta para onde a função sobe mais rápido e seu tamanho diz o quão íngreme é. Clique no mapa para escolher o ponto.",
   campo: "Num talhão, z(x, y) é a altitude. O gradiente é a ladeira: aponta morro acima, e a água escorre no sentido contrário. A declividade é o tamanho do gradiente, e é o que comanda erosão e terraceamento.",
   dia: "As cores são curvas de nível: cada faixa é um valor da função. O gradiente é sempre perpendicular a elas. Descer contra o gradiente é o gradiente descendente que treina modelos.",
-  python: `import numpy as np
-
-f = lambda p: 0.5*p[0]**2 + 4*p[1]**2
-grad = lambda p: np.array([p[0], 8*p[1]])      # [df/dx, df/dy]
-p = np.array([2.5, 1.2])
-for _ in range(50):
-    p = p - 0.1*grad(p)                         # desce contra o gradiente
-print(p, f(p))`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const SF = [
       {nome: "Tigela (perda simples)", f: (x, y) => x * x + y * y, g: (x, y) => [2 * x, 2 * y], R: 3, st: [2.2, 1.6], lr: 0.1, gs: 4, t: "Mínimo único no centro. O gradiente aponta para fora; descer leva ao centro em linha reta."},
       {nome: "Vale estreito (perda mal condicionada)", f: (x, y) => 0.5 * x * x + 4 * y * y, g: (x, y) => [x, 8 * y], R: 3, st: [2.5, 1.2], lr: 0.1, gs: 6, t: "O gradiente não aponta para o mínimo e a descida faz zigue-zague. Suba a taxa até 0,25 e veja a oscilação crescer."},
@@ -909,7 +902,16 @@ print(p, f(p))`,
         <div>f(x, y) = <b>${fmt(S.f(pt[0], pt[1]), 2)}</b>${mg < 1e-3 ? " · gradiente ≈ 0: ponto crítico" : ""}</div><div>${S.t}</div>
         <div>Seta verde = gradiente (sobe mais rápido). Seta laranja = direção u. Gire u: o valor é máximo quando alinha com a verde e zero quando é perpendicular.</div>`;
     }
-    pt = SF[0].st.slice(); draw(); return draw;
+    pt = SF[0].st.slice(); draw();
+    kit("gradiente", extra, {
+      state: () => { const g = SF[k].g(pt[0], pt[1]); return {k, gn: Math.hypot(g[0], g[1]), steps: trail.length - 1}; },
+      goals: [
+        {t: "Desça até o gradiente ficar menor que 0,05.", ok: s => s.steps > 0 && s.gn < 0.05, win: () => "Gradiente quase zero: você chegou ao fundo."},
+        {t: "No relevo do talhão, faça a descida terminar num ponto de gradiente quase zero.", ok: s => s.k === 3 && s.steps > 0 && s.gn < 0.1, win: () => "A água parou aqui: é uma baixada do terreno."}
+      ],
+      react: s => s.steps === 0 ? ["Clique no mapa para escolher o ponto, ou use Descer.", "thinking"] : s.gn < 0.1 ? ["Quase parado: o gradiente é quase zero.", "happy"] : ["Seta verde: para onde sobe mais rápido. A descida vai ao contrário.", "neutral"]
+    });
+    return draw;
   }});
 
 /* ---------- mais cálculo visual ---------- */
@@ -1030,16 +1032,9 @@ print(float(erro))                      # quanto a aproximação erra ali`,
   }});
 
 MODS.push({id: "newton", grupo: "Cálculo", nome: "Método de Newton",
-  lead: "Para achar onde uma função vale zero, trace a tangente e veja onde ela cruza o eixo. Repita. Perto da raiz, cada passo costuma dobrar os dígitos corretos.",
   campo: "Achar a dose em que o lucro marginal zera, o pH de equilíbrio, a vazão em que a pressão no canal bate o limite ou a taxa de juros de um financiamento. Equações sem fórmula fechada se resolvem assim.",
   dia: "É o algoritmo por trás da raiz quadrada em calculadoras e de muitos solvers. Aplicado à derivada vira otimização de segunda ordem. Também mostra quando um algoritmo falha: tangente horizontal e chute inicial ruim.",
-  python: `f  = lambda x: x**2 - 2
-df = lambda x: 2*x
-x = 1.0
-for i in range(6):
-    x = x - f(x)/df(x)              # passo de Newton
-    print(i, x)                     # 1.5, 1.4167, 1.41422, ...`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const FN = [
       {nome: "x² − 2 (raiz de 2)", f: x => x * x - 2, d: x => 2 * x, a: -3, b: 3, y0: -4, y1: 8, x0: 1, roots: [-Math.SQRT2, Math.SQRT2]},
       {nome: "x³ − 2x − 5", f: x => x ** 3 - 2 * x - 5, d: x => 3 * x * x - 2, a: -3, b: 4, y0: -20, y1: 40, x0: 3, roots: [2.0945514815]},
@@ -1064,23 +1059,22 @@ for i in range(6):
         (Math.abs(d) < 1e-9 ? `<div class="no"><b>Tangente horizontal:</b> ela nunca cruza o eixo. Mude o chute inicial.</div>` : `<div>próximo x: <b>${fmt(x - F.f(x) / d, 8)}</b> (onde a tangente cruza o eixo)</div>`) +
         `<div>Círculos verdes = raízes. Observe o erro: perto da raiz ele cai de forma muito mais rápida que a cada passo anterior.${k === 3 ? " Aqui o chute decide de qual raiz você chega perto; em x = ln 3 a tangente é horizontal." : ""}</div>`;
     }
-    draw(); return draw;
+    draw();
+    kit("newton", extra, {
+      state: () => { const F = FN[k], x = xs[xs.length - 1], e = F.roots.map(rt => Math.abs(x - rt)), err = Math.min(...e); return {k, err, ri: e.indexOf(err), n: xs.length - 1}; },
+      goals: [
+        {t: "Chegue a uma raiz com erro menor que 0,000000001.", ok: s => s.err < 1e-9, win: s => "Em " + s.n + " passos. Newton converge muito rápido."},
+        {t: "Em eˣ − 3x, ache as duas raízes mudando o chute inicial.", ok: (s, memo) => { if (s.k === 3 && s.err < 1e-6) memo[s.ri] = 1; return Object.keys(memo).length === 2; }, win: () => "As duas raízes! O chute inicial decide qual você alcança."}
+      ],
+      react: s => s.err < 1e-9 ? ["Chegamos: o erro some em poucos passos.", "happy"] : s.n === 0 ? ["Dê um passo: a tangente aponta onde cruza o eixo.", "thinking"] : ["Cada passo aproxima bem mais que o anterior.", "neutral"]
+    });
+    return draw;
   }});
 
 MODS.push({id: "otimizadores", grupo: "Machine learning", nome: "Otimizadores: GD, momento e Adam",
-  lead: "Três jeitos de descer a mesma superfície a partir do mesmo ponto. O gradiente puro segue a ladeira, o momento acumula velocidade e o Adam ajusta o passo de cada eixo.",
   campo: "É o problema de calibrar um modelo de resposta da cultura com muitos parâmetros: a superfície do erro tem vales estreitos, e a forma de descer decide se o ajuste converge em segundos ou nunca.",
   dia: "Cada trilha é um treino. O vale estreito mostra por que o gradiente puro zigue-zagueia. A banana de Rosenbrock é o teste clássico de otimizadores. Clique no mapa para mudar o ponto de partida.",
-  python: `import numpy as np
-
-grad = lambda p: np.array([p[0], 8*p[1]])        # vale estreito
-p = v = m = s = np.zeros(2); p = np.array([2.5, 1.5])
-for t in range(1, 101):
-    g = grad(p)
-    m = 0.9*m + 0.1*g                              # média móvel do gradiente
-    s = 0.999*s + 0.001*g**2                       # média móvel do g²
-    p = p - 0.1 * (m/(1-0.9**t)) / (np.sqrt(s/(1-0.999**t)) + 1e-8)   # Adam`,
-  build(stage, panel) {
+  build(stage, panel, extra) {
     const SO = [
       {nome: "Vale estreito", f: (x, y) => 0.5 * x * x + 4 * y * y, g: (x, y) => [x, 8 * y], R: 3, st: [2.5, 1.5], lr: 0.1, lra: 0.1},
       {nome: "Banana de Rosenbrock", f: (x, y) => (1 - x) ** 2 + 100 * (y - x * x) ** 2, g: (x, y) => [-2 * (1 - x) - 400 * x * (y - x * x), 200 * (y - x * x)], R: 2, st: [-1.2, 1], lr: 0.001, lra: 0.05},
@@ -1120,7 +1114,16 @@ for t in range(1, 101):
         `<div class="cl">Hessiano no ponto do Adam</div><div>autovalores: <b>${fmt(l1, 2)}</b> e <b>${fmt(l2, 2)}</b></div><div>${kind}${l2 > 1e-6 ? " · número de condição: <b>" + fmt(l1 / l2, 1) + "</b>" : ""}</div>
         <div>Condição alta significa vale muito mais curvo num eixo que no outro: é o que faz o gradiente puro zigue-zaguear.</div>`;
     }
-    reset(); return draw;
+    reset();
+    kit("otimizadores", extra, {
+      state: () => { const S = SO[k], f = o => S.f(o.p[0], o.p[1]); return {k, n: opts[0].n, fG: f(opts[0]), fM: f(opts[1]), fA: f(opts[2])}; },
+      goals: [
+        {t: "Na banana de Rosenbrock, leve o Adam a um valor de f abaixo de 0,01.", ok: s => s.k === 1 && s.fA < 0.01, win: () => "O Adam achou o fundo da banana, onde o gradiente puro sofre."},
+        {t: "No vale estreito, dê 100 passos e veja as três trilhas chegarem perto do mínimo (f abaixo de 0,05).", ok: s => s.k === 0 && s.n >= 100 && s.fG < 0.05 && s.fM < 0.05 && s.fA < 0.05, win: () => "As três chegaram. A diferença está no caminho que cada uma fez."}
+      ],
+      react: s => s.n === 0 ? ["Dê alguns passos e compare as três trilhas.", "thinking"] : s.fA < s.fG && s.fA < s.fM ? ["O Adam está na frente.", "happy"] : ["O gradiente puro ainda está se arrastando.", "neutral"]
+    });
+    return draw;
   }});
 
 /* ---------- ligação com o trabalho atual ---------- */
@@ -1156,6 +1159,7 @@ Object.assign(IA, {
   otimizadores: "Adam, e sua variante AdamW, é o otimizador mais comum no treino e no ajuste fino de redes e LLMs. Os sintomas ficam legíveis: perda oscilando indica taxa alta, treino lento em vale estreito indica mau condicionamento, e platôs lembram selas."
 });
 const ID_ORDER = ["ideia", "funcao", "limite", "derivada", "regras", "taylor", "maxmin", "newton", "integral", "multiplas", "gradiente", "matrizes", "estatistica", "regressao", "otimizadores", "overfit", "logistica", "rede", "embeddings", "atencao", "token", "trilha", "jogos"];
+MODS.forEach(m => Object.assign(m, CONTENT[m.id]));
 MODS.sort((a, b) => ID_ORDER.indexOf(a.id) - ID_ORDER.indexOf(b.id));
 
 /* ---------- navegação ---------- */
@@ -1169,14 +1173,7 @@ function show(id) {
   try { localStorage.setItem("mc-mod", m.id); } catch (e) {}
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === m.id));
   const main = $("#main"); main.dataset.area = AREA[m.grupo];
-  if (m.gancho) layoutDidatico(m, main);
-  else {
-    main.innerHTML = `<div><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="lead">${m.lead}</p></div>
-    <div class="uses"><section><h3>No campo</h3><p>${m.campo}</p></section><section><h3>No dia a dia</h3><p>${m.dia}</p></section><section class="me"><h3>No seu trabalho</h3><p>${IA[m.id]}</p></section></div>
-    <div class="lab"><div class="stage"></div><div class="panel"></div></div>
-    <div><h3 class="py">Em Python</h3><pre><code></code></pre></div>`;
-    $("pre code", main).textContent = m.python;
-  }
+  layoutDidatico(m, main);
   redraw = m.build($(".stage", main), $(".panel", main), $(".extra", main));
   main.insertAdjacentHTML("beforeend", finishHTML(m)); bindFinish();
   Progress.get().visited[m.id] = true; Progress.save(); renderAll();
@@ -1342,6 +1339,32 @@ window.addEventListener("mc:goal", e => {
   const r = e.detail && e.detail.el && e.detail.el.getBoundingClientRect(); if (r) confetti(r.left + 20, r.top + 18);
   if (e.detail) onGoal(e.detail);
 });
+
+/* desafios e reações do Broto, iguais para todos os assuntos.
+   Cada assunto entrega: state() com os fatos do laboratório, goals com a meta e o teste, e react() com o comentário do Broto. */
+function kit(mod, extra, {goals, state, react}) {
+  const done = goals.map((_, i) => !!Progress.get().goals[mod + ":" + i]), memo = goals.map(() => ({}));
+  extra.innerHTML = `<h3 class="goals-title">Desafios</h3><ol class="goals">${goals.map((g, i) => `<li class="goal${done[i] ? " done" : ""}" data-i="${i}"><span class="goal-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13l5 5L20 6"/></svg></span><span>${g.t}</span></li>`).join("")}</ol><p class="goal-msg" role="status"></p>`;
+  const ac = new AbortController(), root = extra.closest("main"); let armed = false, prev = null, tm = 0, last = "";
+  ["input", "pointerdown", "click", "keydown"].forEach(ev => root.addEventListener(ev, () => { armed = true; }, {capture: true, signal: ac.signal}));
+  const check = () => {
+    let s; try { s = state(); } catch (e) { return; }
+    const key = JSON.stringify(s); if (key === last) return; last = key;
+    let won = false;
+    if (armed) goals.forEach((g, i) => {
+      if (done[i] || !g.ok(s, memo[i])) return;
+      won = true; done[i] = true; const li = $(`.goal[data-i="${i}"]`, extra); li.classList.add("done", "just"); $(".goal-msg", extra).textContent = g.win(s);
+      if (broto) { clearTimeout(tm); broto.say(g.win(s), "happy"); }
+      window.dispatchEvent(new CustomEvent("mc:goal", {detail: {module: mod, index: i, total: goals.length, el: li}}));
+    });
+    const next = done.indexOf(false); extra.querySelectorAll(".goal").forEach((li, i) => li.classList.toggle("active", i === next));
+    if (!won && armed && prev) { clearTimeout(tm); tm = setTimeout(() => { const r = react && react(s, prev); prev = s; if (r && broto) broto.say(r[0], r[1]); }, 450); }
+    if (!prev) prev = s;
+  };
+  const iv = setInterval(check, 350), old = onLeave;
+  onLeave = () => { clearInterval(iv); clearTimeout(tm); ac.abort(); if (old) old(); };
+  check();
+}
 
 function layoutDidatico(m, main) {
   const ctx = [["campo", "No campo", m.campo], ["dia", "No dia a dia", m.dia], ["trabalho", "No seu trabalho", IA[m.id]]];

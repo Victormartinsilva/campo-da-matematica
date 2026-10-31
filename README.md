@@ -15,7 +15,8 @@ Laboratório interativo para revisar a matemática da graduação em Engenharia 
 - `index.html`: estrutura da página.
 - `tokens.css`: tokens de design (paleta de papel, cores por área, fontes, espaçamentos, tema escuro).
 - `styles.css`: layout e componentes, sempre lendo os tokens.
-- `app.js`: ferramentas de gráfico e interface, os módulos (cada um com sua aplicação, laboratório e código Python) e a navegação.
+- `content.js`: o texto didático de cada assunto (gancho, resumo, detalhes e o Python comentado linha a linha).
+- `app.js`: ferramentas de gráfico e interface, os módulos (aplicações, laboratório, desafios e reações do Broto), o progresso e a navegação.
 
 ## Rodar localmente
 
