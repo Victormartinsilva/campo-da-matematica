@@ -123,8 +123,6 @@ const det3 = A => A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) - A[0][1] * 
 const MODS = [];
 
 MODS.push({id: "funcao", grupo: "Cálculo", nome: "Funções",
-  campo: "Toda recomendação técnica é uma função: dose de adubo vira produtividade, lâmina de água vira produção, temperatura vira ritmo de desenvolvimento. Sem a função você só tem uma tabela de pontos soltos.",
-  dia: "Frete por quilômetro, conta de energia e parcela de financiamento são funções. Conhecer o domínio evita extrapolar: uma dose de 1.000 kg/ha não rende 1.000 sacas.",
   build(stage, panel, extra) {
     const FN = [
       {nome: "Frete: custo por distância (linear)", f: x => 120 + 3.5 * x, a: 0, b: 200, xu: "km", yu: "R$", eq: "C(x) = 120 + 3,5·x", xl: "distância (km)", yl: "custo (R$)"},
@@ -156,8 +154,6 @@ MODS.push({id: "funcao", grupo: "Cálculo", nome: "Funções",
   }});
 
 MODS.push({id: "limite", grupo: "Cálculo", nome: "Limites",
-  campo: "O que acontece com a produtividade quando a dose cresce sem parar? Ela satura em um platô. Concentração de nutriente na solução, temperatura de equilíbrio e tamanho de amostra grande também são perguntas de limite.",
-  dia: "É a forma rigorosa de lidar com o 0/0 e com o “tende a”. Derivada e integral são definidas como limites. Também mostra quando um modelo quebra, como em degraus de tarifa ou divisão por zero.",
   build(stage, panel, extra) {
     const CS = [
       {nome: "(x² − 1)/(x − 1) perto de x = 1", f: x => (x * x - 1) / (x - 1), a: 1, y0: 0, y1: 4, hole: 2},
@@ -195,8 +191,6 @@ MODS.push({id: "limite", grupo: "Cálculo", nome: "Limites",
   }});
 
 MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
-  campo: "Quanto cada kg extra de nitrogênio rende (produto marginal). Quão rápido a planta cresce hoje. Vazão é a derivada do volume no tempo. Taxa de infiltração é a derivada da lâmina infiltrada.",
-  dia: "O velocímetro é a derivada da posição. Em inteligência artificial, treinar um modelo é descer uma ladeira guiado por derivadas. A reta tangente é a melhor aproximação linear perto do ponto.",
   build(stage, panel, extra) {
     const DF = [
       {nome: "Produtividade × adubo", f: x => 80 + 0.30 * x - 0.0009 * x * x, df: x => 0.30 - 0.0018 * x, a: 0, b: 300, xu: "kg N/ha", yu: "sc/ha", x0: 100},
@@ -236,8 +230,6 @@ MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
   }});
 
 MODS.push({id: "maxmin", grupo: "Cálculo", nome: "Máximos e mínimos",
-  campo: "A dose de adubo que dá mais lucro não é a que dá mais produção: depois de certo ponto, o último quilo custa mais do que rende. O mesmo vale para ração, lâmina de irrigação e dimensionamento de canais.",
-  dia: "Qualquer decisão do tipo “até onde vale a pena” é um problema de otimização. O botão abaixo faz o que algoritmos de aprendizado de máquina fazem: seguir a derivada, passo a passo.",
   build(stage, panel, extra) {
     const A0 = 80, B = 0.30, C2 = 0.0009; const y = x => A0 + B * x - C2 * x * x;
     const c = canvas(stage); const R = readout(panel); let x = 40;
@@ -274,8 +266,6 @@ MODS.push({id: "maxmin", grupo: "Cálculo", nome: "Máximos e mínimos",
   }});
 
 MODS.push({id: "integral", grupo: "Cálculo", nome: "Integrais",
-  campo: "Chuva acumulada a partir da intensidade, volume irrigado a partir da vazão, carga de sedimentos, graus-dia acumulados ao longo da safra. O equipamento mede a taxa e a integral entrega o total.",
-  dia: "Distância percorrida a partir da velocidade, energia em kWh a partir da potência, lucro acumulado a partir do fluxo de caixa. Taxa em um eixo, total na área.",
   build(stage, panel, extra) {
     const PR = [
       {nome: "Chuva: intensidade (mm/h) em 6 h", f: t => 12 * Math.exp(-t / 2), F: t => -24 * Math.exp(-t / 2), a: 0, b: 6, xl: "tempo (h)", yl: "mm/h", u: "mm"},
@@ -314,8 +304,6 @@ MODS.push({id: "integral", grupo: "Cálculo", nome: "Integrais",
   }});
 
 MODS.push({id: "multiplas", grupo: "Cálculo", nome: "Integrais duplas e triplas",
-  campo: "Um pluviômetro mede a chuva em um ponto, mas a lavoura recebe chuva desigual. O volume sobre o talhão é uma integral dupla. A massa de solo em uma camada, com densidade que muda com a profundidade, é uma integral tripla.",
-  dia: "Volume de terra em terraplenagem, probabilidade conjunta de duas variáveis, massa de um objeto com densidade irregular. É a mesma ideia dos retângulos, agora em células e cubinhos.",
   build(stage, panel, extra) {
     const rf = (x, y) => 5 + 20 * Math.exp(-((x - 30) ** 2 + (y - 65) ** 2) / (2 * 22 * 22));
     const vol = n => { let s = 0; const d = 100 / n; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) s += rf((i + .5) * d, (j + .5) * d); return s / 1000 * d * d; };
@@ -353,8 +341,6 @@ MODS.push({id: "multiplas", grupo: "Cálculo", nome: "Integrais duplas e triplas
   }});
 
 MODS.push({id: "matrizes", grupo: "Álgebra linear", nome: "Matrizes e sistemas",
-  campo: "Formular adubo ou ração é um sistema linear: quanto de cada produto comercial entrega os nutrientes-alvo? Cada coluna é um produto, cada linha é um nutriente, e a inversa devolve as quantidades.",
-  dia: "Orçamentos, redes elétricas, gráficos 3D e redes neurais usam matrizes. Uma matriz sem inversa (singular) indica informação redundante: dois ingredientes que fazem o mesmo papel.",
   build(stage, panel, extra) {
     const A0 = [[45, 11, 0], [0, 52, 0], [0, 0, 60]], b0 = [100, 80, 60], prod = ["Ureia", "MAP", "KCl"], nut = ["N", "P₂O₅", "K₂O"];
     stage.innerHTML = `<div class="mxwrap"><h4>A: teor de nutriente (%) em cada produto</h4><table class="mx" id="mxA"></table><h4>b: meta (kg de nutriente por ha)</h4><table class="mx" id="mxB"></table></div>`;
@@ -387,8 +373,6 @@ MODS.push({id: "matrizes", grupo: "Álgebra linear", nome: "Matrizes e sistemas"
   }});
 
 MODS.push({id: "estatistica", grupo: "Estatística", nome: "Experimentos de campo",
-  campo: "Comparar cultivares, doses e manejos exige repetições. Cada parcela varia por razões que você não controla. Mais repetições ou menos variação deixam o efeito real mais fácil de enxergar.",
-  dia: "É o mesmo raciocínio do teste A/B de um site e do controle de qualidade de uma fábrica. O poder do teste diz a chance de enxergar uma diferença que realmente existe.",
   build(stage, panel, extra) {
     const c = canvas(stage); const R = readout(panel); let A = [], B = [];
     const ds = ctl(panel, "Diferença real entre cultivares", 0, 15, 0.5, 4, v => fmt(v, 1) + " sc/ha", () => run());
@@ -425,8 +409,6 @@ MODS.push({id: "estatistica", grupo: "Estatística", nome: "Experimentos de camp
   }});
 
 MODS.push({id: "jogos", grupo: "Decisão", nome: "Teoria dos jogos",
-  campo: "Duas cooperativas decidindo se baixam o preço, vizinhos que dividem silo ou maquinário, produtor e fiscalização. Em todos, a sua melhor escolha depende do que o outro faz.",
-  dia: "Negociação, leilão, trânsito, preço de concorrentes. Marcar a melhor resposta em cada coluna e em cada linha já revela os equilíbrios.",
   build(stage, panel, extra) {
     const PS = [
       {nome: "Cooperativas: dilema dos preços", L: ["Manter preço", "Baixar preço"], C: ["Manter preço", "Baixar preço"], P: [[[5, 5], [1, 7]], [[7, 1], [3, 3]]], t: "Cada uma ganha mais baixando o preço, qualquer que seja a outra. Resultado: ambas baixam e ficam pior do que se mantivessem."},
@@ -476,8 +458,6 @@ MODS.push({id: "jogos", grupo: "Decisão", nome: "Teoria dos jogos",
 const mulberry = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 
 MODS.push({id: "regressao", grupo: "Machine learning", nome: "Regressão linear e gradiente",
-  campo: "Prever a produtividade a partir da chuva do ciclo, da temperatura ou da dose de adubo é regressão. É a base de quase todo modelo de previsão: ajustar parâmetros para errar o mínimo possível.",
-  dia: "O treino de uma rede neural repete este laço: calcular o erro, calcular a derivada, andar na direção que reduz o erro. A taxa de aprendizado é o tamanho do passo.",
   build(stage, panel, extra) {
     const rnd = mulberry(7), gz = () => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
     const D = Array.from({length: 24}, (_, i) => { const x = -2 + 4 * (i + .5) / 24 + (rnd() - .5) * .1; return [x, 60 + 8 * x + 6 * gz()]; });
@@ -516,8 +496,6 @@ MODS.push({id: "regressao", grupo: "Machine learning", nome: "Regressão linear 
   }});
 
 MODS.push({id: "embeddings", grupo: "Machine learning", nome: "Vetores, embeddings e busca",
-  campo: "Achar, em milhares de laudos e boletins técnicos, o trecho sobre o problema que o produtor descreveu. A busca por palavra falha quando o produtor usa outros termos; a busca por significado funciona.",
-  dia: "É o que acontece por trás de recomendação de filmes, busca semântica e detecção de duplicatas. Aqui o espaço tem 2 dimensões; os modelos reais usam centenas ou milhares.",
   build(stage, panel, extra) {
     const DOCS = [
       {t: "Adubação nitrogenada em milho", s: "Adubação N", v: [-0.8, 0.45]}, {t: "Irrigação por gotejamento", s: "Irrigação", v: [-0.35, 0.2]},
@@ -554,8 +532,6 @@ MODS.push({id: "embeddings", grupo: "Machine learning", nome: "Vetores, embeddin
   }});
 
 MODS.push({id: "atencao", grupo: "Machine learning", nome: "Softmax e atenção",
-  campo: "Na frase “o milho precisa de nitrogênio”, entender “precisa” exige olhar para “milho” e “nitrogênio”. A atenção aprende quais palavras importam para cada uma.",
-  dia: "É o bloco central do Transformer, repetido em várias cabeças e camadas. Os vetores abaixo são valores de brinquedo, escolhidos à mão. Em um modelo real eles vêm do treino.",
   build(stage, panel, extra) {
     const T = [["o", [0.1, 0.1]], ["milho", [1, 0.2]], ["precisa", [0.3, 0.9]], ["de", [0.1, 0.2]], ["nitrogênio", [0.9, 0.5]], [".", [-0.2, 0]]];
     const c = canvas(stage, 380); const R = readout(panel); let qi = 1;
@@ -589,8 +565,6 @@ MODS.push({id: "atencao", grupo: "Machine learning", nome: "Softmax e atenção"
   }});
 
 MODS.push({id: "overfit", grupo: "Machine learning", nome: "Overfitting, viés e variância",
-  campo: "Ajustar uma curva de resposta da cultura com poucas parcelas é o caso clássico. Um polinômio de grau alto passa por todos os pontos e prevê absurdos entre eles.",
-  dia: "Toda a prática de ML gira em torno disso: separar treino e teste, validação cruzada, regularização, parar o treino cedo. O erro no treino sempre melhora com mais complexidade. O erro no teste, não.",
   build(stage, panel, extra) {
     const rnd = mulberry(21), gz = () => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd()), f0 = x => Math.sin(2.2 * x);
     const tr = Array.from({length: 14}, () => { const x = rnd() * 2 - 1; return [x, f0(x) + 0.25 * gz()]; }), te = Array.from({length: 80}, () => { const x = rnd() * 2 - 1; return [x, f0(x) + 0.25 * gz()]; });
@@ -632,8 +606,6 @@ const erf = x => { const s = Math.sign(x); x = Math.abs(x); const t = 1 / (1 + 0
 const Phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
 
 MODS.push({id: "logistica", grupo: "Machine learning", nome: "Classificação, limiar e guardrails",
-  campo: "Detectar doença em folhas por imagem: chamar uma planta sadia de doente custa uma visita. Deixar passar uma doente custa a safra. Os dois erros têm preços diferentes.",
-  dia: "Spam, fraude e exame médico seguem a mesma lógica. A regressão logística é o modelo mais simples que gera esse score: a sigmoide transforma uma soma ponderada em probabilidade.",
   build(stage, panel, extra) {
     const PI = [0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], S = 0.15, M0 = 0.35; let t = 0.5;
     const c1 = canvas(stage, 220), c2 = canvas(stage, 250); const R = readout(panel);
@@ -668,8 +640,6 @@ MODS.push({id: "logistica", grupo: "Machine learning", nome: "Classificação, l
   }});
 
 MODS.push({id: "rede", grupo: "Machine learning", nome: "Redes neurais e backpropagation",
-  campo: "Separar áreas de solo por duas medidas (por exemplo, argila e matéria orgânica) quando a fronteira não é uma reta. Uma rede com poucos neurônios já desenha fronteiras curvas.",
-  dia: "É a mesma máquina de redes de visão e de linguagem, em escala minúscula. Aqui há 2 entradas, uma camada oculta e 1 saída. Os pesos são treinados ao vivo no seu navegador.",
   build(stage, panel, extra) {
     const LR = [0.1, 0.5, 1.5]; let ds = 1, h = 6, lri = 1, epoch = 0, hist = [], timer = null, pts, W1, b1, W2, b2;
     const cm = canvas(stage, 320), cl = canvas(stage, 150); const R = readout(panel);
@@ -712,8 +682,6 @@ MODS.push({id: "rede", grupo: "Machine learning", nome: "Redes neurais e backpro
   }});
 
 MODS.push({id: "token", grupo: "Machine learning", nome: "Do logit ao próximo token",
-  campo: "Para a frase “o milho precisa de ___”, o modelo pontua cada candidato. O mais provável é “nitrogênio”, mas “água” está logo atrás, e “carro” é quase impossível.",
-  dia: "Os logits abaixo são valores de brinquedo escolhidos à mão. Em um modelo real há dezenas de milhares de candidatos, mas a conta é exatamente esta.",
   build(stage, panel, extra) {
     const TK = [["nitrogênio", 4.2], ["água", 3.9], ["luz", 3.1], ["fósforo", 2.9], ["sol", 2.0], [".", 0.5], ["carro", -1], ["banco", -2]]; let counts = null;
     stage.innerHTML = `<div class="mxwrap" id="tk"></div>`; const box = $("#tk", stage), R = readout(panel);
@@ -744,8 +712,6 @@ MODS.push({id: "token", grupo: "Machine learning", nome: "Do logit ao próximo t
   }});
 
 MODS.push({id: "trilha", grupo: "Machine learning", nome: "Trilha e ferramentas",
-  campo: "A graduação treinou o hábito mais importante: formular o problema, modelar, resolver e conferir se o resultado faz sentido no mundo real.",
-  dia: "Estudar modelos sem aplicar em algo concreto não fixa. Cada etapa abaixo termina em um exercício que dá para guardar como projeto.",
   build(stage, panel) {
     const T = [
       ["Regressão linear e logística", "derivadas, matrizes, probabilidade", "scikit-learn, statsmodels", "Prever um indicador do seu negócio e comparar com a média simples."],
@@ -778,8 +744,6 @@ function arrow(g, x1, y1, x2, y2, color, w = 2) {
 }
 
 MODS.push({id: "ideia", grupo: "Cálculo", nome: "A grande ideia do cálculo",
-  campo: "O hidrômetro mede a vazão agora. A conta de água cobra o volume acumulado. O pluviômetro registra mm/h, mas a lavoura sente os mm do total da chuva.",
-  dia: "Velocímetro e hodômetro. Uma mostra a taxa, o outro soma tudo. O teorema fundamental diz que a inclinação do acumulado em cada instante é a taxa daquele instante.",
   build(stage, panel, extra) {
     const SC = [
       {nome: "Reservatório: vazão e volume", q: t => 30 + 10 * Math.sin(t), V: t => 30 * t - 10 * Math.cos(t) + 10, a: 0, b: 10, xl: "tempo (min)", ql: "vazão q(t) em L/min", Vl: "volume acumulado V(t) em L", u: "L", ur: "L/min", tu: "min"},
@@ -813,8 +777,6 @@ MODS.push({id: "ideia", grupo: "Cálculo", nome: "A grande ideia do cálculo",
   }});
 
 MODS.push({id: "regras", grupo: "Cálculo", nome: "Regras de derivação",
-  campo: "Respostas reais são combinações: produtividade vezes preço, uma função de dose dentro de outra de clima, uma razão custo por área. A regra certa evita derivar tudo na unha.",
-  dia: "Soma e produto são fáceis. A regra do quociente aparece em razões e médias. A regra da cadeia, função dentro de função, é a mais usada em ciência de dados.",
   build(stage, panel, extra) {
     const LB = [
       ["x", x => x, x => 1, "x", "1"], ["x²", x => x * x, x => 2 * x, "x²", "2x"], ["x³", x => x ** 3, x => 3 * x * x, "x³", "3x²"], ["eˣ", Math.exp, Math.exp, "eˣ", "eˣ"],
@@ -861,8 +823,6 @@ MODS.push({id: "regras", grupo: "Cálculo", nome: "Regras de derivação",
   }});
 
 MODS.push({id: "gradiente", grupo: "Cálculo", nome: "Gradientes e curvas de nível",
-  campo: "Num talhão, z(x, y) é a altitude. O gradiente é a ladeira: aponta morro acima, e a água escorre no sentido contrário. A declividade é o tamanho do gradiente, e é o que comanda erosão e terraceamento.",
-  dia: "As cores são curvas de nível: cada faixa é um valor da função. O gradiente é sempre perpendicular a elas. Descer contra o gradiente é o gradiente descendente que treina modelos.",
   build(stage, panel, extra) {
     const SF = [
       {nome: "Tigela (perda simples)", f: (x, y) => x * x + y * y, g: (x, y) => [2 * x, 2 * y], R: 3, st: [2.2, 1.6], lr: 0.1, gs: 4, t: "Mínimo único no centro. O gradiente aponta para fora; descer leva ao centro em linha reta."},
@@ -950,8 +910,6 @@ MODS.push({id: "taylor", grupo: "Cálculo", nome: "Séries de Taylor",
   gancho: "Por que uma reta serve para prever a curva aqui, mas não ali?",
   resumo: "Perto de um ponto, qualquer curva suave parece um polinômio. Cada termo novo estica a faixa onde a aproximação vale.",
   detalhes: "Cada termo vem de uma derivada no centro a: f(a) dá a altura, f′(a) a inclinação, f″(a) a curvatura, e assim por diante. Com um termo você tem a tangente. Com dois, uma parábola que acompanha a curva. A faixa verde do gráfico mostra onde o erro fica abaixo de 5% do tamanho da função. Longe do centro a aproximação se desfaz. Em funções como ln(1 + x) existe até um limite de distância que nenhum número de termos consegue ultrapassar.",
-  campo: "Em torno do ponto de operação, a resposta da cultura a uma pequena mudança de dose ou de temperatura cabe numa reta ou numa parábola. Por isso modelos locais servem para ajuste fino e falham quando você extrapola.",
-  dia: "É assim que calculadoras e bibliotecas calculam sen, exp e log. A tangente (ordem 1) e a parábola (ordem 2) sustentam o método de Newton e as otimizações de segunda ordem.",
   python: `import sympy as sp                      # biblioteca de matemática simbólica
 
 x = sp.symbols('x')                     # x vira uma variável simbólica, não um número
@@ -1032,8 +990,6 @@ print(float(erro))                      # quanto a aproximação erra ali`,
   }});
 
 MODS.push({id: "newton", grupo: "Cálculo", nome: "Método de Newton",
-  campo: "Achar a dose em que o lucro marginal zera, o pH de equilíbrio, a vazão em que a pressão no canal bate o limite ou a taxa de juros de um financiamento. Equações sem fórmula fechada se resolvem assim.",
-  dia: "É o algoritmo por trás da raiz quadrada em calculadoras e de muitos solvers. Aplicado à derivada vira otimização de segunda ordem. Também mostra quando um algoritmo falha: tangente horizontal e chute inicial ruim.",
   build(stage, panel, extra) {
     const FN = [
       {nome: "x² − 2 (raiz de 2)", f: x => x * x - 2, d: x => 2 * x, a: -3, b: 3, y0: -4, y1: 8, x0: 1, roots: [-Math.SQRT2, Math.SQRT2]},
@@ -1072,8 +1028,6 @@ MODS.push({id: "newton", grupo: "Cálculo", nome: "Método de Newton",
   }});
 
 MODS.push({id: "otimizadores", grupo: "Machine learning", nome: "Otimizadores: GD, momento e Adam",
-  campo: "É o problema de calibrar um modelo de resposta da cultura com muitos parâmetros: a superfície do erro tem vales estreitos, e a forma de descer decide se o ajuste converge em segundos ou nunca.",
-  dia: "Cada trilha é um treino. O vale estreito mostra por que o gradiente puro zigue-zagueia. A banana de Rosenbrock é o teste clássico de otimizadores. Clique no mapa para mudar o ponto de partida.",
   build(stage, panel, extra) {
     const SO = [
       {nome: "Vale estreito", f: (x, y) => 0.5 * x * x + 4 * y * y, g: (x, y) => [x, 8 * y], R: 3, st: [2.5, 1.5], lr: 0.1, lra: 0.1},
@@ -1127,37 +1081,6 @@ MODS.push({id: "otimizadores", grupo: "Machine learning", nome: "Otimizadores: G
   }});
 
 /* ---------- ligação com o trabalho atual ---------- */
-const IA = {
-  funcao: "Um modelo de ML é uma função aprendida, f(entrada; parâmetros), e um endpoint de API também é uma função. Entender domínio e extrapolação explica por que um modelo erra fora do que viu no treino, o chamado drift.",
-  limite: "Convergência de treino, tolerância ε, estabilidade numérica (overflow no softmax, log de zero) e o que acontece com latência e custo quando o volume cresce sem parar em um pipeline.",
-  derivada: "Backpropagation é a regra da cadeia aplicada camada por camada, e os otimizadores (SGD, Adam) usam essas derivadas. Em séries temporais de métricas, a taxa de variação ajuda a detectar anomalias.",
-  maxmin: "Treinar é minimizar uma função de perda. A mesma lógica acha o ponto ideal entre custo e qualidade (tamanho de chunk, tokens, temperatura) e o limiar de um guardrail, entre falso positivo e falso negativo.",
-  integral: "Probabilidade é área sob uma densidade, e a AUC-ROC é uma integral. Também aparece em métricas acumuladas em janelas de streaming e no custo total de tokens ou de computação a partir de uma taxa de consumo.",
-  multiplas: "Distribuições conjuntas e marginalização são somas sobre várias variáveis. Quando a integral não tem fórmula fechada, métodos de Monte Carlo fazem a soma por amostragem, como em simulações e inferência bayesiana.",
-  matrizes: "Embeddings são vetores, uma camada de rede é A·x + b, e PCA e SVD reduzem dimensão. Adaptadores como LoRA aproximam as matrizes de pesos com matrizes menores.",
-  estatistica: "Avaliar prompts, RAG e guardrails com amostras pede intervalo de confiança da taxa de acerto, teste A/B entre versões e tamanho adequado do conjunto de avaliação. Poucos exemplos geram conclusões frágeis.",
-  jogos: "Atacante e defensor em prompt injection, sistemas multiagente, leilões de anúncio e preço de APIs. Redes generativas adversariais são um jogo entre dois modelos.",
-  regressao: "A regressão linear é o baseline de qualquer problema tabular: se um modelo complexo não a supera, algo está errado. Tanto o scikit-learn quanto o Spark MLlib implementam esse ajuste, e o MLflow registra os parâmetros e as métricas dos experimentos.",
-  embeddings: "É a base do RAG: documentos e pergunta viram vetores e o retriever devolve os mais próximos. A métrica deve seguir a do modelo de embedding, e vetores normalizados fazem cosseno e produto escalar darem o mesmo ranking.",
-  atencao: "Cada bloco de um Transformer repete este mecanismo em várias cabeças. O custo cresce com o quadrado do tamanho do contexto, e o softmax com temperatura reaparece na amostragem de tokens e na calibração de scores."
-};
-Object.assign(IA, {
-  overfit: "Em pipelines de dados, vazamento entre treino e teste gera métricas bonitas e modelos ruins em produção. A validação deve imitar o uso real, por exemplo separando por data em vez de sortear linhas.",
-  logistica: "Guardrails, classificadores de intenção e filtros de qualidade são classificadores com limiar. O limiar certo vem do custo dos dois erros e da taxa real de casos ruins, não de 0,5 por padrão.",
-  rede: "Um LLM é uma rede enormemente maior, treinada com o mesmo laço: passo adiante, perda, passo atrás, atualização. Entender o laço pequeno ajuda a depurar treino, ajuste fino e taxa de aprendizado.",
-  token: "Temperatura, top-k e top-p são os parâmetros que você ajusta nas chamadas de API de um LLM. Temperatura baixa dá respostas mais repetíveis, útil em extração e classificação. Alta dá variedade.",
-  trilha: "Use esta ordem como roteiro: cada etapa reaproveita a matemática da anterior e tem um exercício com dados do seu ambiente."
-});
-Object.assign(IA, {
-  ideia: "No mundo dos dados, diff e cumsum (pandas, funções de janela no Spark) são a versão discreta da derivada e da integral. A taxa e o acumulado de uma métrica de streaming formam esse mesmo par.",
-  regras: "A regra da cadeia é a que mais pesa: backpropagation é a regra da cadeia aplicada camada por camada. O PyTorch calcula essas derivadas sozinho (autograd), mas saber a regra ajuda a depurar gradientes que somem ou explodem.",
-  gradiente: "Treinar um modelo é descer a superfície da perda seguindo o gradiente. Taxa grande demais oscila, vale estreito faz zigue-zague (por isso existem momento e Adam) e pontos de sela são comuns em redes grandes."
-});
-Object.assign(IA, {
-  taylor: "A aproximação de primeira ordem (tangente) é o que o gradiente descendente usa, e a de segunda ordem (parábola, via Hessiano) é a base de Newton e L-BFGS. Localmente tudo é quase linear, por isso passos pequenos são seguros.",
-  newton: "A mesma ideia resolve equações em solvers numéricos, na calibração de modelos e no cálculo de TIR. Como toda rotina iterativa de produção, precisa de critério de parada e de tratamento dos casos em que falha.",
-  otimizadores: "Adam, e sua variante AdamW, é o otimizador mais comum no treino e no ajuste fino de redes e LLMs. Os sintomas ficam legíveis: perda oscilando indica taxa alta, treino lento em vale estreito indica mau condicionamento, e platôs lembram selas."
-});
 const ID_ORDER = ["ideia", "funcao", "limite", "derivada", "regras", "taylor", "maxmin", "newton", "integral", "multiplas", "gradiente", "matrizes", "estatistica", "regressao", "otimizadores", "overfit", "logistica", "rede", "embeddings", "atencao", "token", "trilha", "jogos"];
 MODS.forEach(m => Object.assign(m, CONTENT[m.id]));
 MODS.sort((a, b) => ID_ORDER.indexOf(a.id) - ID_ORDER.indexOf(b.id));
@@ -1191,10 +1114,17 @@ function showCampo() {
 
 /* ---------- layout didático: gancho, laboratório primeiro, contextos em abas, Python com cópia ---------- */
 const ICONS = {
-  campo: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6z"/><path d="M12 15c0-3-2.5-5-6-5 0 3.5 2.5 5 6 5z"/></svg>`,
+  agro: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6z"/><path d="M12 15c0-3-2.5-5-6-5 0 3.5 2.5 5 6 5z"/></svg>`,
   dia: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/></svg>`,
-  trabalho: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20M10 9l-2 2 2 2M14 9l2 2-2 2"/></svg>`
+  dados: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M8 16v-4M12 16V8M16 16v-6"/></svg>`,
+  publico: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18M5 20V11M10 20V11M14 20V11M19 20V11M3 10l9-6 9 6z"/></svg>`,
+  engenharia: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>`,
+  negocios: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>`,
+  todos: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>`
 };
+/* contextos em que cada assunto é explicado; a escolha vale para o site inteiro e fica lembrada */
+const CONTEXTOS = [{id: "todos", nome: "Todos"}, {id: "agro", nome: "Agro e ambiente"}, {id: "publico", nome: "Políticas públicas"}, {id: "engenharia", nome: "Engenharia"}, {id: "dados", nome: "Dados e IA"}, {id: "negocios", nome: "Negócios"}, {id: "dia", nome: "Dia a dia"}];
+let ctxAtual = "todos"; try { const salvo = localStorage.getItem("mc-ctx"); if (CONTEXTOS.some(c => c.id === salvo)) ctxAtual = salvo; } catch (e) {}
 function tex(el, s) {
   if (window.katex) { try { katex.render(s, el, {throwOnError: false}); return; } catch (e) {} }
   el.textContent = s.replace(/\\[a-z]+|[{}]/g, "");
@@ -1378,22 +1308,27 @@ function kit(mod, extra, {goals, state, react}) {
 }
 
 function layoutDidatico(m, main) {
-  const ctx = [["campo", "No campo", m.campo], ["dia", "No dia a dia", m.dia], ["trabalho", "No seu trabalho", IA[m.id]]];
   main.innerHTML = `<div class="head"><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="gancho">${m.gancho}</p>
       <p class="lead">${m.resumo}</p>
       <button class="more" type="button" aria-expanded="false" aria-controls="detalhes">Quero mais detalhes</button><div class="detalhes" id="detalhes" hidden><p>${m.detalhes}</p></div></div>
     <div class="lab"><div class="stage"></div><div class="side"><div class="guide"></div><div class="panel"></div></div></div>
     <div class="extra"></div>
-    <section class="ctx" aria-label="Onde isso aparece"><div class="tabs" role="tablist">${ctx.map(([id, nome], i) => `<button class="tab" role="tab" type="button" id="tab-${id}" aria-selected="${i === 0}" aria-controls="pn-${id}" tabindex="${i === 0 ? 0 : -1}">${ICONS[id]}<span>${nome}</span></button>`).join("")}</div>
-      ${ctx.map(([id, , txt], i) => `<div class="tabpanel" role="tabpanel" id="pn-${id}" aria-labelledby="tab-${id}" ${i ? "hidden" : ""}><p>${txt}</p></div>`).join("")}</section>
+    <section class="ctx" aria-label="Onde isso aparece"><p class="ctx-titulo">Onde isso aparece</p><div class="tabs" role="tablist" aria-label="Contexto">${CONTEXTOS.map(c => `<button class="tab" role="tab" type="button" id="tab-${c.id}" data-ctx="${c.id}" aria-selected="${c.id === ctxAtual}" aria-controls="pn-ctx" tabindex="${c.id === ctxAtual ? 0 : -1}">${ICONS[c.id]}<span>${c.nome}</span></button>`).join("")}</div>
+      <div class="tabpanel" role="tabpanel" id="pn-ctx"></div></section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
   $("pre code", main).textContent = m.python;
   broto = createBroto($(".guide", main)); broto.say(m.saudacao || "Oi! Eu sou o Broto. Mexe nos controles e eu te conto o que acontece.", "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };
-  const tabs = [...main.querySelectorAll(".tab")];
-  const pick = i => tabs.forEach((t, j) => { t.setAttribute("aria-selected", i === j); t.tabIndex = i === j ? 0 : -1; $("#" + t.getAttribute("aria-controls"), main).hidden = i !== j; });
-  tabs.forEach((t, i) => { t.onclick = () => pick(i); t.onkeydown = e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const j = (i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length; pick(j); tabs[j].focus(); } }; });
+  const tabs = [...main.querySelectorAll(".tab")], painel = $("#pn-ctx", main), T = CTX_TEXTO[m.id] || {};
+  const pintar = () => {
+    painel.setAttribute("aria-labelledby", "tab-" + ctxAtual);
+    painel.innerHTML = ctxAtual === "todos" ? `<div class="ctx-todos">${CONTEXTOS.slice(1).map((c, i) => `<article class="ctx-nota n${i % 3}"><h4>${ICONS[c.id]}${c.nome}</h4><p>${T[c.id] || ""}</p></article>`).join("")}</div>` : `<p>${T[ctxAtual] || ""}</p>`;
+    tabs.forEach(t => { const on = t.dataset.ctx === ctxAtual; t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1; });
+  };
+  const escolher = id => { ctxAtual = id; try { localStorage.setItem("mc-ctx", id); } catch (e) {} pintar(); };
+  tabs.forEach((t, i) => { t.onclick = () => escolher(t.dataset.ctx); t.onkeydown = e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const j = (i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length; escolher(tabs[j].dataset.ctx); tabs[j].focus(); } }; });
+  pintar();
   const cp = $(".copy", main); let tm = 0;
   cp.onclick = async () => { const ok = await copyText(m.python); if (ok) window.dispatchEvent(new CustomEvent("mc:copy", {detail: {module: m.id}})); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; clearTimeout(tm); tm = setTimeout(() => { cp.textContent = "Copiar código"; }, 1800); };
 }

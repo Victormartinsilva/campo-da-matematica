@@ -2,7 +2,7 @@
    As aplicações (campo, dia a dia, trabalho) e os laboratórios ficam em app.js. */
 const CONTENT = {
   ideia: {
-    gancho: "Se a conta de água é o total, o que o hidrômetro mede agora?",
+    gancho: "Se o total é o que você paga, o que mede o que está acontecendo agora?",
     resumo: "A taxa e o total contam a mesma história. Derivar o total dá a taxa, e somar a taxa dá o total.",
     detalhes: "Imagine a vazão de uma bomba mudando minuto a minuto. A área sob a curva de vazão até o instante t é o volume bombeado até ali. A inclinação da curva do volume, nesse mesmo instante, é a vazão. Esse vai e volta é o teorema fundamental do cálculo: integrar e derivar desfazem um ao outro.",
     python: `import numpy as np                          # arrays e contas numéricas
@@ -15,9 +15,9 @@ q_de_volta = np.gradient(V, dt)             # derivada do volume: devolve a vaz�
 print(q[500], q_de_volta[500])              # os dois valores quase coincidem`
   },
   funcao: {
-    gancho: "Se eu dobrar o adubo, a lavoura dobra a produção?",
+    gancho: "Se eu dobrar o esforço, o resultado dobra?",
     resumo: "Uma função liga uma entrada a uma saída. Conhecer a regra e o domínio evita prometer o que a curva não entrega.",
-    detalhes: "Cada situação aqui tem a sua regra: o frete cresce em linha reta, a produtividade sobe e depois cai, a praga explode. A pergunta é sempre a mesma: para essa entrada, qual é a saída? E até onde a regra vale? Fora do domínio medido, a curva é só um palpite.",
+    detalhes: "Cada situação do laboratório tem a sua regra: um custo que cresce em linha reta, uma resposta que sobe e depois cai, um crescimento que explode. A pergunta é sempre a mesma: para essa entrada, qual é a saída? E até onde a regra vale? Fora do domínio medido, a curva é só um palpite.",
     python: `def produtividade(x):                       # x é a dose de N em kg por hectare
     return 80 + 0.30*x - 0.0009*x**2        # regra: sobe no começo e curva para baixo depois
 
@@ -35,9 +35,9 @@ for p in range(1, 7):                       # h = 0,1; 0,01; ... 0,000001
     print(h, f(1 - h), f(1 + h))            # esquerda e direita chegam em 2`
   },
   derivada: {
-    gancho: "A planta está crescendo rápido ou devagar agora?",
+    gancho: "Esse número está subindo rápido ou devagar agora?",
     resumo: "A derivada é a inclinação da tangente: a velocidade com que a saída muda naquele ponto.",
-    detalhes: "Comece com uma secante, a reta que liga dois pontos próximos. Quanto menor a distância h, mais ela se parece com a tangente. A inclinação resultante é a taxa de variação: cm por dia na planta, sacas por kg de adubo na produtividade. O gráfico de baixo mostra a derivada em todos os pontos de uma vez.",
+    detalhes: "Comece com uma secante, a reta que liga dois pontos próximos. Quanto menor a distância h, mais ela se parece com a tangente. A inclinação resultante é a taxa de variação: quanto a saída muda para cada unidade a mais de entrada, como cm por dia, casos por semana ou reais por unidade. O gráfico de baixo mostra a derivada em todos os pontos de uma vez.",
     python: `import sympy as sp                          # matemática simbólica
 
 x = sp.symbols('x')                         # x vira uma variável, não um número
@@ -58,9 +58,9 @@ print(sp.diff(g/h, x))                      # quociente
 print(sp.diff(g.subs(x, h), x))             # cadeia: sen(x**2) deriva em 2*x*cos(x**2)`
   },
   maxmin: {
-    gancho: "Mais adubo sempre dá mais lucro?",
-    resumo: "Onde a derivada vale zero, a curva para de subir. Esse ponto é a melhor dose, e quase nunca é a de maior produção.",
-    detalhes: "O lucro é a receita da produção menos o custo do adubo. No começo cada quilo rende mais do que custa. Depois de certo ponto, o último quilo custa mais do que rende. O topo da curva de lucro fica antes do topo da produção. O botão de subida faz o que o aprendizado de máquina faz: seguir a derivada, passo a passo.",
+    gancho: "Investir mais sempre dá mais retorno?",
+    resumo: "Onde a derivada vale zero, a curva para de subir. Esse ponto é a melhor escolha, e quase nunca é a de maior produção.",
+    detalhes: "O lucro é a receita menos o custo, e o laboratório usa como exemplo a dose de um insumo. No começo cada unidade a mais rende mais do que custa. Depois de certo ponto, a última unidade custa mais do que rende. O topo da curva de lucro fica antes do topo da produção. O botão de subida faz o que o aprendizado de máquina faz: seguir a derivada, passo a passo.",
     python: `B, C2 = 0.30, 0.0009                        # parâmetros da curva de produtividade
 p, c = 60, 6                                # preço da saca e custo do kg de N
 dL = lambda x: p*(B - 2*C2*x) - c           # derivada do lucro em relação à dose
@@ -71,7 +71,7 @@ for passo in range(10):                     # dez passos de subida
 print(x, (B - c/p)/(2*C2))                  # numérico e analítico se encontram`
   },
   newton: {
-    gancho: "Como achar a dose em que o lucro marginal zera, sem fórmula pronta?",
+    gancho: "Como achar o ponto em que o saldo zera, sem fórmula pronta?",
     resumo: "Trace a tangente, veja onde ela cruza o eixo e repita. Perto da raiz, cada passo costuma dobrar os dígitos certos.",
     detalhes: "A tangente é a melhor reta local. Ela cruza o eixo perto da raiz, e esse cruzamento vira o novo palpite. Funciona rápido, mas pode falhar: com a tangente horizontal ela nunca cruza, e um chute ruim pode levar você a outra raiz.",
     python: `f  = lambda x: x**2 - 2                     # queremos f(x) = 0, ou seja, a raiz de 2
@@ -83,9 +83,9 @@ for i in range(6):                          # seis passos
     print(i, x)                             # 1.5, 1.4167, 1.41422, ...`
   },
   integral: {
-    gancho: "Quanta chuva caiu no total se a intensidade não parou de mudar?",
+    gancho: "Como saber o total acumulado quando o ritmo não para de mudar?",
     resumo: "A integral soma uma quantidade que varia. Com retângulos cada vez mais finos, a soma vira a área exata.",
-    detalhes: "O pluviômetro mede mm por hora, mas a lavoura sente os mm do total. Dividir o tempo em faixas, multiplicar altura por largura e somar dá uma aproximação. Quanto mais faixas, menor o erro, e o limite dessa soma é a integral.",
+    detalhes: "Um sensor mede uma taxa, como mm de chuva por hora, litros por minuto ou casos por dia, mas o que importa costuma ser o total. Dividir o tempo em faixas, multiplicar altura por largura e somar dá uma aproximação. Quanto mais faixas, menor o erro, e o limite dessa soma é a integral.",
     python: `import numpy as np                          # contas numéricas
 
 t = np.linspace(0, 6, 1000)                 # 1000 instantes em 6 horas
@@ -94,9 +94,9 @@ total = np.sum((i[1:] + i[:-1])/2 * np.diff(t))     # soma de trapézios: chuva 
 print(total)                                # perto de 22,8`
   },
   multiplas: {
-    gancho: "Um pluviômetro só basta para saber a chuva da lavoura inteira?",
+    gancho: "Uma medição num ponto só basta para saber o total de uma região inteira?",
     resumo: "A integral dupla soma sobre uma região e a tripla soma sobre um volume, como a massa de solo.",
-    detalhes: "A chuva não cai igual no talhão. Dividir a área em células, medir cada uma e somar dá o volume total. Com poucas células o erro é grande, e um único pluviômetro pode errar muito. Para a massa de solo, soma-se também ao longo da profundidade, com a densidade mudando em cada camada.",
+    detalhes: "A chuva não cai igual em toda a área, nem a densidade de pessoas num mapa. Dividir a região em células, medir cada uma e somar dá o total. Com poucas células o erro é grande, e um único ponto de medição pode errar muito. Para a massa de um corpo, soma-se também ao longo da profundidade, com a densidade mudando em cada camada.",
     python: `import numpy as np                          # contas numéricas
 
 n, L = 200, 100                             # 200 células por lado, talhão de 100 m
@@ -107,7 +107,7 @@ V = (r/1000).sum() * (L/n)**2               # mm viram m e multiplicam a área d
 print(V)                                    # volume total em m3, perto de 110`
   },
   gradiente: {
-    gancho: "Para onde a água escorre neste talhão?",
+    gancho: "A partir de onde você está, em que direção as coisas melhoram mais depressa?",
     resumo: "O gradiente aponta para onde a função sobe mais rápido. Descer contra ele leva ao fundo do vale.",
     detalhes: "Com duas variáveis, a derivada vira um vetor com uma componente por eixo. O tamanho dele é a declividade, e ele é perpendicular às curvas de nível. A derivada numa direção qualquer é o produto do gradiente pela direção, e é máxima quando a direção coincide com ele.",
     python: `import numpy as np                          # vetores
@@ -120,9 +120,9 @@ for _ in range(50):                         # 50 passos
 print(p, f(p))                              # perto do mínimo, na origem`
   },
   matrizes: {
-    gancho: "Quanto de cada adubo comercial entrega o N, o P e o K que a lavoura pede?",
+    gancho: "Quanto de cada ingrediente fecha todas as metas ao mesmo tempo?",
     resumo: "Um sistema vira A·x = b. Quando a matriz tem inversa, a receita sai de x = A⁻¹·b.",
-    detalhes: "Cada coluna da matriz é um produto e cada linha, um nutriente. Resolver é achar quanto de cada produto fecha as metas. Se dois produtos entregam os nutrientes na mesma proporção, a matriz perde a inversa e a receita deixa de ter solução única. Quantidades negativas indicam que a receita é inviável.",
+    detalhes: "Cada coluna da matriz é um insumo e cada linha, uma meta (no laboratório, produtos e nutrientes). Resolver é achar quanto de cada insumo fecha todas as metas. Se dois insumos entregam as metas na mesma proporção, a matriz perde a inversa e a receita deixa de ter solução única. Quantidades negativas indicam que a receita é inviável.",
     python: `import numpy as np                          # álgebra linear
 
 A = np.array([[.45, .11, 0],                # linha N: teor de N em ureia, MAP e KCl
@@ -132,9 +132,9 @@ b = np.array([100, 80, 60])                 # meta em kg de nutriente por hectar
 print(np.linalg.solve(A, b))                # kg de ureia, MAP e KCl que fecham a meta`
   },
   estatistica: {
-    gancho: "A cultivar B rendeu mais, ou foi sorte do solo?",
-    resumo: "O teste compara a diferença entre as médias com a variação entre parcelas. Mais repetições deixam o efeito real mais fácil de ver.",
-    detalhes: "Cada parcela varia por motivos que você não controla. O teste t de Welch pergunta se a diferença observada seria comum só pelo acaso. O poder do teste é a chance de enxergar uma diferença que realmente existe, e cresce com mais repetições, menos ruído e efeito maior.",
+    gancho: "A versão B foi melhor de verdade, ou foi sorte?",
+    resumo: "O teste compara a diferença entre as médias com a variação entre unidades. Mais repetições deixam o efeito real mais fácil de ver.",
+    detalhes: "Cada unidade de teste varia por motivos que você não controla: parcelas de solo, lotes de peças, usuários de um site. O teste t de Welch pergunta se a diferença observada seria comum só pelo acaso. O poder do teste é a chance de enxergar uma diferença que realmente existe, e cresce com mais repetições, menos ruído e efeito maior.",
     python: `import numpy as np                          # sorteios
 from scipy import stats                     # testes estatísticos
 
@@ -144,7 +144,7 @@ b = rng.normal(64, 6, 5)                    # cultivar B: 4 sc/ha melhor de verd
 print(stats.ttest_ind(a, b, equal_var=False))   # teste de Welch: estatística e p-valor`
   },
   regressao: {
-    gancho: "Dá para prever a produtividade só pela chuva do ciclo?",
+    gancho: "Dá para prever um resultado a partir de outro número?",
     resumo: "Ajustar uma reta é achar os parâmetros que errem o mínimo. O gradiente chega lá andando contra a derivada do erro.",
     detalhes: "Cada ponto tem um erro: a diferença entre o que a reta prevê e o que foi medido. Elevar ao quadrado e tirar a média dá a perda. A derivada da perda diz em que direção mexer a inclinação e o intercepto. A taxa de aprendizado é o tamanho do passo: pequeno demais demora, grande demais passa do ponto.",
     python: `import numpy as np                          # contas numéricas
@@ -220,7 +220,7 @@ for epoca in range(500):                    # 500 passos
     opt.step()                              # atualiza os pesos`
   },
   embeddings: {
-    gancho: "Como achar o trecho certo quando o produtor usa outras palavras?",
+    gancho: "Como achar o trecho certo quando as pessoas usam outras palavras?",
     resumo: "Um texto vira um ponto no espaço. Perguntas parecidas ficam perto, e buscar vira medir ângulo ou distância.",
     detalhes: "Cada documento e a pergunta viram vetores, e a busca devolve os mais próximos. O cosseno mede o ângulo e ignora o tamanho do vetor. A distância e o produto escalar também contam o tamanho, e por isso o ranking pode mudar. A métrica deve ser a do modelo que gerou os embeddings.",
     python: `import numpy as np                          # vetores

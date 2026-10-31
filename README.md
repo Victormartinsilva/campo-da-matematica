@@ -1,6 +1,6 @@
 # Campo da Matemática
 
-Laboratório interativo para revisar a matemática da graduação em Engenharia Agrícola com foco no trabalho atual em engenharia de dados e IA. Cada assunto tem três blocos de aplicação (no campo, no dia a dia, no seu trabalho), um laboratório para mexer e um trecho de código Python.
+Caderno interativo para revisar a matemática da graduação e levá-la a vários contextos: agro e ambiente, políticas públicas, engenharia, dados e IA, negócios e dia a dia. Cada assunto tem um seletor de contexto (a escolha vale para o site inteiro e fica lembrada), um laboratório para mexer e um trecho de código Python comentado.
 
 ## Assuntos
 
@@ -16,6 +16,7 @@ Laboratório interativo para revisar a matemática da graduação em Engenharia 
 - `tokens.css`: tokens de design (paleta de papel, cores por área, fontes, espaçamentos, tema escuro).
 - `styles.css`: layout e componentes, sempre lendo os tokens.
 - `content.js`: o texto didático de cada assunto (gancho, resumo, detalhes e o Python comentado linha a linha).
+- `content/contextos.js`: a aplicação de cada assunto em cada contexto. Para criar um contexto novo, adicione-o em `CONTEXTOS` (app.js) e uma chave nova em cada assunto.
 - `app.js`: ferramentas de gráfico e interface, os módulos (aplicações, laboratório, desafios e reações do Broto), o progresso e a navegação.
 
 ## Campo Vivo
