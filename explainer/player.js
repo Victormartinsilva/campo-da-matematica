@@ -31,13 +31,15 @@
 
   /* ---------- ações de cena: cada uma vira tweens na timeline mestre ---------- */
   const ACOES = {
-    aparecer: (tl, el, a, t) => tl.fromTo(el, {opacity: 0, y: (a.de && a.de.y) || 10, scale: 0.94, transformOrigin: "50% 100%"}, {opacity: 1, y: 0, scale: 1, duration: a.dur, ease: "back.out(1.4)"}, t),
+    aparecer: (tl, el, a, t) => { tl.set(el, {opacity: 0, y: (a.de && a.de.y) || 10, scale: 0.94, transformOrigin: "50% 100%"}, t); tl.to(el, {opacity: 1, y: 0, scale: 1, duration: a.dur, ease: "back.out(1.4)"}, t); },
+    /* aparecer num elemento que já está visível vira só um pulso curto */
+    reaparecer: (tl, el, a, t) => tl.to(el, {scale: 1.08, transformOrigin: "50% 50%", duration: Math.min(a.dur, 0.6) / 2, yoyo: true, repeat: 1, ease: "sine.inOut"}, t),
     sumir: (tl, el, a, t) => tl.to(el, {opacity: 0, duration: a.dur, ease: "power1.in"}, t),
     mover: (tl, el, a, t) => tl.to(el, {x: a.para.x || 0, y: a.para.y || 0, duration: a.dur, ease: "power2.inOut"}, t),
     destacar: (tl, el, a, t) => { const v = a.vezes || 2; tl.to(el, {scale: 1.12, transformOrigin: "50% 50%", duration: a.dur / (2 * v), yoyo: true, repeat: 2 * v - 1, ease: "sine.inOut"}, t); },
     desenhar: (tl, el, a, t) => {
       const ps = el.matches("path") ? [el] : [...el.querySelectorAll("path")];
-      tl.set(el, {opacity: 1}, t); tl.fromTo(ps, {strokeDasharray: 1, strokeDashoffset: 1}, {strokeDashoffset: 0, duration: a.dur, ease: "none"}, t);
+      tl.set(el, {opacity: 1}, t); tl.set(ps, {strokeDasharray: 1, strokeDashoffset: 1}, t); tl.to(ps, {strokeDashoffset: 0, duration: a.dur, ease: "none"}, t);
     },
     cor: (tl, el, a, t) => {
       const alvos = el.matches("path,rect,circle,ellipse,line,polyline") ? [el] : [...el.querySelectorAll("path,rect,circle,ellipse,line,polyline")], p = a.para || {}, vars = {duration: a.dur, ease: "none"};
@@ -51,7 +53,7 @@
       this.host = host; this.script = script; this.opts = {legendas: true, autoplayNaTela: false, ...opts}; this.i = 0; this.legendas = this.opts.legendas;
       if (!window.gsap) { host.innerHTML = `<p class="expl-aviso">Não consegui carregar o motor de animação. A transcrição está abaixo.</p>` + this.transcricaoHTML(this.compilar()); return; }
       this.pecas = this.compilar(); this.estatico = reduzido();
-      this.montar(); this.construirTimeline(); this.ligar(); this.sync();
+      this.montar(); this.hud = new Explainer.Hud(this); this.construirTimeline(); this.ligar(); this.sync();
       if (this.opts.autoplayNaTela && !this.estatico && "IntersectionObserver" in window) {
         this.io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? this.play() : this.pause()), {threshold: 0.6}); this.io.observe(host);
       }
@@ -74,7 +76,7 @@
       this.host.classList.add("expl"); this.host.setAttribute("tabindex", "0"); this.host.setAttribute("role", "region"); this.host.setAttribute("aria-label", `Mini-vídeo: ${m.titulo}`); this.host.dataset.area = m.area || "calculo";
       this.host.innerHTML = `
         <div class="expl-stage"><svg class="expl-svg" viewBox="${cena ? cena.viewBox : "0 0 800 450"}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Cena do mini-vídeo: ${esc(m.titulo)}"></svg>
-          <div class="expl-slots"><div class="slot slot-tag"></div><div class="slot slot-counter"></div><div class="slot slot-terminal"></div><div class="slot slot-pill"></div><div class="slot slot-example"></div><div class="slot slot-why"></div></div>
+          <div class="expl-slots"><div class="slot slot-tag"></div><div class="slot slot-counter"></div><div class="slot slot-terminal"></div><div class="slot slot-pill"></div><div class="slot slot-example"></div><div class="slot slot-why"></div><div class="slot slot-cta"></div></div>
           <p class="expl-caption" aria-hidden="true"></p></div>
         <div class="expl-controls" role="toolbar" aria-label="Controles do mini-vídeo">
           <button type="button" class="eb eb-play" aria-label="Tocar"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic-play" d="M8 5v14l11-7z"/><path class="ic-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
@@ -92,20 +94,26 @@
       this.vb = this.svg.viewBox.baseVal; this.vb0 = [this.vb.x, this.vb.y, this.vb.width, this.vb.height];
       this.cap.hidden = !this.legendas; if (this.estatico) this.host.classList.add("expl-estatico");
     }
-    transcricaoHTML(pecas) { return `<ol class="expl-texto">${pecas.map(p => `<li><b>${p.final ? "Final" : "Peça " + p.ordem}.</b> ${esc(p.narration || "")}${p.example ? ` <i>${esc(p.example.titulo)}: ${esc(p.example.texto)}</i>` : ""}</li>`).join("")}</ol>`; }
+    transcricaoHTML(pecas) { return `<ol class="expl-texto">${pecas.map(p => `<li><b>${p.final ? "Final" : "Peça " + p.ordem}.</b> ${esc(p.narration || "")}${p.example ? ` <i>${esc(p.example.titulo)}: ${esc(p.example.texto)}</i>` : ""}${p.why ? ` <em>Por que importa: ${esc(p.why)}</em>` : ""}</li>`).join("")}</ol>`; }
 
     /* ---------- timeline mestre ---------- */
     construirTimeline() {
       const tl = this.tl = gsap.timeline({paused: true, onUpdate: () => this.sync(), onComplete: () => this.aoFim()});
-      for (const p of this.pecas) {
-        tl.addLabel("p" + p.ordem, p.start);
-        for (const a of (p.scene || [])) {
-          const alvo = this.svg.querySelector("#" + a.alvo);
-          if (a.acao === "zoom") { this.zoom(tl, a, p.start + a.at); continue; }
-          if (!alvo) { console.warn("Explainer: alvo ausente na cena:", a.alvo); continue; }
-          const f = ACOES[a.acao]; if (!f) { console.warn("Explainer: ação desconhecida:", a.acao); continue; }
-          f(tl, alvo, a, p.start + a.at);
-        }
+      for (const p of this.pecas) tl.addLabel("p" + p.ordem, p.start);
+      /* todas as ações em ordem de tempo, para saber se um elemento está visível quando uma ação chega */
+      const todas = []; for (const p of this.pecas) for (const a of (p.scene || [])) todas.push({a, t: p.start + a.at, n: todas.length});
+      todas.sort((x, y) => x.t - y.t || x.n - y.n);
+      const ocultosCena = new Set(((window.Cenas || {})[this.script.meta.cena] || {}).ocultos || []), oculto = new Map();
+      for (const {a} of todas) if (!oculto.has(a.alvo)) oculto.set(a.alvo, ocultosCena.has(a.alvo) || a.acao === "aparecer" || a.acao === "desenhar");
+      oculto.forEach((h, id) => { const el = this.svg.querySelector("#" + id); if (el && h) el.style.opacity = 0; });
+      for (const {a, t} of todas) {
+        if (a.acao === "zoom") { this.zoom(tl, a, t); continue; }
+        const alvo = this.svg.querySelector("#" + a.alvo);
+        if (!alvo) { console.warn("Explainer: alvo ausente na cena:", a.alvo); continue; }
+        const f = a.acao === "aparecer" && !oculto.get(a.alvo) ? ACOES.reaparecer : ACOES[a.acao];
+        if (!f) { console.warn("Explainer: ação desconhecida:", a.acao); continue; }
+        f(tl, alvo, a, t);
+        if (a.acao === "aparecer" || a.acao === "desenhar") oculto.set(a.alvo, false); else if (a.acao === "sumir") oculto.set(a.alvo, true);
       }
       tl.set({}, {}, this.total);
     }
@@ -147,6 +155,7 @@
       this.host.querySelector(".expl-pos").textContent = p.final ? "Final" : `Peça ${p.ordem}/${this.script.pieces.length}`;
       this.host.querySelector(".expl-tempo").textContent = `${fmtT(t)} / ${fmtT(this.total)}`;
       this.host.querySelectorAll(".seg").forEach(b => { const q = this.pecas[+b.dataset.k], f = Math.min(1, Math.max(0, (t - q.start) / q.dur)); b.style.setProperty("--f", f); b.classList.toggle("atual", q.k === k); });
+      this.hud.atualizar(t, p, this.estatico);
       if (!this.legendas) return;
       if (this.estatico) { if (this.fraseKey !== "e" + k) { this.fraseKey = "e" + k; this.cap.innerHTML = `<span class="frase">${p.words.map(w => `<span class="w on${w.hl ? " hl" : ""}">${esc(w.t)}</span>`).join(" ")}</span>`; } return; }
       const fr = p.frases.find(f => t >= f.s && t < f.e), chave = fr ? k + ":" + fr.s : "";
@@ -154,6 +163,6 @@
       if (fr) fr.words.forEach((w, i) => this.ws[i].classList.toggle("on", t >= w.s));
     }
   }
-  window.Explainer = {Player: ExplainerPlayer, palavras};
+  window.Explainer = Object.assign(window.Explainer || {}, {Player: ExplainerPlayer, palavras});
   window.Explainers = window.Explainers || {}; window.Cenas = window.Cenas || {};
 })();

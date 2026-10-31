@@ -92,3 +92,17 @@ O roteiro usa só estes ids, e a cena precisa trazer todos:
 | `seta-descida` | seta curva mostrando a bola descendo contra o gradiente | oculto |
 
 O guia (`palha`) precisa de pelo menos dois grupos internos animáveis: `palha-braco` (o braço que aponta) e `palha-chapeu`.
+
+## Como o player interpreta o roteiro
+
+- O estado da cena persiste de uma peça para a seguinte. O que entra continua visível até uma ação `sumir`.
+- Elementos cuja primeira ação é `aparecer` ou `desenhar` começam invisíveis, mesmo sem estar em `ocultos`. Um `aparecer` num elemento que já está visível vira só um pulso curto.
+- `mover` e `dimensionar` usam valores absolutos em relação à posição e ao tamanho originais (não acumulam).
+- O estado em qualquer instante depende só do tempo, então voltar, avançar e clicar na barra funcionam.
+- Contador: "PEÇAS n/total", onde total é `pieces.length`. O `outro` é a cena final, mostrada como "FINAL".
+- Terminal: aparece em `terminal.at` e digita `cmd` durante `terminal.dur`. Fica até o fim da peça.
+- Pílula: aparece em `status.at` e fica até o fim da peça. Sempre leva ícone e texto, nunca só cor.
+- `example`: aparece em `example.at` (padrão 1,2 s) e fica até o fim da peça.
+- `why`: aparece nos últimos 2,6 s da peça.
+- No final aparecem a chamada para ação (`cta`, que rola até `alvoLab`) e o confete.
+- Com movimento reduzido o vídeo vira estático, peça a peça, mostrando o estado do fim de cada peça.
