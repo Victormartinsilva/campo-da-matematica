@@ -1,6 +1,6 @@
 # Campo da Matemática
 
-Caderno interativo para revisar a matemática da graduação e levá-la a vários contextos: agro e ambiente, políticas públicas, engenharia, dados e IA, negócios e dia a dia. Cada assunto tem um seletor de contexto (a escolha vale para o site inteiro e fica lembrada), um laboratório para mexer e um trecho de código Python comentado.
+Caderno de estudo interativo de matemática, física, estatística e IA, com aplicações em vários contextos: agro e ambiente, políticas públicas, engenharia, dados e IA, negócios e dia a dia. Cada assunto tem um seletor de contexto (a escolha vale para o site inteiro e fica lembrada), um laboratório para mexer e um trecho de código Python comentado.
 
 ## Assuntos
 
@@ -9,6 +9,7 @@ Caderno interativo para revisar a matemática da graduação e levá-la a vário
 - **Estatística:** experimentos de campo (teste t e poder).
 - **Machine learning (9):** regressão linear, otimizadores (GD, momento, Adam), overfitting, classificação e guardrails, redes neurais, embeddings e busca, atenção, do logit ao próximo token, trilha de ferramentas.
 - **Decisão:** teoria dos jogos.
+- **Física (6):** grandezas e vetores, movimento e leis de Newton, propulsão e foguetes, gravidade e órbitas, manobras, e física aplicada à engenharia. Cada capítulo traz fórmulas, exemplos resolvidos, exercícios com resposta e laboratório. A documentação de cada etapa está em `docs/fisica-aplicada/`.
 
 ## Estrutura
 

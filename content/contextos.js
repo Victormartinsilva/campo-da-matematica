@@ -184,5 +184,53 @@ const CTX_TEXTO = {
     "dados": "Adam, e sua variante AdamW, é o otimizador mais comum no treino e no ajuste fino de redes e LLMs. Os sintomas ficam legíveis: perda oscilando indica taxa alta, treino lento em vale estreito indica mau condicionamento, e platôs lembram selas.",
     "negocios": "Ajustar preço, estoque e anúncios ao mesmo tempo é otimizar uma função de lucro com várias variáveis. Quando a superfície é estreita e torta, o gradiente puro avança devagar.",
     "dia": "Cada trilha é um treino. O vale estreito mostra por que o gradiente puro zigue-zagueia. A banana de Rosenbrock é o teste clássico de otimizadores. Clique no mapa para mudar o ponto de partida."
+  },
+  "vetores": {
+    "agro": "Na engenharia agrícola, direção e sentido importam tanto quanto o valor: declividade, deslocamento de máquinas, vento e forças precisam ser tratados como vetores.",
+    "publico": "Em planejamento urbano e de emergências, vento, correntes e deslocamentos de equipes são vetores. Somar rotas e forças pelas componentes evita erros de direção.",
+    "engenharia": "As forças numa estrutura são vetores: decompor cada força em componentes permite checar o equilíbrio em cada eixo.",
+    "dados": "Vetores aparecem em dados geoespaciais, deslocamentos, direção de vento, gradientes e decomposição de forças. Em dados, separar componentes e unidades evita somar grandezas incompatíveis.",
+    "negocios": "Rotas de entrega têm direção e distância. Pensar em vetores ajuda a combinar deslocamentos e a ver o deslocamento líquido de uma frota.",
+    "dia": "Rotas, velocidade do veículo e força aplicada em uma ferramenta são exemplos de grandezas que exigem módulo, direção e sentido."
+  },
+  "leis-newton": {
+    "agro": "Aceleração de máquinas, frenagem, transporte de cargas e resistência ao movimento podem ser analisados com cinemática e leis de Newton.",
+    "publico": "A segurança viária usa Newton: a distância de frenagem cresce com a velocidade, e isso fundamenta limites de velocidade e projetos de via.",
+    "engenharia": "Dimensionar um motor, um freio ou um elevador exige a força necessária para a aceleração desejada com a massa envolvida (ΣF = m·a).",
+    "dados": "A relação entre força resultante, massa e aceleração é um modelo simples de causa e efeito. Em sistemas de dados de sensores, velocidade e aceleração ajudam a detectar mudanças de operação.",
+    "negocios": "Em logística, a carga transportada e a aceleração disponível definem o consumo de um veículo e o tempo de entrega.",
+    "dia": "O cinto de segurança, a arrancada de um ônibus e o atrito ao caminhar mostram a relação entre força e movimento."
+  },
+  "propulsao": {
+    "agro": "A propulsão ilustra conservação de quantidade de movimento e balanço de forças, conceitos úteis também para compreender bombas, jatos e sistemas de transporte de fluidos.",
+    "publico": "Foguetes e satélites sustentam serviços públicos de previsão do tempo, navegação e monitoramento ambiental. Entender o empuxo mostra o custo de colocar algo em órbita.",
+    "engenharia": "Empuxo, massa e conservação da quantidade de movimento dimensionam motores a jato, hélices e bombas.",
+    "dados": "Conservação de quantidade de movimento ajuda a entender sistemas de propulsão e fluxos. A distinção entre força aplicada, impulso e variação de velocidade também aparece em modelos físicos discretizados.",
+    "negocios": "O custo de lançar carga ao espaço depende da massa e do combustível: a equação do foguete explica por que reduzir peso reduz custo.",
+    "dia": "Um balão que esvazia e se desloca demonstra, em escala simples, o princípio de ação e reação."
+  },
+  "gravidade": {
+    "agro": "A gravidade interfere em escoamentos, estabilidade de estruturas, queda de materiais e operações de levantamento e transporte.",
+    "publico": "A previsão de marés, o desenho de reservatórios e o planejamento de satélites de monitoramento dependem de gravidade e de órbitas.",
+    "engenharia": "Estruturas, barragens e levantamento de cargas consideram o peso e o campo gravitacional. Um satélite precisa da velocidade certa para ficar em órbita.",
+    "dados": "Modelos gravitacionais e orbitais usam relações entre distância, massa e aceleração. O mesmo cuidado com unidades e escalas é essencial em qualquer modelo científico ou geoespacial.",
+    "negocios": "Empresas de satélites e de telecomunicações escolhem órbitas pela troca entre cobertura, latência e custo de lançamento.",
+    "dia": "Peso, queda de objetos, satélites e marés são manifestações da interação gravitacional."
+  },
+  "manobras": {
+    "agro": "Separar orientação, força e trajetória ajuda a analisar direção de máquinas, sistemas de controle e movimentos com atuadores.",
+    "publico": "A coordenação de operações de emergência separa o rumo de um veículo da sua trajetória. Distinguir os dois evita decisões erradas.",
+    "engenharia": "Sistemas de controle de drones, robôs e satélites separam a atitude (para onde aponta) da trajetória (para onde vai).",
+    "dados": "Sistemas de controle separam estado, orientação, atuação e resposta. A distinção entre atitude e trajetória é análoga à diferença entre a configuração de um equipamento e o deslocamento que ele executa.",
+    "negocios": "Frotas e entregas por drone dependem de sistemas que ajustam rumo e velocidade gastando o mínimo de energia.",
+    "dia": "Um carro pode virar o volante, mudar a orientação das rodas e só então alterar sua trajetória; são fenômenos relacionados, mas distintos."
+  },
+  "fisica-engenharia": {
+    "agro": "Potência na barra de tração, esforço de implementos, eficiência de bombeamento e aderência ao solo são aplicações diretas da Física na operação agrícola.",
+    "publico": "A eficiência de bombeamento, de iluminação pública e de transporte coletivo são decisões de potência e energia. Cada ganho de eficiência vira economia pública.",
+    "engenharia": "Potência, trabalho e atrito aparecem em motores, elevadores e máquinas. O dimensionamento compara a força e a potência necessárias com as disponíveis.",
+    "dados": "Indicadores de potência, eficiência, consumo e capacidade operacional ajudam a transformar dados de máquinas e operações em decisões de engenharia. É importante distinguir potência nominal, potência útil e perdas.",
+    "negocios": "O consumo de energia e a eficiência das máquinas entram direto no custo operacional: potência útil menos perdas define o custo por unidade produzida.",
+    "dia": "Consumo de energia, elevadores, bombas, veículos e ferramentas podem ser comparados por trabalho, potência e eficiência."
   }
 };

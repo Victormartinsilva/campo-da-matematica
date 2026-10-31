@@ -30,6 +30,7 @@
   --a-estatistica-fill: #E8B54A; --a-estatistica-ink: #7A5200;
   --a-ml-fill: #E0795A;        --a-ml-ink: #B5482A;
   --a-decisao-fill: #C77C9F;   --a-decisao-ink: #8A3A5C;
+  --a-fisica-fill: #8FB5CC;    --a-fisica-ink: #315D78;
 
   /* post-its */
   --note-1: #FBEFC4;
@@ -83,6 +84,7 @@
     --a-estatistica-fill: #E8B54A; --a-estatistica-ink: #F0BE4A;
     --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
     --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
+    --a-fisica-fill: #8FB5CC;    --a-fisica-ink: #A8CBE0;
     --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
     --soil: #7A5C40; --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
     color-scheme: dark;
@@ -99,6 +101,7 @@
   --a-estatistica-fill: #E8B54A; --a-estatistica-ink: #F0BE4A;
   --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
   --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
+    --a-fisica-fill: #8FB5CC;    --a-fisica-ink: #A8CBE0;
   --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
   --soil: #7A5C40; --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
   color-scheme: dark;
@@ -110,3 +113,4 @@
 [data-area="estatistica"]{ --area-fill: var(--a-estatistica-fill);--area-ink: var(--a-estatistica-ink); }
 [data-area="ml"]         { --area-fill: var(--a-ml-fill);         --area-ink: var(--a-ml-ink); }
 [data-area="decisao"]    { --area-fill: var(--a-decisao-fill);    --area-ink: var(--a-decisao-ink); }
+[data-area="fisica"]     { --area-fill: var(--a-fisica-fill);     --area-ink: var(--a-fisica-ink); }

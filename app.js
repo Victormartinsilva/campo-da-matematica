@@ -21,7 +21,7 @@ function sel(panel, label, opts, on) {
   s.addEventListener("change", () => on(+s.value));
   panel.appendChild(d); return s;
 }
-function readout(panel) { const d = document.createElement("div"); d.className = "read"; d.setAttribute("aria-live", "polite"); panel.appendChild(d); return d; }
+function readout(panel) { const d = document.createElement("div"); d.className = "read"; d.setAttribute("aria-live", "polite"); d.setAttribute("aria-atomic", "true"); panel.appendChild(d); return d; }
 function btn(host, text, on, alt) { const b = document.createElement("button"); b.className = "btn" + (alt ? " alt" : ""); b.textContent = text; b.onclick = on; host.appendChild(b); return b; }
 function row(panel) { const d = document.createElement("div"); d.className = "row"; panel.appendChild(d); return d; }
 function canvas(stage, h = 340) { const c = document.createElement("canvas"); c.style.height = h + "px"; stage.appendChild(c); return c; }
@@ -1071,12 +1071,219 @@ MODS.push({id: "otimizadores", grupo: "Machine learning", nome: "Otimizadores: G
   }});
 
 /* ---------- ligação com o trabalho atual ---------- */
-const ID_ORDER = ["ideia", "funcao", "limite", "derivada", "regras", "taylor", "maxmin", "newton", "integral", "multiplas", "gradiente", "matrizes", "estatistica", "regressao", "otimizadores", "overfit", "logistica", "rede", "embeddings", "atencao", "token", "trilha", "jogos"];
+const ID_ORDER = ["ideia", "funcao", "limite", "derivada", "regras", "taylor", "maxmin", "newton", "integral", "multiplas", "gradiente", "matrizes", "vetores", "leis-newton", "propulsao", "gravidade", "manobras", "fisica-engenharia", "estatistica", "regressao", "otimizadores", "overfit", "logistica", "rede", "embeddings", "atencao", "token", "trilha", "jogos"];
+/* ---------- Física: cinco laboratórios interativos adicionais ---------- */
+function physicsFrame(stage, title, note) {
+  stage.innerHTML = `<div class="estudo-lab"><div class="estudo-lab-head"><strong>${title}</strong><p>${note}</p></div><canvas class="estudo-canvas" aria-label="${title}"></canvas><p class="estudo-lab-note">Modelo didático: valores e escalas são simplificados para destacar as relações físicas.</p></div>`;
+  const c = $("canvas", stage); c.style.width = "100%"; c.style.height = "350px"; c.style.display = "block"; c.style.touchAction = "pan-y";
+  return c;
+}
+function buildVectorLab(stage, panel, extra) {
+  const c = physicsFrame(stage, "Composição de vetores", "Altere módulo e direção de duas grandezas e observe suas componentes e a resultante.");
+  const R = readout(panel);
+  const a = ctl(panel, "Vetor A — módulo", 0, 100, 1, 60, v => fmt(v, 0) + " u", draw);
+  const aa = ctl(panel, "Vetor A — ângulo", 0, 359, 1, 25, v => fmt(v, 0) + "°", draw);
+  const b = ctl(panel, "Vetor B — módulo", 0, 100, 1, 45, v => fmt(v, 0) + " u", draw);
+  const ba = ctl(panel, "Vetor B — ângulo", 0, 359, 1, 120, v => fmt(v, 0) + "°", draw);
+  const resetBtn = row(panel); btn(resetBtn, "Vetores opostos", () => { aa.set(0); ba.set(180); draw(); }, true); btn(resetBtn, "Reiniciar", () => { a.set(60); aa.set(25); b.set(45); ba.set(120); draw(); });
+  function draw() {
+    const p = plane(c, -120, 120, -120, 120, "Componente x (u)", "Componente y (u)"), g = p.g;
+    const ax = a.get() * Math.cos(aa.get() * Math.PI / 180), ay = a.get() * Math.sin(aa.get() * Math.PI / 180);
+    const bx = b.get() * Math.cos(ba.get() * Math.PI / 180), by = b.get() * Math.sin(ba.get() * Math.PI / 180);
+    const rx = ax + bx, ry = ay + by, mag = Math.hypot(rx, ry), ang = (Math.atan2(ry, rx) * 180 / Math.PI + 360) % 360;
+    const ox = p.X(0), oy = p.Y(0);
+    arrow(g, ox, oy, p.X(ax), p.Y(ay), css("--curve"), 3); arrow(g, ox, oy, p.X(bx), p.Y(by), css("--amber"), 3);
+    arrow(g, ox, oy, p.X(rx), p.Y(ry), css("--area-ink"), 4);
+    g.fillStyle = css("--ink"); g.font = `12px ${css("--f-body")}`; g.fillText("A", p.X(ax) + 6, p.Y(ay) - 6); g.fillText("B", p.X(bx) + 6, p.Y(by) - 6); g.fillText("R = A + B", p.X(rx) + 7, p.Y(ry) - 8);
+    R.innerHTML = `<div><b>A:</b> (${fmt(ax, 1)}; ${fmt(ay, 1)}) u</div><div><b>B:</b> (${fmt(bx, 1)}; ${fmt(by, 1)}) u</div><div><b>Resultante:</b> (${fmt(rx, 1)}; ${fmt(ry, 1)}) u</div><div><b>Módulo:</b> ${fmt(mag, 2)} u · <b>Direção:</b> ${fmt(ang, 1)}°</div>`;
+  }
+  kit("vetores", extra, {state: () => { const ax = a.get()*Math.cos(aa.get()*Math.PI/180), ay=a.get()*Math.sin(aa.get()*Math.PI/180), bx=b.get()*Math.cos(ba.get()*Math.PI/180), by=b.get()*Math.sin(ba.get()*Math.PI/180); return {mag:Math.hypot(ax+bx,ay+by), opposed:Math.abs(((aa.get()-ba.get()+360)%360)-180)<5, equal:Math.abs(a.get()-b.get())<1.1, nonzero:a.get()>1&&b.get()>1}; }, goals:[
+    {t:"Ajuste dois vetores de mesmo módulo em sentidos opostos e observe a resultante próxima de zero.",ok:s=>s.opposed&&s.equal&&s.nonzero&&s.mag<2,win:()=>"Vetores opostos de mesmo módulo se anulam."},
+    {t:"Produza uma resultante com módulo maior que 80 unidades.",ok:s=>s.mag>80,win:()=>"A soma vetorial pode produzir uma resultante maior que cada vetor isolado."}
+  ], react:s=>s.mag<2?["A resultante está próxima de zero: os vetores se equilibram.","happy"]:["Observe como a direção altera a soma, mesmo sem mudar os módulos.","thinking"]});
+  draw(); return draw;
+}
+function buildNewtonLab(stage, panel, extra) {
+  const c = physicsFrame(stage, "Força, massa e aceleração", "A segunda lei de Newton relaciona a força resultante à massa e à aceleração.");
+  const R = readout(panel); let elapsed = 0, velocity = 0, distance = 0;
+  const force = ctl(panel, "Força resultante", 0, 20000, 100, 6000, v => fmt(v, 0) + " N", draw);
+  const mass = ctl(panel, "Massa", 100, 5000, 50, 1000, v => fmt(v, 0) + " kg", draw);
+  const time = ctl(panel, "Tempo do experimento", 1, 20, 1, 5, v => fmt(v, 0) + " s", draw);
+  const actions = row(panel); btn(actions, "Executar experimento", run, true); btn(actions, "Reiniciar", reset);
+  function reset(){elapsed=0;velocity=0;distance=0;draw();}
+  function run(){elapsed=time.get(); const acc=force.get()/mass.get(); velocity=acc*elapsed; distance=.5*acc*elapsed*elapsed; draw();}
+  function draw(){const acc=force.get()/mass.get(); const p=plane(c,0,20,0,Math.max(5,Math.ceil((distance||20)/5)*5),"Tempo (s)","Deslocamento (m)"); p.curve(t=>.5*acc*t*t,css("--area-ink"),2.5,0,20); p.dot(elapsed,distance,css("--amber"),6); R.innerHTML=`<div><b>Força resultante:</b> ${fmt(force.get(),0)} N</div><div><b>Aceleração:</b> ${fmt(acc,2)} m/s²</div><div><b>Após ${fmt(elapsed,0)} s:</b> velocidade ${fmt(velocity,2)} m/s · deslocamento ${fmt(distance,2)} m</div><div>Equação: a = F/m</div>`;}
+  kit("leis-newton",extra,{state:()=>({elapsed,acc:force.get()/mass.get(),velocity,distance}),goals:[
+    {t:"Com 1.000 kg e 2.000 N, execute o experimento e obtenha aceleração de 2 m/s².",ok:s=>Math.abs(s.acc-2)<.01&&s.elapsed>0,win:()=>"A aceleração corresponde à força dividida pela massa."},
+    {t:"Dobre a massa mantendo a força e observe a aceleração cair pela metade.",ok:s=>mass.get()>=1900&&Math.abs(s.acc-force.get()/1000/2)<.05,win:()=>"Para a mesma força, maior massa produz menor aceleração."}
+  ],react:s=>["Compare a aceleração antes e depois de alterar a massa.","thinking"]}); draw(); return draw;
+}
+function buildOrbitLab(stage,panel,extra){
+  const c=physicsFrame(stage,"Gravidade e órbitas","Explore como a velocidade tangencial inicial altera a trajetória em torno de um corpo central.");
+  const R=readout(panel); let x=1,y=0,vx=0,vy=1,t=0,trail=[],running=false;
+  const speedCtl=ctl(panel,"Velocidade tangencial inicial",.55,1.45,.01,1,v=>fmt(v,2)+" unidades",reset);
+  const actions=row(panel); btn(actions,"Avançar 10 passos",()=>step(10),true); btn(actions,"Avançar 100 passos",()=>step(100),true); btn(actions,"Reiniciar órbita",reset);
+  function reset(){x=1;y=0;vx=0;vy=speedCtl.get();t=0;trail=[[x,y]];draw();}
+  function step(n){const dt=.01,mu=1;for(let i=0;i<n;i++){let r=Math.hypot(x,y),ax=-mu*x/(r*r*r),ay=-mu*y/(r*r*r);let xn=x+vx*dt+.5*ax*dt*dt,yn=y+vy*dt+.5*ay*dt*dt,rn=Math.hypot(xn,yn),anx=-mu*xn/(rn*rn*rn),any=-mu*yn/(rn*rn*rn);vx+=(ax+anx)*.5*dt;vy+=(ay+any)*.5*dt;x=xn;y=yn;t+=dt;if(i%2===0&&trail.length<5000)trail.push([x,y]);}draw();}
+  function draw(){const p=plane(c,-2.2,2.2,-2.2,2.2,"x (unidades)","y (unidades)"),g=p.g;p.clip();if(trail.length>1){g.strokeStyle=css("--curve");g.lineWidth=2;g.beginPath();trail.forEach(([tx,ty],i)=>i?g.lineTo(p.X(tx),p.Y(ty)):g.moveTo(p.X(tx),p.Y(ty)));g.stroke();}g.restore();g.beginPath();g.arc(p.X(0),p.Y(0),9,0,Math.PI*2);g.fillStyle=css("--amber");g.fill();p.dot(x,y,css("--curve"),6);const r=Math.hypot(x,y),v=Math.hypot(vx,vy),energy=.5*v*v-1/r;R.innerHTML=`<div><b>Tempo:</b> ${fmt(t,2)} unidades</div><div><b>Distância ao centro:</b> ${fmt(r,3)}</div><div><b>Velocidade:</b> ${fmt(v,3)}</div><div><b>Energia específica:</b> ${fmt(energy,3)}</div><div>${energy<-.02?"Energia negativa: trajetória ligada (órbita).":energy>.02?"Energia positiva: trajetória de escape.":"Próximo da condição de escape."}</div>`;}
+  kit("gravidade",extra,{state:()=>({r:Math.hypot(x,y),energy:.5*(vx*vx+vy*vy)-1/Math.hypot(x,y),t}),goals:[
+    {t:"Use velocidade inicial próxima de 1 e avance 100 passos para observar uma órbita aproximadamente circular.",ok:s=>Math.abs(speedCtl.get()-1)<.015&&s.t>=.9&&s.r>.8&&s.r<1.2,win:()=>"A velocidade circular mantém a distância ao centro aproximadamente constante."},
+    {t:"Reduza a velocidade inicial para 0,70 e avance para observar uma órbita mais alongada.",ok:s=>speedCtl.get()<.75&&s.t>.5&&s.energy<0,win:()=>"A energia continua negativa: a trajetória permanece ligada, mas deixa de ser circular."}
+  ],react:s=>["A velocidade tangencial determina a forma da trajetória gravitacional.","thinking"]});reset();return draw;
+}
+function buildManeuverLab(stage,panel,extra){
+ const c=physicsFrame(stage,"Controle de trajetória","Aplique impulsos em direções diferentes e compare a orientação do veículo com o vetor velocidade.");const R=readout(panel);let vx=30,vy=0,x=0,y=0,trail=[[0,0]],heading=0,impulses=0;
+ const dv=ctl(panel,"Intensidade do impulso",1,20,1,5,v=>fmt(v,0)+" m/s",draw);const dir=ctl(panel,"Direção do impulso",0,359,1,90,v=>fmt(v,0)+"°",draw);
+ const actions=row(panel);btn(actions,"Aplicar impulso",apply,true);btn(actions,"Avançar 1 s",advance,true);btn(actions,"Apontar na direção da velocidade",align);btn(actions,"Reiniciar",reset);
+ function reset(){vx=30;vy=0;x=0;y=0;trail=[[0,0]];heading=0;impulses=0;dir.set(90);draw();}
+ function apply(){const a=dir.get()*Math.PI/180;vx+=dv.get()*Math.cos(a);vy+=dv.get()*Math.sin(a);heading=dir.get();impulses++;draw();}
+ function advance(){x+=vx;y+=vy;trail.push([x,y]);if(trail.length>300)trail.shift();draw();}
+ function align(){heading=(Math.atan2(vy,vx)*180/Math.PI+360)%360;dir.set(Math.round(heading));draw();}
+ function draw(){const p=plane(c,-150,150,-100,100,"Posição x (m)","Posição y (m)"),g=p.g;p.clip();if(trail.length>1){g.strokeStyle=css("--area-ink");g.lineWidth=2;g.beginPath();trail.forEach(([tx,ty],i)=>i?g.lineTo(p.X(tx),p.Y(ty)):g.moveTo(p.X(tx),p.Y(ty)));g.stroke();}g.restore();arrow(g,p.X(x),p.Y(y),p.X(x+vx),p.Y(y+vy),css("--curve"),3);p.dot(x,y,css("--amber"),6);const speed=Math.hypot(vx,vy),course=(Math.atan2(vy,vx)*180/Math.PI+360)%360;R.innerHTML=`<div><b>Velocidade:</b> ${fmt(speed,2)} m/s</div><div><b>Direção da trajetória:</b> ${fmt(course,1)}°</div><div><b>Orientação selecionada:</b> ${fmt(heading,0)}°</div><div><b>Impulsos aplicados:</b> ${impulses}</div><div>O impulso altera a velocidade; a orientação pode ser ajustada separadamente.</div>`;}
+ kit("manobras",extra,{state:()=>({impulses,vy,speed:Math.hypot(vx,vy),course:(Math.atan2(vy,vx)*180/Math.PI+360)%360}),goals:[
+ {t:"Aplique um impulso lateral de 5 m/s e observe a velocidade ganhar componente vertical.",ok:s=>s.impulses>=1&&Math.abs(s.vy)>=4.9,win:()=>"O impulso lateral alterou o vetor velocidade."},
+ {t:"Aplique dois impulsos em direções diferentes para mudar a trajetória novamente.",ok:s=>s.impulses>=2,win:()=>"Uma sequência de impulsos permite construir uma nova trajetória."}
+ ],react:s=>["Orientação e trajetória são grandezas relacionadas, mas não são a mesma coisa.","thinking"]});draw();return draw;
+}
+function buildAgricultureLab(stage,panel,extra){
+ const c=physicsFrame(stage,"Tração e potência agrícola","Compare a força solicitada por um implemento com a aderência disponível entre pneu e solo.");const R=readout(panel);
+ const mass=ctl(panel,"Massa do conjunto",1000,12000,250,6000,v=>fmt(v,0)+" kg",draw);const mu=ctl(panel,"Coeficiente de aderência",.2,1.2,.05,.65,v=>fmt(v,2),draw);const demand=ctl(panel,"Força solicitada pelo implemento",1000,30000,500,12000,v=>fmt(v,0)+" N",draw);const velocity=ctl(panel,"Velocidade de operação",1,15,.5,6,v=>fmt(v,1)+" m/s",draw);
+ const actions=row(panel);btn(actions,"Calcular operação",draw,true);btn(actions,"Configuração inicial",()=>{mass.set(6000);mu.set(.65);demand.set(12000);velocity.set(6);draw();});
+ function draw(){const g=c.getContext("2d"),w=c.clientWidth,h=c.clientHeight,dpr=window.devicePixelRatio||1;c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);const ink=css("--ink"),muted=css("--muted"),grid=css("--grid"),ground=h*.7;g.strokeStyle=grid;g.lineWidth=1;for(let i=0;i<10;i++){g.beginPath();g.moveTo(0,ground+i*8);g.lineTo(w,ground+i*8);g.stroke();}g.strokeStyle=ink;g.lineWidth=2;g.beginPath();g.moveTo(20,ground);g.lineTo(w-20,ground);g.stroke();const tx=w*.38,ty=ground-55;g.fillStyle=css("--area-ink");g.fillRect(tx-45,ty,90,38);g.beginPath();g.arc(tx-25,ground-10,17,0,Math.PI*2);g.arc(tx+30,ground-10,17,0,Math.PI*2);g.fillStyle="#303943";g.fill();g.fillStyle=css("--card");g.fillRect(tx-10,ty-27,35,27);g.fillStyle=ink;g.font=`12px ${css("--f-body")}`;g.fillText("Trator + implemento",tx-48,ty-37);const weight=mass.get()*9.81,available=mu.get()*weight,actual=Math.min(demand.get(),available),power=actual*velocity.get()/1000,slip=demand.get()>available;arrow(g,tx+55,ty+17,tx+55+Math.min(120,demand.get()/250),ty+17,css("--amber"),3);arrow(g,tx-50,ty+17,tx-50-Math.min(120,available/250),ty+17,css("--curve"),3);g.fillStyle=muted;g.fillText("Força solicitada",tx+65,ty+4);g.fillText("Tração disponível",tx-155,ty+4);R.innerHTML=`<div><b>Peso:</b> ${fmt(weight,0)} N</div><div><b>Tração máxima estimada:</b> ${fmt(available,0)} N</div><div><b>Força efetivamente transmitida:</b> ${fmt(actual,0)} N</div><div><b>Potência útil estimada:</b> ${fmt(power,2)} kW</div><div class="${slip?"am":"ok"}">${slip?"A força solicitada excede a aderência estimada: há risco de patinagem.":"A aderência estimada é suficiente para transmitir a força solicitada."}</div><div class="cl">Modelo simplificado: tração máxima = μ × massa × gravidade; potência = força × velocidade.</div>`;}
+ kit("fisica-engenharia",extra,{state:()=>({available:mu.get()*mass.get()*9.81,demand:demand.get(),power:Math.min(demand.get(),mu.get()*mass.get()*9.81)*velocity.get()/1000}),goals:[
+ {t:"Configure a operação para que a tração disponível seja maior que a força solicitada.",ok:s=>s.available>=s.demand,win:()=>"A aderência estimada suporta a força solicitada."},
+ {t:"Aumente a força solicitada até superar a tração disponível e identifique o risco de patinagem.",ok:s=>s.demand>s.available,win:()=>"A força exigida superou o limite de aderência estimado."}
+ ],react:s=>["Potência útil depende da força efetivamente transmitida e da velocidade.","thinking"]});draw();return draw;
+}
+
+
+/* ---------- Física: cadastro dos módulos e laboratórios ---------- */
+const FISICA_MODULOS = [
+  {id: "vetores", nome: "Grandezas, unidades e vetores", saudacao: "Vamos decompor grandezas em componentes e entender como vetores se combinam."},
+  {id: "leis-newton", nome: "Movimento e leis de Newton", saudacao: "Observe primeiro o movimento; depois identifique as forças que podem alterá-lo."},
+  {id: "propulsao", nome: "Propulsão e foguetes", saudacao: "O foguete não empurra o ar: ele expulsa massa e recebe uma variação de movimento no sentido oposto."},
+  {id: "gravidade", nome: "Gravidade e órbitas", saudacao: "Uma órbita é uma queda contínua ao redor de um corpo, não ausência de gravidade."},
+  {id: "manobras", nome: "Manobras e navegação espacial", saudacao: "Vamos separar o giro da nave da mudança de sua velocidade."},
+  {id: "fisica-engenharia", nome: "Física aplicada à engenharia e agricultura", saudacao: "A Física ajuda a estimar se uma máquina tem força, potência e aderência suficientes para a tarefa."}
+];
+function buildRocketLab(stage, panel, extra) {
+  stage.innerHTML = `<div class="rocket-sim"><canvas class="rocket-canvas" role="img" aria-label="Simulação bidimensional do movimento de um foguete">Representação visual do movimento do foguete. Utilize os controles para alterar massa, empuxo e direção.</canvas><div class="rocket-legend"><span><i class="rocket-dot velocity"></i> Velocidade</span><span><i class="rocket-dot thrust"></i> Empuxo</span><span><i class="rocket-dot trail"></i> Trajetória</span></div><p class="rocket-note">Modelo didático 2D: sem gravidade, atmosfera ou perda de massa. A orientação da nave é independente da velocidade.</p></div>`;
+  panel.innerHTML = `<div class="rocket-controls-intro"><strong>Controles de voo</strong><p>Comece com os motores desligados e observe a inércia. Depois aplique empuxo para acelerar, frear ou desviar.</p></div>`;
+  const c = $("canvas", stage), ctx = c.getContext("2d"), R = readout(panel);
+  const mass = ctl(panel, "Massa da nave", 1000, 10000, 250, 4500, v => fmt(v, 0) + " kg", draw);
+  const thrust = ctl(panel, "Empuxo do motor", 0, 30000, 500, 9000, v => fmt(v, 0) + " N", draw);
+  const angle = ctl(panel, "Direção do empuxo", 0, 359, 1, 0, v => fmt(v, 0) + "°", draw);
+  const actions = row(panel); actions.classList.add("rocket-actions");
+  const engineButton = btn(actions, "Ligar motor", toggleEngine);
+  const runButton = btn(actions, "Iniciar", toggleRun, true);
+  const controls2 = row(panel); controls2.classList.add("rocket-actions");
+  btn(controls2, "Apontar contra velocidade", pointAgainst, true);
+  btn(controls2, "Avançar 1 s", stepOne, true);
+  btn(controls2, "Reiniciar", reset, true);
+  const state = {x: 0, y: 0, vx: 35, vy: 0, t: 0, engine: false, running: false, trail: [], deltaV: 0, engineTime: 0, maxSpeed: 35, braking: false, lastSpeed: 35};
+  let raf = 0, lastFrame = 0, disposed = false;
+  const rad = d => d * Math.PI / 180;
+  const speed = () => Math.hypot(state.vx, state.vy);
+  function reset() {
+    stop(); state.x = 0; state.y = 0; state.vx = 35; state.vy = 0; state.t = 0;
+    state.engine = false; state.trail = [[0, 0]]; state.deltaV = 0; state.engineTime = 0;
+    state.maxSpeed = 35; state.braking = false; state.lastSpeed = 35;
+    angle.set(0); engineButton.textContent = "Ligar motor"; runButton.textContent = "Iniciar"; draw();
+  }
+  function toggleEngine() { state.engine = !state.engine; engineButton.textContent = state.engine ? "Desligar motor" : "Ligar motor"; draw(); }
+  function toggleRun() {
+    state.running = !state.running; runButton.textContent = state.running ? "Pausar" : "Continuar";
+    if (state.running) { lastFrame = 0; raf = requestAnimationFrame(frame); } else cancelAnimationFrame(raf);
+    draw();
+  }
+  function stop() { state.running = false; cancelAnimationFrame(raf); }
+  function pointAgainst() {
+    if (speed() < 0.05) return;
+    angle.set((Math.atan2(state.vy, state.vx) * 180 / Math.PI + 180 + 360) % 360);
+    state.braking = true; draw();
+  }
+  function integrate(dt) {
+    const oldSpeed = speed();
+    if (state.engine && thrust.get() > 0) {
+      const a = thrust.get() / mass.get(), theta = rad(angle.get());
+      state.vx += Math.cos(theta) * a * dt; state.vy += Math.sin(theta) * a * dt;
+      state.engineTime += dt;
+    }
+    state.x += state.vx * dt; state.y += state.vy * dt; state.t += dt;
+    const newSpeed = speed(); state.deltaV = Math.hypot(state.vx - 35, state.vy);
+    state.maxSpeed = Math.max(state.maxSpeed, newSpeed); state.lastSpeed = oldSpeed;
+    if (!state.trail.length || Math.hypot(state.x - state.trail[state.trail.length - 1][0], state.y - state.trail[state.trail.length - 1][1]) > 1.5) {
+      state.trail.push([state.x, state.y]); if (state.trail.length > 500) state.trail.shift();
+    }
+  }
+  function frame(ts) {
+    if (!state.running || disposed) return;
+    const dt = lastFrame ? Math.min((ts - lastFrame) / 1000, 0.05) : 1 / 60; lastFrame = ts;
+    const n = Math.max(1, Math.ceil(dt / (1 / 120))), sub = dt / n;
+    for (let i = 0; i < n; i++) integrate(sub);
+    draw(); raf = requestAnimationFrame(frame);
+  }
+  function stepOne() { for (let i = 0; i < 60; i++) integrate(1 / 60); draw(); }
+  function arrow(g, x1, y1, x2, y2, color, width = 2) {
+    const a = Math.atan2(y2 - y1, x2 - x1), head = 9;
+    g.strokeStyle = color; g.fillStyle = color; g.lineWidth = width; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+    g.beginPath(); g.moveTo(x2, y2); g.lineTo(x2 - head * Math.cos(a - .45), y2 - head * Math.sin(a - .45)); g.lineTo(x2 - head * Math.cos(a + .45), y2 - head * Math.sin(a + .45)); g.closePath(); g.fill();
+  }
+  function draw() {
+    const dpr = window.devicePixelRatio || 1, w = c.clientWidth || 640, h = 410;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+    const bg = css("--paper-2") || "#f4f1e8", grid = css("--grid") || "#d7d2c7", ink = css("--ink") || "#263238";
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2, scale = Math.min(w, h) / 150;
+    ctx.strokeStyle = grid; ctx.lineWidth = 1;
+    for (let x = cx % 40; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (let y = cy % 40; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    const screen = ([x, y]) => [cx + (x - state.x) * scale, cy - (y - state.y) * scale];
+    if (state.trail.length > 1) {
+      ctx.strokeStyle = css("--area-ink") || css("--area-ink"); ctx.globalAlpha = .75; ctx.lineWidth = 2; ctx.beginPath();
+      state.trail.forEach((pt, i) => { const q = screen(pt); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    const vx = state.vx, vy = state.vy, vlen = Math.hypot(vx, vy), vscale = Math.min(1.7, 55 / Math.max(vlen, 1));
+    arrow(ctx, cx, cy, cx + vx * vscale, cy - vy * vscale, css("--curve"), 3);
+    if (state.engine && thrust.get() > 0) {
+      const th = rad(angle.get()), alen = Math.min(80, 18 + thrust.get() / mass.get() * 12);
+      arrow(ctx, cx, cy, cx + Math.cos(th) * alen, cy - Math.sin(th) * alen, css("--amber"), 3);
+    }
+    const rot = rad(angle.get()); ctx.save(); ctx.translate(cx, cy); ctx.rotate(-rot);
+    ctx.fillStyle = css("--card"); ctx.strokeStyle = ink; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(21, 0); ctx.lineTo(-12, -9); ctx.lineTo(-8, 0); ctx.lineTo(-12, 9); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = css("--area-ink"); ctx.beginPath(); ctx.moveTo(-5, -7); ctx.lineTo(-16, -14); ctx.lineTo(-13, -5); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-5, 7); ctx.lineTo(-16, 14); ctx.lineTo(-13, 5); ctx.closePath(); ctx.fill();
+    if (state.engine && thrust.get() > 0) { ctx.fillStyle = css("--wheat"); ctx.beginPath(); ctx.moveTo(-12, -4); ctx.lineTo(-32, 0); ctx.lineTo(-12, 4); ctx.fill(); }
+    ctx.restore();
+    ctx.fillStyle = ink; ctx.font = `12px ${css("--f-body")}`; ctx.textAlign = "left"; ctx.fillText("Referencial local — a câmera acompanha a nave", 12, 20);
+    const a = state.engine ? thrust.get() / mass.get() : 0;
+    R.innerHTML = `<div><b>Tempo:</b> ${fmt(state.t, 1)} s</div><div><b>Velocidade:</b> ${fmt(speed(), 2)} m/s</div><div><b>Aceleração:</b> ${fmt(a, 2)} m/s²</div><div><b>Empuxo:</b> ${state.engine ? fmt(thrust.get(), 0) : "0"} N</div><div><b>Deslocamento:</b> x ${fmt(state.x, 1)} m · y ${fmt(state.y, 1)} m</div><div class="${!state.engine ? "ok" : "am"}">${state.engine ? "Motor ligado: a força altera a velocidade." : "Motor desligado: a velocidade permanece constante."}</div>`;
+  }
+  const oldLeave = onLeave;
+  onLeave = () => { disposed = true; stop(); if (oldLeave) oldLeave(); };
+  kit("propulsao", extra, {
+    state: () => ({t: state.t, engine: state.engine, speed: speed(), deltaV: state.deltaV, engineTime: state.engineTime, braking: state.braking}),
+    goals: [
+      {t: "Com o motor desligado, avance pelo menos 5 segundos e observe que a nave mantém sua velocidade próxima de 35 m/s.", ok: s => s.t >= 5 && !s.engine && Math.abs(s.speed - 35) < .05, win: () => "Inércia observada: sem força resultante, a velocidade não desaparece."},
+      {t: "Ligue o motor e produza uma variação de velocidade de pelo menos 10 m/s.", ok: s => s.engineTime >= 1 && s.deltaV >= 10, win: () => "O empuxo alterou a quantidade de movimento da nave."},
+      {t: "Aponte o motor contra a velocidade e freie até ficar abaixo de 2 m/s.", ok: s => s.braking && s.speed < 2 && s.t > 1, win: () => "Frenagem concluída: a aceleração contrária reduziu o módulo da velocidade."}
+    ],
+    react: s => s.engine ? ["Com o motor ligado, observe a direção do empuxo em relação à velocidade.", "thinking"] : ["O motor está desligado. A nave continua em movimento por inércia.", "neutral"]
+  });
+  reset();
+  return draw;
+}
+
+const FISICA_LABS = {vetores: buildVectorLab, "leis-newton": buildNewtonLab, propulsao: buildRocketLab, gravidade: buildOrbitLab, manobras: buildManeuverLab, "fisica-engenharia": buildAgricultureLab};
+FISICA_MODULOS.forEach(m => MODS.push({...m, grupo: "Física", build(stage, panel, extra) { return FISICA_LABS[m.id](stage, panel, extra); }}));
+
 MODS.forEach(m => Object.assign(m, CONTENT[m.id]));
 MODS.sort((a, b) => ID_ORDER.indexOf(a.id) - ID_ORDER.indexOf(b.id));
 
 /* ---------- navegação ---------- */
-const AREA = {"Cálculo": "calculo", "Álgebra linear": "algebra", "Estatística": "estatistica", "Machine learning": "ml", "Decisão": "decisao"};
+const AREA = {"Cálculo": "calculo", "Álgebra linear": "algebra", "Estatística": "estatistica", "Machine learning": "ml", "Decisão": "decisao", "Física": "fisica"};
 const AREAS_LIST = [...new Set(MODS.map(m => m.grupo))];
 let redraw = () => {}, curMod = null;
 function show(id) {
@@ -1145,16 +1352,16 @@ const ICON_SVG = k => k === "wheat" ? `<svg viewBox="0 0 28 110" aria-hidden="tr
 let badgeCache = null;
 function badges() {
   if (badgeCache) return badgeCache;
-  const areaBadges = AREAS_LIST.filter(g => MODS.filter(m => m.grupo === g).length >= 3).map(g => ({id: "talhao-" + AREA[g], nome: `Talhão de ${g} completo`, desc: `Estude todos os assuntos de ${g}.`, icon: "wheat", ok: s => MODS.filter(m => m.grupo === g).every(m => s.done[m.id])}));
+  const areaBadges = AREAS_LIST.filter(g => MODS.filter(m => m.grupo === g).length >= 3).map(g => ({id: "talhao-" + AREA[g], nome: `${g} completo`, desc: `Estude todos os assuntos de ${g}.`, icon: "wheat", ok: s => MODS.filter(m => m.grupo === g).every(m => s.done[m.id])}));
   return badgeCache = [
-    {id: "primeira", nome: "Primeira espiga", desc: "Marque o primeiro assunto como estudado.", icon: "seed", ok: s => cnt(s.done) >= 1},
+    {id: "primeira", nome: "Primeiro assunto", desc: "Marque o primeiro assunto como estudado.", icon: "seed", ok: s => cnt(s.done) >= 1},
     {id: "mao", nome: "Mão na terra", desc: "Cumpra o seu primeiro desafio.", icon: "star", ok: s => cnt(s.goals) >= 1},
     {id: "taylor", nome: "Taylor de ponta a ponta", desc: "Cumpra os 3 desafios das Séries de Taylor.", icon: "star", ok: s => [0, 1, 2].every(i => s.goals["taylor:" + i])},
     {id: "explorador", nome: "Explorador", desc: "Visite 10 assuntos.", icon: "seed", ok: s => cnt(s.visited) >= 10},
     {id: "seq3", nome: "3 dias seguidos", desc: "Estude 3 dias em sequência.", icon: "flame", ok: () => streak() >= 3},
-    {id: "seq7", nome: "Semana de lavoura", desc: "Estude 7 dias em sequência.", icon: "flame", ok: () => streak() >= 7},
+    {id: "seq7", nome: "Semana de estudo", desc: "Estude 7 dias em sequência.", icon: "flame", ok: () => streak() >= 7},
     ...areaBadges,
-    {id: "safra", nome: "Safra cheia", desc: "Estude todos os assuntos.", icon: "wheat", ok: s => MODS.every(m => s.done[m.id])}
+    {id: "safra", nome: "Caderno completo", desc: "Estude todos os assuntos.", icon: "wheat", ok: s => MODS.every(m => s.done[m.id])}
   ];
 }
 function toast(text) {
@@ -1179,7 +1386,7 @@ function onGoal(d) {
 }
 function finishHTML(m) {
   const d = Progress.get().done[m.id];
-  return `<div class="finish ${d ? "is-done" : ""}"><p>${d ? "Assunto estudado. Mais uma espiga na plantação." : "Terminou este assunto? Marque e veja a plantação crescer."}</p><button class="btn ${d ? "alt" : ""}" type="button" id="finish">${d ? "Desmarcar" : "Marcar como estudado"}</button></div>`;
+  return `<div class="finish ${d ? "is-done" : ""}"><p>${d ? "Assunto estudado. Mais um passo no seu caderno." : "Terminou este assunto? Marque e veja o seu progresso crescer."}</p><button class="btn ${d ? "alt" : ""}" type="button" id="finish">${d ? "Desmarcar" : "Marcar como estudado"}</button></div>`;
 }
 function bindFinish() { const f = $("#finish"); if (f && curMod) f.onclick = () => toggleDone(curMod); }
 function toggleDone(m) {
@@ -1297,6 +1504,20 @@ function kit(mod, extra, {goals, state, react}) {
   check();
 }
 
+function renderEstudo(m, main) {
+  if (!Array.isArray(m.formulas) || !Array.isArray(m.exemplos) || !Array.isArray(m.exercicios)) return;
+  const root = document.createElement("section"); root.className = "estudo-study"; root.setAttribute("aria-label", "Material de estudo");
+  const section = (title, cls) => { const el = document.createElement("section"); el.className = `estudo-block ${cls}`; const h = document.createElement("h3"); h.textContent = title; el.appendChild(h); root.appendChild(el); return el; };
+  const formulas = section("Fórmulas essenciais", "estudo-formulas");
+  const fg = document.createElement("div"); fg.className = "estudo-grid"; formulas.appendChild(fg);
+  m.formulas.forEach(f => { const card = document.createElement("article"); card.className = "estudo-card"; const h = document.createElement("h4"); h.textContent = f.nome; const eq = document.createElement("p"); eq.className = "estudo-equation"; eq.textContent = f.expressao; const desc = document.createElement("p"); desc.textContent = f.significado; card.append(h, eq, desc); fg.appendChild(card); });
+  const examples = section("Exemplos resolvidos", "estudo-examples");
+  m.exemplos.forEach((ex, i) => { const card = document.createElement("article"); card.className = "estudo-example"; const h = document.createElement("h4"); h.textContent = `${i + 1}. ${ex.titulo}`; const prompt = document.createElement("p"); prompt.textContent = ex.enunciado; const ol = document.createElement("ol"); ex.passos.forEach(step => { const li = document.createElement("li"); li.textContent = step; ol.appendChild(li); }); const result = document.createElement("p"); result.className = "estudo-result"; result.textContent = ex.resultado; card.append(h, prompt, ol, result); examples.appendChild(card); });
+  const exercises = section("Teste seu entendimento", "estudo-exercises");
+  m.exercicios.forEach((ex, i) => { const card = document.createElement("article"); card.className = "estudo-exercise"; const h = document.createElement("h4"); h.textContent = `Questão ${i + 1}`; const q = document.createElement("p"); q.textContent = ex.pergunta; const details = document.createElement("details"); const summary = document.createElement("summary"); summary.textContent = "Ver resposta e resolução"; const answer = document.createElement("p"); answer.className = "estudo-answer"; answer.textContent = `Resposta: ${ex.resposta}`; const explanation = document.createElement("p"); explanation.textContent = ex.explicacao; details.append(summary, answer, explanation); card.append(h, q, details); exercises.appendChild(card); });
+  const ancora = $(".extra", main) || $(".lab", main); if (ancora) ancora.insertAdjacentElement("afterend", root); else main.appendChild(root);
+}
+
 function layoutDidatico(m, main) {
   main.innerHTML = `<div class="head"><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="gancho">${m.gancho}</p>
       <p class="lead">${m.resumo}</p>
@@ -1306,7 +1527,7 @@ function layoutDidatico(m, main) {
     <section class="ctx" aria-label="Onde isso aparece"><p class="ctx-titulo">Onde isso aparece</p><div class="tabs" role="tablist" aria-label="Contexto">${CONTEXTOS.map(c => `<button class="tab" role="tab" type="button" id="tab-${c.id}" data-ctx="${c.id}" aria-selected="${c.id === ctxAtual}" aria-controls="pn-ctx" tabindex="${c.id === ctxAtual ? 0 : -1}">${ICONS[c.id]}<span>${c.nome}</span></button>`).join("")}</div>
       <div class="tabpanel" role="tabpanel" id="pn-ctx"></div></section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
-  $("pre code", main).textContent = m.python;
+  $("pre code", main).textContent = m.python; renderEstudo(m, main);
   broto = createBroto($(".guide", main)); broto.say(m.saudacao || "Oi! Eu sou o Broto. Mexe nos controles e eu te conto o que acontece.", "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };

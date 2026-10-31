@@ -286,3 +286,100 @@ footer { max-width: 1120px; margin: var(--s-7) auto 0; font: 500 22px/1.3 var(--
 .ctx-nota h4 svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .ctx-nota p { margin: 0; font-size: 15.5px; }
 @media (prefers-reduced-motion: reduce) { .ctx-nota { transform: none !important; } }
+
+/* ---------- material de estudo (fórmulas, exemplos, exercícios) e laboratórios de Física ---------- */
+.estudo-study { display: grid; gap: var(--s-5); animation: enterUp .45s .2s ease both; }
+.estudo-block { display: grid; gap: var(--s-3); }
+.estudo-block > h3 { margin: 0; font: 700 30px/1.1 var(--f-display); color: var(--area-ink); }
+.estudo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--s-3); }
+.estudo-card, .estudo-example, .estudo-exercise { min-width: 0; padding: var(--s-4); background: var(--card); border: 2px solid var(--edge); border-radius: var(--r-card); box-shadow: var(--hard-sm); }
+.estudo-card h4, .estudo-example h4, .estudo-exercise h4 { margin: 0 0 var(--s-2); font: 700 18px/1.2 var(--f-display); color: var(--ink); }
+.estudo-card p, .estudo-example p, .estudo-exercise p { margin: var(--s-2) 0 0; }
+.estudo-equation { padding: 12px; background: var(--paper-2); border-left: 4px solid var(--area-ink); border-radius: 4px; font: 700 18px/1.4 var(--f-body); overflow-wrap: anywhere; }
+.estudo-card p:last-child { color: var(--ink-soft); font-size: 14px; }
+.estudo-examples { display: grid; gap: var(--s-3); }
+.estudo-example ol { margin: var(--s-3) 0 0; padding-left: 1.4rem; display: grid; gap: 7px; }
+.estudo-result { padding: 10px 12px; background: var(--note-1); border-left: 4px solid var(--leaf); border-radius: 4px; font-weight: 700; }
+.estudo-exercises { display: grid; gap: var(--s-3); }
+.estudo-exercise details { margin-top: var(--s-3); padding-top: var(--s-2); border-top: 1px dashed var(--rule-strong); }
+.estudo-exercise summary { color: var(--area-ink); font-weight: 700; cursor: pointer; }
+.estudo-answer { font-weight: 700; }
+
+.estudo-lab { display: grid; gap: 10px; width: 100%; }
+.estudo-lab-head { display: grid; gap: 4px; }
+.estudo-lab-head strong { color: var(--ink); font: 700 17px var(--f-display); }
+.estudo-lab-head p, .estudo-lab-note { margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.5; }
+.estudo-canvas { border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-2); }
+.estudo-lab-note { padding-top: 2px; }
+
+@media (max-width: 600px) { .estudo-block > h3 { font-size: 25px; } .estudo-card, .estudo-example, .estudo-exercise { padding: var(--s-3); } .estudo-equation { font-size: 16px; } }
+
+/* ---------- laboratório de propulsão: simulador de foguete ---------- */
+.rocket-sim { display: grid; gap: 9px; }
+.rocket-canvas { display: block; width: 100%; height: 410px; border-radius: 8px; background: var(--paper-2); }
+.rocket-legend { display: flex; flex-wrap: wrap; gap: 12px 18px; color: var(--ink-soft); font-size: 12px; }
+.rocket-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.rocket-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.rocket-dot.velocity { background: var(--curve); }
+.rocket-dot.thrust { background: var(--amber); }
+.rocket-dot.trail { background: var(--area-ink); }
+.rocket-note, .rocket-controls-intro p { margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.45; }
+.rocket-controls-intro { display: grid; gap: 4px; }
+.rocket-controls-intro strong { color: var(--ink); font: 700 17px var(--f-display); }
+.panel .rocket-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.panel .rocket-actions .btn { flex: 1 1 auto; }
+@media (max-width: 560px) {
+  .rocket-canvas { height: 330px; }
+  .rocket-legend { gap: 8px 12px; }
+}
+
+
+/* ---------- refinamento visual e acessibilidade: Física ---------- */
+.estudo-study { min-width: 0; scroll-margin-top: 18px; }
+.estudo-block, .estudo-grid, .estudo-examples, .estudo-exercises { min-width: 0; }
+.estudo-card, .estudo-example, .estudo-exercise { overflow-wrap: anywhere; }
+.estudo-equation { white-space: normal; }
+.estudo-example ol { line-height: 1.55; }
+.estudo-exercise summary { min-height: 32px; display: flex; align-items: center; }
+.estudo-lab, .rocket-sim { min-width: 0; }
+.estudo-lab-head p { max-width: 72ch; font-size: 13px; }
+.estudo-canvas, .rocket-canvas { max-width: 100%; }
+.estudo-lab-note, .rocket-note { max-width: 78ch; }
+.estudo-lab .estudo-canvas { height: clamp(260px, 42vw, 350px) !important; }
+.panel .ctl { min-width: 0; }
+.panel .ctl .cl { line-height: 1.35; }
+.panel .read { overflow-wrap: anywhere; line-height: 1.45; }
+.panel .row { min-width: 0; }
+.panel .row .btn { min-height: 40px; }
+.btn:focus-visible, .tab:focus-visible, nav button:focus-visible, .more:focus-visible,
+.estudo-exercise summary:focus-visible, input[type=range]:focus-visible {
+  outline: 3px solid var(--area-ink);
+  outline-offset: 3px;
+}
+.estudo-exercise summary:focus-visible { border-radius: 4px; }
+.estudo-lab canvas, .rocket-sim canvas { contain: layout paint; }
+
+@media (max-width: 860px) {
+  .lab { grid-template-columns: minmax(0, 1fr); }
+  .lab > .stage, .lab > .side { min-width: 0; }
+  .estudo-study { gap: var(--s-4); }
+  .estudo-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+}
+@media (max-width: 560px) {
+  #main[data-area="fisica"] .stage { padding: 8px; overflow-x: hidden; }
+  #main[data-area="fisica"] .panel { padding: var(--s-3); }
+  .estudo-lab .estudo-canvas { height: clamp(250px, 68vw, 310px) !important; }
+  .estudo-block > h3 { font-size: clamp(22px, 6vw, 25px); }
+  .estudo-equation { font-size: 15px; }
+  .panel .row .btn { flex: 1 1 140px; }
+  .rocket-canvas { height: 310px; }
+}
+@media (max-width: 380px) {
+  .estudo-grid { grid-template-columns: minmax(0, 1fr); }
+  .panel .row .btn { flex-basis: 100%; }
+  .rocket-legend { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estudo-study, .lab > .stage, .lab > .side { animation: none !important; }
+}
+
