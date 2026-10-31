@@ -37,7 +37,7 @@ function setup(c) {
 function plane(c, x0, x1, y0, y1, xl, yl) {
   const {g, w, h} = setup(c), m = {l: 52, r: 14, t: 16, b: 36};
   const X = x => m.l + (x - x0) / (x1 - x0) * (w - m.l - m.r), Y = y => h - m.b - (y - y0) / (y1 - y0) * (h - m.t - m.b);
-  g.font = `11px ${css("--f-mono")}`; g.lineWidth = 1;
+  g.font = `11px ${css("--f-body")}`; g.lineWidth = 1;
   const sx = niceStep((x1 - x0) / 6), sy = niceStep((y1 - y0) / 5);
   g.textAlign = "center"; g.textBaseline = "top";
   for (let x = Math.ceil(x0 / sx) * sx; x <= x1 + 1e-9; x += sx) {
@@ -330,7 +330,7 @@ print(V)                                                # ≈ 110 m³`,
       g.globalAlpha = 1; g.strokeStyle = css("--axis"); g.lineWidth = 1; if (n <= 40) { for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(ox + i * d, oy); g.lineTo(ox + i * d, oy + S); g.moveTo(ox, oy + i * d); g.lineTo(ox + S, oy + i * d); g.globalAlpha = .35; g.stroke(); } }
       g.globalAlpha = 1; g.strokeRect(ox, oy, S, S);
       g.fillStyle = css("--amber"); g.beginPath(); g.arc(ox + S / 2, oy + S / 2, 6, 0, 7); g.fill();
-      g.fillStyle = css("--muted"); g.font = `11px ${css("--f-mono")}`; g.textAlign = "left"; g.fillText("talhão 100 m × 100 m · ponto = pluviômetro", ox, oy - 5 > 8 ? oy - 5 : 10);
+      g.fillStyle = css("--muted"); g.font = `11px ${css("--f-body")}`; g.textAlign = "left"; g.fillText("talhão 100 m × 100 m · ponto = pluviômetro", ox, oy - 5 > 8 ? oy - 5 : 10);
       const V = vol(n), one = rf(50, 50) / 1000 * 10000;
       R.innerHTML = `<div class="am">só o pluviômetro (centro, ${fmt(rf(50, 50), 1)} mm): <b>${fmt(one, 0)} m³</b></div>
         <div>soma em ${n}×${n} células: <b>${fmt(V, 1)} m³</b></div><div class="ok">integral dupla (referência): <b>${fmt(ref, 1)} m³</b></div>
@@ -730,7 +730,7 @@ def amostrar(logits, T=0.7, k=5, p=0.9):
       q = pr.map((v, i) => kept.has(i) ? v / tot : 0); const H = -q.reduce((s, v) => s + (v > 0 ? v * Math.log2(v) : 0), 0);
       box.innerHTML = `<h4 class="cl" style="margin:4px 0 10px">o milho precisa de ___</h4>` + ord.map(i => `<div style="display:grid;grid-template-columns:96px minmax(80px,1fr) 150px;gap:10px;align-items:center;margin:7px 0">
         <span>${TK[i][0]}</span><div class="bar"><i style="width:${pr[i] * 100}%;opacity:${kept.has(i) ? 1 : 0.28}"></i></div>
-        <span style="font:500 13px var(--f-mono)">${fmt(q[i] * 100, 1)}%${counts ? " · sorteado " + fmt(counts[i] / 10, 1) + "%" : ""}</span></div>`).join("");
+        <span style="font:500 13px var(--f-body)">${fmt(q[i] * 100, 1)}%${counts ? " · sorteado " + fmt(counts[i] / 10, 1) + "%" : ""}</span></div>`).join("");
       R.innerHTML = `<div>candidatos mantidos: <b>${n}</b> de ${TK.length}</div><div>entropia: <b>${fmt(H, 2)} bits</b> (0 = sempre a mesma resposta)</div>
         <div>Temperatura baixa e top-k 1 dão sempre “${TK[ord[0]][0]}”. Temperatura alta espalha a probabilidade. Barras apagadas foram cortadas por top-k ou top-p.</div>`;
     }
@@ -1089,13 +1089,14 @@ const ID_ORDER = ["ideia", "funcao", "limite", "derivada", "regras", "taylor", "
 MODS.sort((a, b) => ID_ORDER.indexOf(a.id) - ID_ORDER.indexOf(b.id));
 
 /* ---------- navegação ---------- */
+const AREA = {"Cálculo": "calculo", "Álgebra linear": "algebra", "Estatística": "estatistica", "Machine learning": "ml", "Decisão": "decisao"};
 let redraw = () => {}, curMod = null;
 function show(id) {
   if (onLeave) { onLeave(); onLeave = null; }
   const m = MODS.find(x => x.id === id) || MODS[0]; curMod = m; N = 0;
   try { localStorage.setItem("mc-mod", m.id); } catch (e) {}
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === m.id));
-  const main = $("#main");
+  const main = $("#main"); main.dataset.area = AREA[m.grupo];
   main.innerHTML = `<div><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="lead">${m.lead}</p></div>
     <div class="uses"><section><h3>No campo</h3><p>${m.campo}</p></section><section><h3>No dia a dia</h3><p>${m.dia}</p></section><section class="me"><h3>No seu trabalho</h3><p>${IA[m.id]}</p></section></div>
     <div class="lab"><div class="stage"></div><div class="panel"></div></div>
@@ -1105,11 +1106,40 @@ function show(id) {
 }
 const nav = $("#nav");
 [...new Set(MODS.map(m => m.grupo))].forEach(g => {
-  const d = document.createElement("div"); d.className = "grp"; d.innerHTML = `<h4>${g}</h4>`;
+  const d = document.createElement("div"); d.className = "grp"; d.dataset.area = AREA[g]; d.innerHTML = `<h4>${g}</h4>`;
   MODS.filter(m => m.grupo === g).forEach(m => { const b = document.createElement("button"); b.textContent = m.nome; b.dataset.id = m.id; b.onclick = () => { show(m.id); window.scrollTo({top: 0}); }; d.appendChild(b); });
   nav.appendChild(d);
 });
-$("#chips").innerHTML = [...new Set(MODS.map(m => m.grupo))].map(g => `<span>${g} · ${MODS.filter(m => m.grupo === g).length}</span>`).join("");
+$("#chips").innerHTML = [...new Set(MODS.map(m => m.grupo))].map(g => `<span data-area="${AREA[g]}">${g} · ${MODS.filter(m => m.grupo === g).length}</span>`).join("");
+
+/* curvas de nível: campo de altitude com algumas colinas, desenhado por marching squares */
+function contourSVG() {
+  const W = 1200, H = 800, cs = 20, nx = W / cs, ny = H / cs;
+  const hills = [[260, 190, 230, 1], [900, 580, 280, .9], [650, 110, 170, .6], [1060, 160, 150, .7], [180, 650, 210, .6]];
+  const alt = (x, y) => hills.reduce((s, [cx, cy, r, a]) => s + a * Math.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (2 * r * r)), 0) + 0.08 * Math.sin(x / 120 + y / 170);
+  const V = Array.from({length: ny + 1}, (_, j) => Array.from({length: nx + 1}, (_, i) => alt(i * cs, j * cs)));
+  let d = "";
+  for (let L = 0.12; L < 1.2; L += 0.1) for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const a = V[j][i], b = V[j][i + 1], c = V[j + 1][i + 1], dd = V[j + 1][i], x = i * cs, y = j * cs;
+    const k = (a >= L ? 8 : 0) | (b >= L ? 4 : 0) | (c >= L ? 2 : 0) | (dd >= L ? 1 : 0); if (k === 0 || k === 15) continue;
+    const E = {t: [x + (L - a) / (b - a) * cs, y], r: [x + cs, y + (L - b) / (c - b) * cs], b: [x + (L - dd) / (c - dd) * cs, y + cs], l: [x, y + (L - a) / (dd - a) * cs]};
+    const seg = {1: ["l", "b"], 2: ["b", "r"], 3: ["l", "r"], 4: ["t", "r"], 5: ["t", "l", "b", "r"], 6: ["t", "b"], 7: ["t", "l"], 8: ["t", "l"], 9: ["t", "b"], 10: ["t", "r", "l", "b"], 11: ["t", "r"], 12: ["l", "r"], 13: ["b", "r"], 14: ["l", "b"]}[k];
+    for (let s = 0; s < seg.length; s += 2) { const p = E[seg[s]], q = E[seg[s + 1]]; d += `M${p[0].toFixed(0)} ${p[1].toFixed(0)}L${q[0].toFixed(0)} ${q[1].toFixed(0)}`; }
+  }
+  return `<svg class="contours" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+}
+document.body.insertAdjacentHTML("afterbegin", contourSVG());
+
+/* tema claro/escuro, lembrado no navegador quando possível */
+(function () {
+  const root = document.documentElement; let saved = null;
+  try { saved = localStorage.getItem("mc-theme"); } catch (e) {}
+  if (saved) root.dataset.theme = saved;
+  $("#theme").addEventListener("click", () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches, next = dark ? "light" : "dark";
+    root.dataset.theme = next; try { localStorage.setItem("mc-theme", next); } catch (e) {}
+  });
+})();
 let first = location.hash.slice(1); try { first = first || localStorage.getItem("mc-mod"); } catch (e) {}
 show(first);
 const re = () => redraw();

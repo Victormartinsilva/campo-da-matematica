@@ -4,21 +4,80 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matemática no Campo</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="top">
-  <h1>Matemática no Campo</h1>
-  <p>A matemática da graduação em Engenharia Agrícola, revista para quem trabalha hoje com engenharia de dados e IA. Cada assunto mostra o uso no campo, no dia a dia e no seu trabalho, tem um laboratório para mexer e termina em código Python.</p>
-  <div class="chips" id="chips"></div>
-</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- tremido de traço feito à mão, só para ilustrações decorativas -->
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <symbol id="wheat" viewBox="-14 -110 28 110">
+      <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <path d="M0 0 C2 -30 -2 -62 0 -96"/>
+        <path d="M0 -40 C-9 -44 -12 -52 -12 -58 M0 -52 C9 -56 12 -64 12 -70 M0 -66 C-8 -70 -11 -78 -11 -84 M0 -78 C8 -82 11 -90 11 -96"/>
+      </g>
+      <g fill="currentColor">
+        <ellipse cx="-12" cy="-62" rx="4" ry="7" transform="rotate(-18 -12 -62)"/>
+        <ellipse cx="12" cy="-74" rx="4" ry="7" transform="rotate(18 12 -74)"/>
+        <ellipse cx="-11" cy="-88" rx="4" ry="7" transform="rotate(-18 -11 -88)"/>
+        <ellipse cx="11" cy="-100" rx="4" ry="7" transform="rotate(18 11 -100)"/>
+        <ellipse cx="0" cy="-106" rx="4" ry="8"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="hero">
+  <button class="theme" id="theme" type="button" aria-label="Alternar entre tema claro e escuro" title="Claro / escuro">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+  </button>
+  <div class="hero-text">
+    <p class="kicker">Caderno de campo</p>
+    <h1>Matemática <em>no Campo<svg class="scribble" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M4 12 C40 4 70 17 110 9 S190 4 230 12 S280 8 296 6" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" filter="url(#rough)"/></svg></em></h1>
+    <p class="lede">A matemática que você viu na Engenharia Agrícola, de volta e testada na prática: gráficos para mexer, exemplos da lavoura e código Python para levar para o trabalho com dados e IA.</p>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="hero-art">
+    <svg class="stamp" viewBox="0 0 120 120" role="img" aria-label="Selo: laboratório de campo" filter="url(#rough)">
+      <defs><path id="ring" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0"/></defs>
+      <circle cx="60" cy="60" r="55" fill="none" stroke="currentColor" stroke-width="3"/>
+      <circle cx="60" cy="60" r="30" fill="none" stroke="currentColor" stroke-width="2"/>
+      <text font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="11" letter-spacing="3" fill="currentColor"><textPath href="#ring">LABORATÓRIO DE CAMPO · FEITO À MÃO · </textPath></text>
+      <use href="#wheat" x="44" y="38" width="32" height="48"/>
+    </svg>
+    <svg class="sketch" viewBox="0 0 400 300" role="img" aria-label="Rabisco de um gráfico: uma curva com a reta tangente no topo e espigas de trigo crescendo no eixo">
+      <g filter="url(#rough)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M30 262 H382 M44 270 V28" stroke="var(--ink)" stroke-width="3"/>
+        <path d="M370 254 L384 262 L370 270 M36 40 L44 26 L52 40" stroke="var(--ink)" stroke-width="3"/>
+        <path d="M60 240 C110 140 160 70 210 66 C260 62 300 120 360 232" stroke="var(--water)" stroke-width="5"/>
+        <path d="M130 70 L292 62" stroke="var(--terra)" stroke-width="4" stroke-dasharray="2 9"/>
+        <path d="M232 94 C250 108 262 98 252 116" stroke="var(--terra)" stroke-width="3" opacity="0"/>
+      </g>
+      <circle cx="210" cy="66" r="8" fill="var(--terra)" stroke="var(--ink)" stroke-width="3" filter="url(#rough)"/>
+      <g filter="url(#rough)" fill="none" stroke="var(--terra)" stroke-width="3" stroke-linecap="round"><path d="M300 20 C270 22 250 36 224 56 M224 56 l16 -2 M224 56 l5 -15"/></g>
+      <text x="304" y="26" font-family="Caveat, cursive" font-weight="700" font-size="25" fill="var(--terra)">f′(x) = 0 aqui!</text>
+      <g color="var(--a-estatistica-ink)">
+        <use href="#wheat" x="70" y="154" width="38" height="110" style="color:var(--wheat)"/>
+        <use href="#wheat" x="300" y="170" width="34" height="92" style="color:var(--leaf)"/>
+        <use href="#wheat" x="330" y="160" width="38" height="102" style="color:var(--wheat)"/>
+      </g>
+    </svg>
+  </div>
+</header>
 
 <div class="shell">
   <nav id="nav" aria-label="Assuntos"></nav>
   <main id="main"></main>
 </div>
-<footer>Os números dos exemplos são ilustrativos e servem para entender a matemática. Não são recomendações agronômicas nem financeiras.</footer>
-
-<script src="app.js"></script></body>
+<footer>Os números dos exemplos são ilustrativos. Servem para entender a matemática e não são recomendação agronômica nem financeira.</footer>
+<script src="app.js"></script>
+</body>
 </html>

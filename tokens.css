@@ -1,0 +1,111 @@
+/* Tokens de design do Caderno de Campo: cores, tipografia, espaçamento e áreas.
+   Todo o resto do estilo (styles.css) e os gráficos em canvas (app.js) leem daqui. */
+
+:root {
+  /* papel e tinta */
+  --paper: #F6EFE0;
+  --paper-2: #EBE0C8;
+  --card: #FCF8EE;
+  --ink: #2B2118;
+  --ink-soft: #5E4F40;
+  --edge: #2B2118;      /* contorno dos cartões */
+  --shadow: #2B2118;    /* sombra dura deslocada */
+  --rule: #CDBFA3;      /* linhas finas */
+  --rule-soft: #E4D8BF;
+  --rule-strong: #A6957A;
+  --contour: #8E7B5C;   /* curvas de nível do fundo */
+
+  /* cores de lavoura */
+  --leaf: #2F6B2E;
+  --wheat: #E3A72F;
+  --wheat-ink: #7A5200;
+  --terra: #B5482A;
+  --water: #2A6F8F;
+  --beet: #8A3A5C;
+  --alert: #9E2A2B;
+
+  /* áreas da matemática: cada uma é um talhão (preenchimento e cor de texto) */
+  --a-calculo-fill: #7FB36B;   --a-calculo-ink: #2F6B2E;
+  --a-algebra-fill: #6FAFCB;   --a-algebra-ink: #2A6F8F;
+  --a-estatistica-fill: #E8B54A; --a-estatistica-ink: #7A5200;
+  --a-ml-fill: #E0795A;        --a-ml-ink: #B5482A;
+  --a-decisao-fill: #C77C9F;   --a-decisao-ink: #8A3A5C;
+
+  /* post-its */
+  --note-1: #FBEFC4;
+  --note-2: #FCF8EE;
+  --note-3: #DDEBF0;
+
+  /* quadro-negro do código */
+  --chalk-bg: #2E241B;
+  --chalk-ink: #F1E7D2;
+
+  /* nomes usados pelos gráficos (app.js) */
+  --bg: var(--paper);
+  --panel: var(--card);
+  --muted: var(--ink-soft);
+  --line: var(--rule);
+  --grid: var(--rule-soft);
+  --axis: var(--rule-strong);
+  --curve: var(--water);
+  --amber: var(--terra);
+  --good: var(--leaf);
+  --bad: var(--alert);
+
+  /* tipografia */
+  --f-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+
+  /* espaçamento e forma */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
+  --r-card: 6px 16px 8px 18px;   /* cantos irregulares, como recorte à mão */
+  --r-chip: 999px;
+  --hard: 4px 4px 0 var(--shadow);
+  --hard-sm: 3px 3px 0 var(--shadow);
+
+  /* área ativa (definida por [data-area]) */
+  --area-fill: var(--a-calculo-fill);
+  --area-ink: var(--a-calculo-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #231A14; --paper-2: #2A2018; --card: #2E231B;
+    --ink: #F0E4CF; --ink-soft: #BFAE96;
+    --edge: #D9C7A8; --shadow: #0E0A07;
+    --rule: #4A3A2D; --rule-soft: #392C22; --rule-strong: #7D6A55; --contour: #8A7355;
+    --leaf: #8FC27A; --wheat: #F0BE4A; --wheat-ink: #F0BE4A; --terra: #F0906C; --water: #7FBFDD; --beet: #DE94B3; --alert: #F0806E;
+    --a-calculo-fill: #7FB36B;   --a-calculo-ink: #8FC27A;
+    --a-algebra-fill: #6FAFCB;   --a-algebra-ink: #7FBBD6;
+    --a-estatistica-fill: #E8B54A; --a-estatistica-ink: #F0BE4A;
+    --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
+    --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
+    --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
+    --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #231A14; --paper-2: #2A2018; --card: #2E231B;
+  --ink: #F0E4CF; --ink-soft: #BFAE96;
+  --edge: #D9C7A8; --shadow: #0E0A07;
+  --rule: #4A3A2D; --rule-soft: #392C22; --rule-strong: #7D6A55; --contour: #8A7355;
+  --leaf: #8FC27A; --wheat: #F0BE4A; --wheat-ink: #F0BE4A; --terra: #F0906C; --water: #7FBFDD; --beet: #DE94B3; --alert: #F0806E;
+  --a-calculo-fill: #7FB36B;   --a-calculo-ink: #8FC27A;
+  --a-algebra-fill: #6FAFCB;   --a-algebra-ink: #7FBBD6;
+  --a-estatistica-fill: #E8B54A; --a-estatistica-ink: #F0BE4A;
+  --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
+  --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
+  --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
+  --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
+  color-scheme: dark;
+}
+
+/* cada assunto herda a cor do seu talhão */
+[data-area="calculo"]    { --area-fill: var(--a-calculo-fill);    --area-ink: var(--a-calculo-ink); }
+[data-area="algebra"]    { --area-fill: var(--a-algebra-fill);    --area-ink: var(--a-algebra-ink); }
+[data-area="estatistica"]{ --area-fill: var(--a-estatistica-fill);--area-ink: var(--a-estatistica-ink); }
+[data-area="ml"]         { --area-fill: var(--a-ml-fill);         --area-ink: var(--a-ml-ink); }
+[data-area="decisao"]    { --area-fill: var(--a-decisao-fill);    --area-ink: var(--a-decisao-ink); }
