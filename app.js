@@ -975,7 +975,16 @@ print(float(erro))                      # quanto a aproximação erra ali`,
       {t: "Deixe só a tangente (ordem 1) e ache um ponto de teste onde o erro passe de 1.", ok: s => s.n === 1 && s.err > 1, win: () => "Isso mesmo: uma reta só segura a curva por perto."},
       {t: "No sen x, com centro em 0, chegue em x ≈ 3 com erro menor que 0,01. Qual a menor ordem que serve?", ok: s => s.k === 0 && Math.abs(s.a) <= 0.15 && Math.abs(s.x - 3) <= 0.12 && s.err < 0.01, win: s => `Acertou! Precisou de ordem ${s.n}. Dá para tentar com menos?`}
     ];
-    const done = G.map(() => false); let k = 0; const c = canvas(stage, 380);
+    const done = G.map(() => false); let k = 0, first = true, tm = 0, prev = null; const c = canvas(stage, 380);
+    /* o Broto comenta o que mudou, um instante depois de você parar de mexer */
+    function react(s) {
+      const p = prev; prev = s; if (!broto) return;
+      if (p && p.k !== s.k) return broto.say(`Agora é o ${FS[s.k].nome}. Onde você quer o centro?`, "thinking");
+      if (s.lvl === "ok") return broto.say("Colou! Aqui a curva e o polinômio quase não se distinguem.", "happy");
+      if (s.lvl === "bad") return broto.say(s.beyond ? "O ln(1 + x) só vale até 1 + a de distância do centro. Mais termos não ajudam." : s.dist > 1.2 ? "Muito longe do centro, a curva se solta!" : s.n < 12 ? "Poucos termos para essa curvatura. Que tal subir a ordem?" : "Nem com ordem alta. Chega o centro mais perto daqui.", "worried");
+      if (p && p.n !== s.n) return broto.say(s.w > p.w ? "Mais um termo e a faixa verde cresceu." : "A faixa verde mudou de tamanho.", "neutral");
+      broto.say("Quase lá. Dá para usar, mas a diferença já aparece.", "thinking");
+    }
     const cen = a => (a - FS[k].a0) / (FS[k].a1 - FS[k].a0), A = () => FS[k].a0 + as.get() * (FS[k].a1 - FS[k].a0), XT = () => FS[k].x0 + xt.get() * (FS[k].x1 - FS[k].x0);
     const s = sel(panel, "Função", FS.map(f => f.nome), v => { k = v; as.set(cen(0)); xt.set(clamp((1 - FS[k].x0) / (FS[k].x1 - FS[k].x0), 0, 1)); draw(); }); panel.insertBefore(s.parentElement, panel.firstChild);
     const ns = ctl(panel, "Ordem do polinômio", 0, 12, 1, 3, v => v, draw), as = ctl(panel, "Centro a", 0, 1, 0.005, 0.5, v => fmt(FS[k].a0 + v * (FS[k].a1 - FS[k].a0), 2), draw), xt = ctl(panel, "Ponto de teste x", 0, 1, 0.005, 0.8, v => fmt(FS[k].x0 + v * (FS[k].x1 - FS[k].x0), 2), draw);
@@ -1005,13 +1014,16 @@ print(float(erro))                      # quanto a aproximação erra ali`,
         : n < 12 ? "Aqui a aproximação já se perdeu. Tente aumentar a ordem ou chegar mais perto do centro." : "Mesmo com ordem alta, esse ponto está longe demais do centro. Mova o centro para perto dele.";
       tex(fml, taylorTex(F, n, a));
       hint.textContent = `Faixa boa: de x = ${fmt(xl, 2)} até ${fmt(xr, 2)}. Diferença neste ponto: ${fmt(err, 4)}.`;
-      const st = {k, n, a, x, err};
-      G.forEach((gl, i) => { if (!done[i] && gl.ok(st)) {
+      const st = {k, n, a, x, err}; let won = false;
+      G.forEach((gl, i) => { if (!done[i] && gl.ok(st)) { won = true;
         done[i] = true; const li = $(`.goal[data-i="${i}"]`, extra); li.classList.add("done", "just"); $(".goal-msg", extra).textContent = gl.win(st);
         meter.classList.remove("flash"); void meter.offsetWidth; meter.classList.add("flash");
-        window.dispatchEvent(new CustomEvent("mc:goal", {detail: {module: "taylor", index: i}}));
+        if (broto) { clearTimeout(tm); broto.say(gl.win(st), "happy"); }
+        window.dispatchEvent(new CustomEvent("mc:goal", {detail: {module: "taylor", index: i, el: li}}));
       } });
       const next = done.indexOf(false); extra.querySelectorAll(".goal").forEach((li, i) => li.classList.toggle("active", i === next));
+      const now = {lvl, beyond, n, k, dist: Math.abs(x - a), w: xr - xl};
+      if (first) { prev = now; first = false; } else if (!won) { clearTimeout(tm); tm = setTimeout(() => react(now), 450); }
     }
     draw(); return draw;
   }});
@@ -1150,6 +1162,7 @@ const AREA = {"Cálculo": "calculo", "Álgebra linear": "algebra", "Estatística
 let redraw = () => {}, curMod = null;
 function show(id) {
   if (onLeave) { onLeave(); onLeave = null; }
+  if (broto) { broto.dispose(); broto = null; }
   const m = MODS.find(x => x.id === id) || MODS[0]; curMod = m; N = 0;
   try { localStorage.setItem("mc-mod", m.id); } catch (e) {}
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === m.id));
@@ -1180,17 +1193,63 @@ async function copyText(text) {
   const t = document.createElement("textarea"); t.value = text; t.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(t); t.select();
   let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove(); return ok;
 }
+/* ---------- Broto, o guia de campo: plantinha que comenta o que você faz ---------- */
+let broto = null;
+const BROTO_SVG = `<svg class="broto" viewBox="0 0 120 140" role="img" aria-label="Broto, o guia de campo" data-mood="neutral">
+  <ellipse cx="60" cy="128" rx="38" ry="7" fill="var(--paper-2)" stroke="var(--edge)" stroke-width="2"/>
+  <g class="sway">
+    <g class="lf-l"><path d="M60 56C44 54 30 42 26 26C44 26 58 38 60 56Z" fill="var(--area-ink)" stroke="var(--edge)" stroke-width="2.5" stroke-linejoin="round"/><path d="M58 52C50 44 40 36 31 29" fill="none" stroke="var(--edge)" stroke-width="1.5" opacity=".45"/></g>
+    <g class="lf-r"><g transform="translate(120 0) scale(-1 1)"><path d="M60 56C44 54 30 42 26 26C44 26 58 38 60 56Z" fill="var(--area-ink)" stroke="var(--edge)" stroke-width="2.5" stroke-linejoin="round"/><path d="M58 52C50 44 40 36 31 29" fill="none" stroke="var(--edge)" stroke-width="1.5" opacity=".45"/></g></g>
+    <ellipse cx="60" cy="90" rx="33" ry="35" fill="var(--area-fill)" stroke="var(--edge)" stroke-width="3"/>
+    <ellipse cx="48" cy="72" rx="8" ry="4.5" fill="#fff" opacity=".3" transform="rotate(-25 48 72)"/>
+    <g class="f f-neutral"><g class="eyes"><ellipse cx="49" cy="86" rx="3.5" ry="4.8" fill="var(--edge)"/><ellipse cx="71" cy="86" rx="3.5" ry="4.8" fill="var(--edge)"/></g>
+      <path d="M53 100Q60 105 67 100" fill="none" stroke="var(--edge)" stroke-width="2.8" stroke-linecap="round"/><ellipse cx="41" cy="96" rx="5.5" ry="3.2" fill="var(--terra)" opacity=".35"/><ellipse cx="79" cy="96" rx="5.5" ry="3.2" fill="var(--terra)" opacity=".35"/></g>
+    <g class="f f-happy"><path d="M43 87Q49 78 55 87M65 87Q71 78 77 87" fill="none" stroke="var(--edge)" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M50 96Q60 112 70 96Z" fill="var(--edge)" stroke="var(--edge)" stroke-width="2" stroke-linejoin="round"/><ellipse cx="60" cy="104" rx="5" ry="3" fill="var(--terra)"/><ellipse cx="40" cy="96" rx="6" ry="3.6" fill="var(--terra)" opacity=".5"/><ellipse cx="80" cy="96" rx="6" ry="3.6" fill="var(--terra)" opacity=".5"/></g>
+    <g class="f f-worried"><ellipse cx="49" cy="87" rx="3.8" ry="5.2" fill="var(--edge)"/><ellipse cx="71" cy="87" rx="3.8" ry="5.2" fill="var(--edge)"/>
+      <path d="M42 76L55 80M78 76L65 80" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round"/><path d="M51 104Q55.500 98 60 102T69 100" fill="none" stroke="var(--edge)" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M90 70C86 76 85 80 90 82C95 80 94 76 90 70Z" fill="var(--water)" stroke="var(--edge)" stroke-width="1.8"/></g>
+    <g class="f f-thinking"><circle cx="49" cy="86" r="5.3" fill="#fff" stroke="var(--edge)" stroke-width="2"/><circle cx="71" cy="86" r="5.3" fill="#fff" stroke="var(--edge)" stroke-width="2"/>
+      <circle cx="51" cy="84" r="2.5" fill="var(--edge)"/><circle cx="73" cy="84" r="2.5" fill="var(--edge)"/><path d="M62 74Q69 69 77 74" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M55 101H66" fill="none" stroke="var(--edge)" stroke-width="2.8" stroke-linecap="round"/>
+      <circle cx="92" cy="62" r="3" fill="var(--ink-soft)"/><circle cx="100" cy="50" r="4.2" fill="var(--ink-soft)"/><circle cx="110" cy="34" r="6" fill="var(--ink-soft)"/></g>
+  </g></svg>`;
+function createBroto(host) {
+  host.innerHTML = `${BROTO_SVG}<div class="bubble"><p role="status" aria-live="polite"></p></div>`;
+  const svg = $(".broto", host), bubble = $(".bubble", host), p = $("p", bubble); let idle = 0, back = 0;
+  const arm = () => { clearTimeout(idle); idle = setTimeout(() => say("Hmm… parou? Mexe num controle e eu comento.", "thinking", true), 16000); };
+  function say(text, mood = "neutral", keepIdle) {
+    p.textContent = text; svg.dataset.mood = mood; bubble.classList.remove("pop"); void bubble.offsetWidth; bubble.classList.add("pop");
+    clearTimeout(back); if (mood === "happy") back = setTimeout(() => { svg.dataset.mood = "neutral"; }, 4500);
+    if (!keepIdle) arm();
+  }
+  arm(); return {say, dispose() { clearTimeout(idle); clearTimeout(back); }};
+}
+
+/* confete discreto: folhinhas e grãos que caem do ponto do acerto */
+function confetti(x, y) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cols = ["--leaf", "--wheat", "--terra", "--water"].map(css);
+  for (let i = 0; i < 26; i++) {
+    const el = document.createElement("i"); el.className = "cf " + (i % 3 ? "leaf" : "grain"); el.style.background = cols[i % cols.length]; el.style.left = x + "px"; el.style.top = y + "px"; document.body.appendChild(el);
+    const dx = (Math.random() - 0.5) * 260, dy = -40 - Math.random() * 120, r = (Math.random() - 0.5) * 720;
+    el.animate([{transform: "translate(0,0) rotate(0)", opacity: 1}, {transform: `translate(${dx * 0.7}px,${dy}px) rotate(${r / 2}deg)`, opacity: 1, offset: .35}, {transform: `translate(${dx}px,${dy + 220}px) rotate(${r}deg)`, opacity: 0}], {duration: 1100 + Math.random() * 500, easing: "cubic-bezier(.2,.7,.4,1)"}).onfinish = () => el.remove();
+  }
+}
+window.addEventListener("mc:goal", e => { const r = e.detail && e.detail.el && e.detail.el.getBoundingClientRect(); if (r) confetti(r.left + 20, r.top + 18); });
+
 function layoutDidatico(m, main) {
   const ctx = [["campo", "No campo", m.campo], ["dia", "No dia a dia", m.dia], ["trabalho", "No seu trabalho", IA[m.id]]];
   main.innerHTML = `<div class="head"><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="gancho">${m.gancho}</p>
       <p class="lead">${m.resumo}</p>
       <button class="more" type="button" aria-expanded="false" aria-controls="detalhes">Quero mais detalhes</button><div class="detalhes" id="detalhes" hidden><p>${m.detalhes}</p></div></div>
-    <div class="lab"><div class="stage"></div><div class="panel"></div></div>
+    <div class="lab"><div class="stage"></div><div class="side"><div class="guide"></div><div class="panel"></div></div></div>
     <div class="extra"></div>
     <section class="ctx" aria-label="Onde isso aparece"><div class="tabs" role="tablist">${ctx.map(([id, nome], i) => `<button class="tab" role="tab" type="button" id="tab-${id}" aria-selected="${i === 0}" aria-controls="pn-${id}" tabindex="${i === 0 ? 0 : -1}">${ICONS[id]}<span>${nome}</span></button>`).join("")}</div>
       ${ctx.map(([id, , txt], i) => `<div class="tabpanel" role="tabpanel" id="pn-${id}" aria-labelledby="tab-${id}" ${i ? "hidden" : ""}><p>${txt}</p></div>`).join("")}</section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
   $("pre code", main).textContent = m.python;
+  broto = createBroto($(".guide", main)); broto.say(m.saudacao || "Oi! Eu sou o Broto. Mexe nos controles e eu te conto o que acontece.", "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };
   const tabs = [...main.querySelectorAll(".tab")];

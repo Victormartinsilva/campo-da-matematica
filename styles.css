@@ -7,6 +7,7 @@ body {
   background-color: var(--paper);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .27 0 0 0 0 .18 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
   color: var(--ink);
+  overflow-x: clip;   /* as animações de entrada passam um pouco da borda e não podem criar rolagem lateral */
   font: 17px/1.6 var(--f-body);
   padding-block: var(--s-5) 56px;
   padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
@@ -121,6 +122,49 @@ table.mx input { width: 76px; padding: 5px 6px; text-align: right; font: 400 14p
 .game .br { color: var(--leaf); font-weight: 700; }
 .bar { height: 11px; border-radius: 6px; background: var(--rule-soft); border: 1.5px solid var(--rule-strong); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--water); }
+
+/* ---------- Broto, o guia de campo ---------- */
+.side { display: grid; gap: var(--s-3); min-width: 0; }
+.guide { display: flex; align-items: flex-end; gap: var(--s-2); }
+.broto { flex: none; width: 96px; height: auto; overflow: visible; }
+.broto .f { display: none; }
+.broto[data-mood="neutral"] .f-neutral, .broto[data-mood="happy"] .f-happy, .broto[data-mood="worried"] .f-worried, .broto[data-mood="thinking"] .f-thinking { display: block; }
+.broto .sway { transform-box: view-box; transform-origin: 60px 126px; animation: sway 4.5s ease-in-out infinite; }
+.broto .lf-l, .broto .lf-r { transform-box: view-box; transform-origin: 60px 56px; transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+.broto[data-mood="happy"] .lf-l { transform: rotate(24deg); } .broto[data-mood="happy"] .lf-r { transform: rotate(-24deg); }
+.broto[data-mood="worried"] .lf-l { transform: rotate(-30deg); } .broto[data-mood="worried"] .lf-r { transform: rotate(30deg); }
+.broto[data-mood="thinking"] .lf-r { transform: rotate(-38deg); }
+.broto[data-mood="happy"] .sway { animation: hop .55s ease 3; }
+.broto[data-mood="worried"] .sway { animation: shiver .18s linear 5; }
+.broto[data-mood="thinking"] .sway { animation: tilt .4s ease forwards; }
+.broto .eyes { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+@keyframes sway { 0%, 100% { rotate: -2.5deg; } 50% { rotate: 2.5deg; } }
+@keyframes hop { 0%, 100% { translate: 0 0; } 40% { translate: 0 -12px; } }
+@keyframes shiver { 0%, 100% { translate: 0 0; } 25% { translate: -2px 0; } 75% { translate: 2px 0; } }
+@keyframes tilt { to { rotate: 6deg; } }
+@keyframes blink { 0%, 94%, 100% { scale: 1 1; } 97% { scale: 1 .1; } }
+.bubble { position: relative; flex: 1; min-width: 0; margin-bottom: 18px; padding: 9px 13px; background: var(--card); border: 2px solid var(--edge); border-radius: 14px 14px 14px 4px; box-shadow: var(--hard-sm); }
+.bubble::before { content: ""; position: absolute; left: -9px; bottom: 10px; width: 14px; height: 14px; background: var(--card); border-left: 2px solid var(--edge); border-bottom: 2px solid var(--edge); transform: rotate(45deg); }
+.bubble p { margin: 0; font: 700 21px/1.12 var(--f-hand); color: var(--ink); }
+.bubble.pop { animation: pop .32s cubic-bezier(.3, 1.6, .5, 1); }
+.cf { position: fixed; z-index: 50; pointer-events: none; width: 7px; height: 11px; border: 1.5px solid var(--edge); }
+.cf.leaf { border-radius: 0 100% 0 100%; width: 11px; height: 14px; }
+.cf.grain { border-radius: 50%; }
+
+/* ---------- entradas: cada tipo de bloco chega do seu jeito ---------- */
+@keyframes enterUp { from { opacity: 0; translate: 0 16px; } to { opacity: 1; translate: 0 0; } }
+@keyframes enterPop { from { opacity: 0; scale: .96; } to { opacity: 1; scale: 1; } }
+@keyframes enterRight { from { opacity: 0; translate: 22px 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes enterDrop { from { opacity: 0; translate: 0 -18px; rotate: -1.6deg; } to { opacity: 1; translate: 0 0; rotate: 0deg; } }
+@keyframes enterWipe { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+main > .head, main > div:first-child { animation: enterUp .45s ease both; }
+.lab > .stage { animation: enterPop .5s .08s cubic-bezier(.3, 1.3, .5, 1) both; }
+.lab > .side, .lab > .panel { animation: enterRight .5s .16s ease both; }
+.extra { animation: enterDrop .55s .26s cubic-bezier(.3, 1.4, .5, 1) both; }
+.ctx { animation: enterUp .5s .3s ease both; }
+.pywrap, main > div:last-child:not(.extra):not(.head) { animation: enterWipe .6s .38s ease both; }
+.uses section { animation: enterUp .5s ease both; }
+.uses section:nth-child(2) { animation-delay: .08s; } .uses section:nth-child(3) { animation-delay: .16s; }
 
 /* ---------- layout didático ---------- */
 .gancho { margin: var(--s-3) 0 0; max-width: 24ch; font: 800 clamp(24px, 3.6vw, 34px)/1.15 var(--f-display); font-style: italic; color: var(--terra); font-variation-settings: "SOFT" 100, "WONK" 1; }
