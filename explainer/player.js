@@ -50,7 +50,7 @@
 
   class ExplainerPlayer {
     constructor(host, script, opts = {}) {
-      this.host = host; this.script = script; this.opts = {legendas: true, autoplayNaTela: false, ...opts}; this.i = 0; this.legendas = this.opts.legendas;
+      this.host = host; this.script = script; this.opts = {legendas: true, autoplayNaTela: false, ...opts}; this.i = 0; this.legendas = this.opts.legendas; this.voz = "speechSynthesis" in window; this.som = this.voz && this.opts.som !== false; this.vozK = null;
       if (!window.gsap) { host.innerHTML = `<p class="expl-aviso">Não consegui carregar o motor de animação. A transcrição está abaixo.</p>` + this.transcricaoHTML(this.compilar()); return; }
       this.pecas = this.compilar(); this.estatico = reduzido();
       this.montar(); this.hud = new Explainer.Hud(this); this.construirTimeline(); this.ligar(); this.sync();
@@ -85,6 +85,7 @@
           <button type="button" class="eb eb-restart" aria-label="Reiniciar do começo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></svg></button>
           <span class="expl-pos" aria-live="polite"></span>
           <span class="expl-sp" role="group" aria-label="Velocidade">${[0.75, 1, 1.25].map(v => `<button type="button" class="es" data-v="${v}" aria-pressed="${v === 1}">${String(v).replace(".", ",")}x</button>`).join("")}</span>
+          ${this.voz ? `<button type="button" class="eb eb-som" aria-pressed="${this.som}" aria-label="Narração em voz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="ic-onda" d="M16 9a4 4 0 0 1 0 6M18.500 6.500a8 8 0 0 1 0 11"/></svg></button>` : ""}
           <button type="button" class="eb eb-cc" aria-pressed="${this.legendas}" aria-label="Legendas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M9.500 10.500a2 2 0 1 0 0 3M16 10.500a2 2 0 1 0 0 3"/></svg></button>
           <span class="expl-tempo"></span></div>
         <div class="expl-bar" role="group" aria-label="Peças do vídeo">${this.pecas.map(p => `<button type="button" class="seg" data-k="${p.k}" style="flex:${p.dur}" aria-label="${p.final ? "Final" : "Peça " + p.ordem}"><i></i></button>`).join("")}</div>
@@ -126,6 +127,7 @@
     ligar() {
       const q = s => this.host.querySelector(s);
       q(".eb-play").onclick = () => this.alternar(); q(".eb-prev").onclick = () => this.anterior(); q(".eb-next").onclick = () => this.proxima(); q(".eb-restart").onclick = () => this.reiniciar();
+      if (this.voz) q(".eb-som").onclick = e => { this.som = !this.som; e.currentTarget.setAttribute("aria-pressed", this.som); if (!this.som) this.pararVoz(); };
       q(".eb-cc").onclick = e => { this.legendas = !this.legendas; e.currentTarget.setAttribute("aria-pressed", this.legendas); this.cap.hidden = !this.legendas; };
       this.host.querySelectorAll(".es").forEach(b => b.onclick = () => { this.tl.timeScale(+b.dataset.v); this.host.querySelectorAll(".es").forEach(o => o.setAttribute("aria-pressed", o === b)); });
       this.host.querySelectorAll(".seg").forEach(b => b.onclick = e => { const p = this.pecas[+b.dataset.k], r = b.getBoundingClientRect(), f = e.detail === 0 ? 0 : Math.min(0.999, Math.max(0, (e.clientX - r.left) / r.width)); this.ir(p.start + f * p.dur); });
@@ -139,14 +141,24 @@
     pause() { this.tl.pause(); this.atualizarPlay(); }
     alternar() { this.tl.paused() || this.tl.progress() >= 1 ? this.play() : this.pause(); }
     reiniciar() { if (this.estatico) return this.ir(this.fimDe(this.pecas[0])); this.tl.restart(); this.atualizarPlay(); }
-    ir(t) { const tocando = !this.tl.paused(); this.tl.time(Math.min(t, this.total)); if (!tocando) this.tl.pause(); this.sync(); this.atualizarPlay(); }
+    ir(t) { if (this.voz) this.pararVoz(); const tocando = !this.tl.paused(); this.tl.time(Math.min(t, this.total)); if (!tocando) this.tl.pause(); this.sync(); this.atualizarPlay(); }
     atual() { const t = this.tl.time(); let k = 0; this.pecas.forEach(p => { if (t >= p.start - 1e-6) k = p.k; }); return k; }
     anterior() { const p = this.pecas[this.atual()], t = this.tl.time(); this.irPeca(this.estatico || t - p.start < 1.5 ? Math.max(0, p.k - 1) : p.k); }
     proxima() { const k = this.atual(); if (k >= this.pecas.length - 1) return this.estatico ? null : this.ir(this.total); this.irPeca(k + 1); }
     irPeca(k) { const p = this.pecas[k]; this.ir(this.estatico ? this.fimDe(p) : p.start); }
     fimDe(p) { return p.start + p.dur - 0.01; }
-    aoFim() { this.atualizarPlay(); this.host.dispatchEvent(new CustomEvent("expl:fim", {bubbles: true, detail: {id: this.script.meta.id}})); }
+    aoFim() { this.pararVoz(); this.atualizarPlay(); this.host.dispatchEvent(new CustomEvent("expl:fim", {bubbles: true, detail: {id: this.script.meta.id}})); }
     atualizarPlay() { const tocando = !this.tl.paused() && this.tl.progress() < 1, b = this.host.querySelector(".eb-play"); this.host.classList.toggle("expl-tocando", tocando); b.setAttribute("aria-label", tocando ? "Pausar" : "Tocar"); }
+
+    /* ---------- narração em voz (voz do navegador; áudio gravado entra depois) ---------- */
+    pararVoz() { if (this.voz) speechSynthesis.cancel(); this.vozK = null; }
+    falar(p, t) {
+      const rel = t - p.start, resto = p.words.filter(w => w.e > rel + 0.05); this.vozK = p.k; if (!resto.length) return;
+      const u = new SpeechSynthesisUtterance(resto.map(w => w.t).join(" ")), vozes = speechSynthesis.getVoices();
+      u.lang = "pt-BR"; u.voice = vozes.find(v => /pt-BR/i.test(v.lang)) || vozes.find(v => /^pt/i.test(v.lang)) || null; u.rate = Math.min(1.5, Math.max(0.7, 0.92 * this.tl.timeScale()));
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }
+    destruir() { this.pararVoz(); if (this.io) this.io.disconnect(); if (this.tl) this.tl.kill(); }
 
     /* ---------- legenda palavra por palavra e estado ---------- */
     sync() {
@@ -156,6 +168,7 @@
       this.host.querySelector(".expl-tempo").textContent = `${fmtT(t)} / ${fmtT(this.total)}`;
       this.host.querySelectorAll(".seg").forEach(b => { const q = this.pecas[+b.dataset.k], f = Math.min(1, Math.max(0, (t - q.start) / q.dur)); b.style.setProperty("--f", f); b.classList.toggle("atual", q.k === k); });
       this.hud.atualizar(t, p, this.estatico);
+      if (this.voz) { const tocando = !this.tl.paused() && this.tl.progress() < 1 && !this.estatico; if (tocando && this.som) { if (this.vozK !== p.k) this.falar(p, t); } else if (this.vozK !== null) this.pararVoz(); }
       if (!this.legendas) return;
       if (this.estatico) { if (this.fraseKey !== "e" + k) { this.fraseKey = "e" + k; this.cap.innerHTML = `<span class="frase">${p.words.map(w => `<span class="w on${w.hl ? " hl" : ""}">${esc(w.t)}</span>`).join(" ")}</span>`; } return; }
       const fr = p.frases.find(f => t >= f.s && t < f.e), chave = fr ? k + ":" + fr.s : "";

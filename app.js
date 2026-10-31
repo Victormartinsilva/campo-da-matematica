@@ -79,6 +79,16 @@ function plane(c, x0, x1, y0, y1, xl, yl) {
 }
 const range = (f, a, b) => { let lo = Infinity, hi = -Infinity; for (let i = 0; i <= 200; i++) { const y = f(a + (b - a) * i / 200); if (Number.isFinite(y)) { lo = Math.min(lo, y); hi = Math.max(hi, y); } } return [lo, hi]; };
 
+/* arrastar direto no gráfico: fn(x, y, evento) recebe a posição em unidades do gráfico; devolve um registrador do plano atual */
+function arrastavel(c, fn) {
+  let on = false, p = null; c.style.touchAction = "none"; c.style.cursor = "grab";
+  const mv = e => { if (!p) return; const b = c.getBoundingClientRect(); fn(p.x0 + (e.clientX - b.left - p.m.l) / (p.w - p.m.l - p.m.r) * (p.x1 - p.x0), p.y1 - (e.clientY - b.top - p.m.t) / (p.h - p.m.t - p.m.b) * (p.y1 - p.y0), e); };
+  c.addEventListener("pointerdown", e => { on = true; c.setPointerCapture(e.pointerId); c.style.cursor = "grabbing"; mv(e); });
+  c.addEventListener("pointermove", e => { if (on) mv(e); });
+  c.addEventListener("pointerup", () => { on = false; c.style.cursor = "grab"; });
+  return q => { p = q; };
+}
+
 /* ---------- estatística: p-valor do teste t ---------- */
 function lgamma(z) { const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5]; let y = z, t = z + 5.5; t -= (z + .5) * Math.log(t); let s = 1.000000000190015; for (const ci of c) { y += 1; s += ci / y; } return -t + Math.log(2.5066282746310005 * s / z); }
 function betacf(a, b, x) {
@@ -152,36 +162,49 @@ MODS.push({id: "funcao", grupo: "Cálculo", nome: "Funções",
 MODS.push({id: "limite", grupo: "Cálculo", nome: "Limites",
   build(stage, panel, extra) {
     const CS = [
-      {nome: "(x² − 1)/(x − 1) perto de x = 1", f: x => (x * x - 1) / (x - 1), a: 1, y0: 0, y1: 4, hole: 2},
-      {nome: "sen(x)/x perto de x = 0", f: x => Math.sin(x) / x, a: 0, y0: -0.4, y1: 1.3, hole: 1},
-      {nome: "1/x perto de x = 0", f: x => 1 / x, a: 0, y0: -10, y1: 10},
-      {nome: "Tarifa em degrau perto de x = 2", f: x => x < 2 ? 1 : 3, a: 2, y0: 0, y1: 4}
+      {nome: "(x² − 1)/(x − 1) perto de x = 1", f: x => (x * x - 1) / (x - 1), a: 1, y0: 0, y1: 4, hole: 2, lim: 2},
+      {nome: "sen(x)/x perto de x = 0", f: x => Math.sin(x) / x, a: 0, y0: -0.4, y1: 1.3, hole: 1, lim: 1},
+      {nome: "1/x perto de x = 0", f: x => 1 / x, a: 0, y0: -10, y1: 10, lim: null},
+      {nome: "Tarifa em degrau perto de x = 2", f: x => x < 2 ? 1 : 3, a: 2, y0: 0, y1: 4, lim: null}
     ];
-    let k = 0; const c = canvas(stage); const R = readout(panel);
+    let k = 0; const c = canvas(stage, 380); const R = readout(panel);
     const hs = ctl(panel, "Distância h até o ponto", 0, 4, 0.05, 0.5, v => "h = " + fmt(Math.pow(10, -v), 4), draw);
+    const es = ctl(panel, "Tolerância ε na saída", 0, 2.5, 0.05, 0.7, v => "ε = " + fmt(Math.pow(10, -v), 3), draw);
     const s = sel(panel, "Função", CS.map(f => f.nome), v => { k = v; draw(); }); panel.insertBefore(s.parentElement, panel.firstChild);
+    const drag = arrastavel(c, x => { hs.set(clamp(-Math.log10(clamp(Math.abs(x - CS[k].a), 1e-4, 1)), 0, 4)); draw(); });
+    /* δ: a maior distância ao ponto que mantém a saída a menos de ε do limite, dos dois lados */
+    const delta = (C, eps) => { for (let t = 0.001; t <= 2; t += 0.001) if (Math.abs(C.f(C.a - t) - C.lim) >= eps || Math.abs(C.f(C.a + t) - C.lim) >= eps) return t; return 2; };
     function draw() {
-      const C = CS[k], h = Math.pow(10, -hs.get()), a = C.a, L = C.f(a - h), Rr = C.f(a + h);
-      const p = plane(c, a - 2, a + 2, C.y0, C.y1, "x", "f(x)");
+      const C = CS[k], h = Math.pow(10, -hs.get()), eps = Math.pow(10, -es.get()), a = C.a, L = C.f(a - h), Rr = C.f(a + h), tem = C.lim !== null, d = tem ? delta(C, eps) : 0;
+      const p = plane(c, a - 2, a + 2, C.y0, C.y1, "x", "f(x)"), g = p.g; drag(p);
+      if (tem) {
+        p.clip(); g.globalAlpha = 0.16; g.fillStyle = css("--leaf"); g.fillRect(p.m.l, p.Y(C.lim + eps), p.w - p.m.l - p.m.r, p.Y(C.lim - eps) - p.Y(C.lim + eps));
+        g.fillStyle = css("--water"); g.globalAlpha = 0.14; g.fillRect(p.X(a - d), p.m.t, p.X(a + d) - p.X(a - d), p.h - p.m.t - p.m.b); g.globalAlpha = 1; g.restore();
+        p.line(a - 2, C.lim + eps, a + 2, C.lim + eps, css("--leaf"), 1.5, [5, 4]); p.line(a - 2, C.lim - eps, a + 2, C.lim - eps, css("--leaf"), 1.5, [5, 4]);
+        p.line(a - d, C.y0, a - d, C.y1, css("--water"), 1.5, [5, 4]); p.line(a + d, C.y0, a + d, C.y1, css("--water"), 1.5, [5, 4]);
+        g.font = `700 20px ${css("--f-hand")}`; g.textAlign = "left"; g.textBaseline = "bottom"; g.fillStyle = css("--leaf"); g.fillText("ε", p.m.l + 6, p.Y(C.lim + eps) - 2); g.fillStyle = css("--water"); g.fillText("δ", p.X(a + d) + 4, p.m.t + 22);
+      }
       p.curve(C.f, css("--curve"));
       p.line(a - h, 0, a - h, L, css("--amber"), 1, [4, 4]); p.line(a + h, 0, a + h, Rr, css("--good"), 1, [4, 4]);
-      p.dot(a - h, L, css("--amber")); p.dot(a + h, Rr, css("--good"));
+      p.dot(a - h, L, css("--amber"), 7); p.dot(a + h, Rr, css("--good"), 7);
       if (C.hole) p.dot(a, C.hole, css("--curve"), 5, true);
-      const fa = C.f(a), fin = Number.isFinite(fa);
-      const agree = h <= 0.01 && Math.abs(L - Rr) < 0.01 * Math.max(1, Math.abs(L));
+      const fa = C.f(a), fin = Number.isFinite(fa), agree = h <= 0.01 && Math.abs(L - Rr) < 0.01 * Math.max(1, Math.abs(L));
       const verdict = agree ? `<span class="ok">Os dois lados chegam em ≈ ${fmt(L, 3)}. O limite existe.</span>`
         : h <= 0.01 ? `<span class="no">Os lados vão para lugares diferentes. O limite não existe.</span>` : `<span class="am">Reduza h para ver para onde cada lado vai.</span>`;
       R.innerHTML = `<div>pela esquerda: f(${fmt(a - h, 4)}) = <b>${fmt(L, 4)}</b></div><div>pela direita: f(${fmt(a + h, 4)}) = <b>${fmt(Rr, 4)}</b></div>
-        <div>no ponto: f(${a}) ${fin ? "= <b>" + fmt(fa, 3) + "</b>" : "é <b>indefinida</b>"}</div><div>${verdict}</div>`;
+        <div>no ponto: f(${a}) ${fin ? "= <b>" + fmt(fa, 3) + "</b>" : "é <b>indefinida</b>"}</div><div>${verdict}</div>
+        ${tem ? `<div class="ok">Para a saída ficar a menos de ε = <b>${fmt(eps, 3)}</b> de ${C.lim}, basta a entrada ficar a menos de δ = <b>${fmt(d, 3)}</b> de ${a}. Aperte o ε e veja o δ encolher.</div>` : `<div class="no">Sem limite: não existe um valor de saída para o qual algum δ funcione com ε pequeno.</div>`}
+        <div>Arraste no gráfico para aproximar os dois pontos de x = ${a}.</div>`;
     }
     draw();
     kit("limite", extra, {
-      state: () => ({k, h: Math.pow(10, -hs.get())}),
+      state: () => ({k, h: Math.pow(10, -hs.get()), eps: Math.pow(10, -es.get())}),
       goals: [
         {t: "Em (x² − 1)/(x − 1), leve h abaixo de 0,001: os dois lados chegam em 2.", ok: s => s.k === 0 && s.h < 0.001, win: () => "Os dois lados chegam em 2. O buraco não atrapalha o limite."},
+        {t: "No sen(x)/x, aperte o ε abaixo de 0,02 e veja a faixa do δ ficar estreita.", ok: s => s.k === 1 && s.eps < 0.02, win: () => "Quanto menor a tolerância na saída, menor a distância permitida na entrada."},
         {t: "No 1/x, leve h abaixo de 0,01 e veja os lados irem para lugares diferentes.", ok: s => s.k === 2 && s.h < 0.01, win: () => "Um lado vai para menos infinito e o outro para mais infinito. Sem limite."}
       ],
-      react: s => s.h < 0.01 ? (s.k >= 2 ? ["Os lados discordam: aqui o limite não existe.", "worried"] : ["Os dois lados se encontram: o limite existe.", "happy"]) : ["Diminua h para chegar mais perto do ponto.", "thinking"]
+      react: s => s.h < 0.01 ? (s.k >= 2 ? ["Os lados discordam: aqui o limite não existe.", "worried"] : ["Os dois lados se encontram: o limite existe.", "happy"]) : ["Arraste os pontos para perto de x ou diminua h.", "thinking"]
     });
     return draw;
   }});
@@ -191,13 +214,14 @@ MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
     const DF = cenarios("derivada", ctxAtual).map(e => { const C = CURVA(e.curva); return {...e, f: C.f, df: C.df}; });
     let k = 0; const c = canvas(stage); const R = readout(panel);
     const c2 = canvas(stage, 170);
+    const drag = arrastavel(c, x => { const F = DF[k]; xs.set(clamp((x - F.a) / (F.b - F.a), 0, 1)); draw(); });
     const xs = ctl(panel, "Ponto x₀", 0, 1, 0.0025, 0.33, v => fmt(DF[k].a + v * (DF[k].b - DF[k].a), 2), draw);
     const hs = ctl(panel, "Distância h da secante", 0, 4, 0.05, 0.7, v => "h = " + fmt((DF[k].b - DF[k].a) * Math.pow(10, -v), 4), draw);
     const s = sel(panel, "Situação", DF.map(f => f.nome), v => { k = v; xs.set((DF[k].x0 - DF[k].a) / (DF[k].b - DF[k].a)); draw(); }); panel.insertBefore(s.parentElement, panel.firstChild);
     function draw() {
       const F = DF[k], w = F.b - F.a, x0 = F.a + xs.get() * w, h = w * Math.pow(10, -hs.get());
       const y0 = F.f(x0), y1 = F.f(x0 + h), ms = (y1 - y0) / h, mt = F.df(x0), [lo, hi] = range(F.f, F.a, F.b), pad = (hi - lo) * 0.1;
-      const p = plane(c, F.a, F.b, lo - pad, hi + pad, F.xu || "x", F.yu || "f(x)");
+      const p = plane(c, F.a, F.b, lo - pad, hi + pad, F.xu || "x", F.yu || "f(x)"); drag(p);
       p.curve(F.f, css("--curve"));
       p.line(F.a, y0 + ms * (F.a - x0), F.b, y0 + ms * (F.b - x0), css("--amber"), 1.5, [6, 4]);
       p.line(F.a, y0 + mt * (F.a - x0), F.b, y0 + mt * (F.b - x0), css("--good"), 2);
@@ -205,7 +229,7 @@ MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
       const un = F.yu ? ` ${F.yu} por ${F.xu}` : "";
       const meaning = F.yu ? `<div>Leitura: em x₀ = ${fmt(x0, 1)} ${F.xu}, mais 1 ${F.xu} muda a saída em ≈ <b>${fmt(mt, 3)} ${F.yu}</b>${mt < 0 ? " (para menos)" : ""}.</div>` : "";
       R.innerHTML = `<div class="am">secante (tracejada): <b>${fmt(ms, 4)}</b>${un}</div><div class="ok">tangente (sólida): <b>${fmt(mt, 4)}</b>${un}</div>
-        <div>diferença: <b>${fmt(Math.abs(ms - mt), 5)}</b>. Diminua h e a secante gira até virar a tangente.</div>${meaning}<div>Gráfico de baixo: a função derivada f′. O ponto verde é a inclinação da tangente de cima.</div>`;
+        <div>diferença: <b>${fmt(Math.abs(ms - mt), 5)}</b>. Diminua h e a secante gira até virar a tangente.</div>${meaning}<div>Arraste o ponto no gráfico de cima. Embaixo: a função derivada f′, e o ponto verde é a inclinação da tangente.</div>`;
       const [dl, dh] = range(F.df, F.a, F.b), dp = (dh - dl) * 0.15 || 1, q = plane(c2, F.a, F.b, dl - dp, dh + dp, F.xu || "x", "f′(x): taxa de variação");
       q.curve(F.df, css("--amber")); q.line(F.a, 0, F.b, 0, css("--axis"), 1, [4, 4]); q.line(x0, 0, x0, mt, css("--good"), 1.5, [4, 4]); q.dot(x0, mt, css("--good"));
     }
@@ -261,34 +285,43 @@ MODS.push({id: "maxmin", grupo: "Cálculo", nome: "Máximos e mínimos",
 MODS.push({id: "integral", grupo: "Cálculo", nome: "Integrais",
   build(stage, panel, extra) {
     const PR = cenarios("integral", ctxAtual).map(e => { const C = CURVA(e.curva); return {...e, f: C.f, F: C.F}; });
-    let k = 0, mt = 0; const c = canvas(stage); const R = readout(panel);
-    const s = sel(panel, "Situação", PR.map(f => f.nome), v => { k = v; draw(); }); panel.insertBefore(s.parentElement, panel.firstChild);
+    let k = 0, mt = 0, lo = PR[0].a, hi = PR[0].b, pega = null; const c = canvas(stage, 300), c2 = canvas(stage, 170); const R = readout(panel);
+    const s = sel(panel, "Situação", PR.map(f => f.nome), v => { k = v; lo = PR[k].a; hi = PR[k].b; draw(); }); panel.insertBefore(s.parentElement, panel.firstChild);
     const ns = ctl(panel, "Número de retângulos", 1, 80, 1, 6, v => v, draw);
     const ms = sel(panel, "Altura de cada retângulo", ["Esquerda", "Ponto médio", "Direita", "Trapézios"], v => { mt = v; draw(); });
+    const drag = arrastavel(c, (x, y, e) => {
+      const P = PR[k], gap = 0.03 * (P.b - P.a); if (e.type === "pointerdown") pega = Math.abs(x - lo) <= Math.abs(x - hi) ? "lo" : "hi";
+      if (pega === "lo") lo = clamp(x, P.a, hi - gap); else hi = clamp(x, lo + gap, P.b); draw();
+    });
+    btn(row(panel), "Voltar aos limites do período", () => { lo = PR[k].a; hi = PR[k].b; draw(); }, true);
     function draw() {
-      const P = PR[k], n = ns.get(), dx = (P.b - P.a) / n, [, hi] = range(P.f, P.a, P.b);
-      const p = plane(c, P.a, P.b, 0, hi * 1.15, P.xl, P.yl), g = p.g; let S = 0;
+      const P = PR[k], n = ns.get(), dx = (hi - lo) / n, [, top] = range(P.f, P.a, P.b);
+      const p = plane(c, P.a, P.b, 0, top * 1.15, P.xl, P.yl), g = p.g; drag(p); let S = 0;
       g.globalAlpha = 0.28; g.fillStyle = css("--curve"); g.strokeStyle = css("--curve"); g.lineWidth = 1;
       for (let i = 0; i < n; i++) {
-        const xa = P.a + i * dx, xb = xa + dx; let area;
+        const xa = lo + i * dx, xb = xa + dx; let area;
         g.beginPath();
         if (mt === 3) { area = (P.f(xa) + P.f(xb)) / 2 * dx; g.moveTo(p.X(xa), p.Y(0)); g.lineTo(p.X(xa), p.Y(P.f(xa))); g.lineTo(p.X(xb), p.Y(P.f(xb))); g.lineTo(p.X(xb), p.Y(0)); }
         else { const hh = P.f(mt === 0 ? xa : mt === 1 ? (xa + xb) / 2 : xb); area = hh * dx; g.rect(p.X(xa), p.Y(hh), p.X(xb) - p.X(xa), p.Y(0) - p.Y(hh)); }
         g.closePath(); g.fill(); g.globalAlpha = 0.6; g.stroke(); g.globalAlpha = 0.28; S += area;
       }
       g.globalAlpha = 1; p.curve(P.f, css("--curve"));
-      const E = P.F(P.b) - P.F(P.a);
-      R.innerHTML = `<div>soma dos ${n} retângulos: <b>${fmt(S, 3)} ${P.u}</b></div><div class="ok">integral exata: <b>${fmt(E, 3)} ${P.u}</b></div>
-        <div>erro: <b>${fmt(Math.abs(S - E) / E * 100, 3)}%</b>. Mais retângulos, menos erro; o limite dessa soma é a integral.</div>`;
+      [["a", lo], ["b", hi]].forEach(([nm, X]) => { p.line(X, 0, X, P.f(X), css("--ink"), 2.5); p.dot(X, P.f(X), css("--wheat"), 8); g.font = `700 20px ${css("--f-hand")}`; g.fillStyle = css("--ink"); g.textAlign = "center"; g.textBaseline = "top"; g.fillText(nm, p.X(X), p.Y(0) + 4); });
+      const E = P.F(hi) - P.F(lo), acum = x => P.F(x) - P.F(lo), q = plane(c2, P.a, P.b, 0, Math.max(E, acum(P.b)) * 1.12 || 1, P.xl, "área acumulada desde a (" + P.u + ")");
+      q.curve(acum, css("--good"), 3, lo, P.b); q.line(P.a, 0, lo, 0, css("--axis"), 2); q.line(hi, 0, hi, E, css("--amber"), 1.5, [4, 4]); q.line(P.a, E, hi, E, css("--amber"), 1.5, [4, 4]); q.dot(hi, E, css("--amber"), 6);
+      R.innerHTML = `<div>de a = <b>${fmt(lo, 2)}</b> até b = <b>${fmt(hi, 2)}</b></div><div>soma dos ${n} retângulos: <b>${fmt(S, 3)} ${P.u}</b></div><div class="ok">integral exata: <b>${fmt(E, 3)} ${P.u}</b></div>
+        <div>erro: <b>${fmt(Math.abs(S - E) / E * 100, 3)}%</b>. Mais retângulos, menos erro; o limite dessa soma é a integral.</div>
+        <div>Arraste os pontos a e b no gráfico. O gráfico de baixo mostra a área acumulada: a altura em b é a integral de a até b.</div>`;
     }
     draw();
     kit("integral", extra, {
-      state: () => ({k, n: ns.get(), mt}),
+      state: () => ({k, n: ns.get(), mt, larg: (hi - lo) / (PR[k].b - PR[k].a)}),
       goals: [
         {t: "Chegue a 40 retângulos ou mais e veja o erro quase sumir.", ok: s => s.n >= 40, win: () => "Mais faixas, menos erro. No limite, a soma vira a integral."},
-        {t: "Com no máximo 8 faixas, troque para trapézios e compare o erro.", ok: s => s.mt === 3 && s.n <= 8, win: () => "Trapézios acompanham melhor a curva do que retângulos com poucas faixas."}
+        {t: "Com no máximo 8 faixas, troque para trapézios e compare o erro.", ok: s => s.mt === 3 && s.n <= 8, win: () => "Trapézios acompanham melhor a curva do que retângulos com poucas faixas."},
+        {t: "Arraste a e b até cobrir só a metade do período e veja a área acumulada cair.", ok: s => s.larg < 0.55, win: () => "Menos intervalo, menos área: a integral mede quanto a curva acumula entre a e b."}
       ],
-      react: s => s.n >= 40 ? ["Bem fininho: o erro é bem pequeno.", "happy"] : s.n <= 4 ? ["Poucas faixas: a soma ainda erra bastante.", "worried"] : ["Mais faixas deixam a soma mais fiel.", "neutral"]
+      react: s => s.larg < 0.55 ? ["Com um intervalo menor, a área também é menor.", "happy"] : s.n >= 40 ? ["Bem fininho: o erro é bem pequeno.", "happy"] : s.n <= 4 ? ["Poucas faixas: a soma ainda erra bastante.", "worried"] : ["Arraste os pontos a e b para ver a área acumular.", "neutral"]
     });
     return draw;
   }});
@@ -1289,6 +1322,7 @@ let redraw = () => {}, curMod = null;
 function show(id) {
   if (onLeave) { onLeave(); onLeave = null; }
   if (broto) { broto.dispose(); broto = null; }
+  if (videoAtual) { videoAtual.destruir(); videoAtual = null; }
   const m = MODS.find(x => x.id === id) || MODS[0]; curMod = m; N = 0;
   try { localStorage.setItem("mc-mod", m.id); } catch (e) {}
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === m.id));
@@ -1518,16 +1552,33 @@ function renderEstudo(m, main) {
   const ancora = $(".extra", main) || $(".lab", main); if (ancora) ancora.insertAdjacentElement("afterend", root); else main.appendChild(root);
 }
 
+/* mini-vídeo narrado do assunto, tocado dentro da página quando houver roteiro */
+let videoAtual = null;
+function videoHTML(m) {
+  const ex = window.Explainers && window.Explainer && Explainers[m.id]; if (!ex || !window.gsap) return "";
+  const d = ex.meta.duracao;
+  return `<section class="video-wrap" aria-label="Mini-vídeo narrado"><div class="video-poster"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4z"/></svg><div><p class="video-kick">Mini-vídeo narrado · ${Math.floor(d / 60)} min ${d % 60} s</p><p class="video-tit">${ex.meta.titulo}: o conceito em cenas</p></div><button class="btn" type="button" id="ver-video">Assistir</button></div><div class="video-host" hidden></div></section>`;
+}
+function montarVideo(m, main) {
+  const wrap = $(".video-wrap", main); if (!wrap) return;
+  $("#ver-video", wrap).onclick = () => {
+    const host = $(".video-host", wrap); $(".video-poster", wrap).hidden = true; host.hidden = false;
+    host.addEventListener("expl:fim", () => { const s = Progress.get(); s.videos = s.videos || {}; s.videos[m.id] = today(); Progress.save(); if (broto) broto.say("Boa! Agora mexa no laboratório e confira.", "happy"); });
+    videoAtual = new Explainer.Player(host, Explainers[m.id]); videoAtual.play();
+  };
+}
+
 function layoutDidatico(m, main) {
   main.innerHTML = `<div class="head"><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="gancho">${m.gancho}</p>
       <p class="lead">${m.resumo}</p>
       <button class="more" type="button" aria-expanded="false" aria-controls="detalhes">Quero mais detalhes</button><div class="detalhes" id="detalhes" hidden><p>${m.detalhes}</p></div></div>
+    ${videoHTML(m)}
     <div class="lab"><div class="stage"></div><div class="side"><div class="guide"></div><div class="panel"></div></div></div>
     <div class="extra"></div>
     <section class="ctx" aria-label="Onde isso aparece"><p class="ctx-titulo">Onde isso aparece</p><div class="tabs" role="tablist" aria-label="Contexto">${CONTEXTOS.map(c => `<button class="tab" role="tab" type="button" id="tab-${c.id}" data-ctx="${c.id}" aria-selected="${c.id === ctxAtual}" aria-controls="pn-ctx" tabindex="${c.id === ctxAtual ? 0 : -1}">${ICONS[c.id]}<span>${c.nome}</span></button>`).join("")}</div>
       <div class="tabpanel" role="tabpanel" id="pn-ctx"></div></section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
-  $("pre code", main).textContent = m.python; renderEstudo(m, main);
+  $("pre code", main).textContent = m.python; renderEstudo(m, main); montarVideo(m, main);
   broto = createBroto($(".guide", main)); broto.say(m.saudacao || "Oi! Eu sou o Broto. Mexe nos controles e eu te conto o que acontece.", "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };

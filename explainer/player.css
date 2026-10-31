@@ -97,3 +97,8 @@
 .expl-cf.leaf { border-radius: 0 100% 0 100%; width: 12px; height: 15px; } .expl-cf.grain { border-radius: 50%; }
 .expl-estatico .expl-slots .slot { transition: none; }
 @media (prefers-reduced-motion: reduce) { .expl-slots .slot { transition: none; } .cmd.digitando::after, .cmd:empty::after { animation: none; } .slot-pill.on .pill { animation: none; } }
+
+/* botão de som */
+.eb-som .ic-onda { display: block; } .eb-som[aria-pressed="false"] .ic-onda { display: none; }
+.eb-som[aria-pressed="false"] { background: var(--paper-2); opacity: .8; }
+.eb-som[aria-pressed="true"] { background: var(--note-3); }

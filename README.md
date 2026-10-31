@@ -53,3 +53,8 @@ As fontes vêm do Google Fonts. Sem internet a página usa as fontes do sistema.
 
 - Os valores de exemplo (dose de adubo, preços, vetores de atenção, logits) são ilustrativos e não são recomendações agronômicas nem financeiras.
 - Os modelos de ML dos laboratórios (regressão, rede neural, otimizadores) rodam no navegador com JavaScript puro.
+
+## Vídeo e manipulação direta
+
+- O Taylor tem um mini-vídeo narrado dentro da página (botão Assistir). O player (`explainer/`) usa GSAP, legenda palavra por palavra, controles, voz do navegador em pt-BR (com botão de som) e funciona em modo estático com movimento reduzido. O guia para criar outros roteiros está em `explainer/ESQUEMA.md`.
+- Limites (faixa ε–δ e pontos arrastáveis), derivadas (ponto arrastável) e integrais (limites a e b arrastáveis com área acumulada) agora se manipulam direto no gráfico.
