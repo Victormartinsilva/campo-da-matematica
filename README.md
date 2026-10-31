@@ -10,9 +10,15 @@ Laboratório interativo para revisar a matemática da graduação em Engenharia 
 - **Machine learning (9):** regressão linear, otimizadores (GD, momento, Adam), overfitting, classificação e guardrails, redes neurais, embeddings e busca, atenção, do logit ao próximo token, trilha de ferramentas.
 - **Decisão:** teoria dos jogos.
 
+## Estrutura
+
+- `index.html`: estrutura da página.
+- `styles.css`: tema claro e escuro, layout e componentes.
+- `app.js`: ferramentas de gráfico e interface, os módulos (cada um com sua aplicação, laboratório e código Python) e a navegação.
+
 ## Rodar localmente
 
-É uma página estática de um arquivo só, sem build. Abra `index.html` no navegador ou sirva a pasta:
+É uma página estática, sem build. Abra `index.html` no navegador ou sirva a pasta:
 
 ```bash
 npx serve .
