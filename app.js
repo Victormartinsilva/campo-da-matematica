@@ -1560,6 +1560,11 @@ function renderEstudo(m, main) {
   m.exemplos.forEach((ex, i) => { const card = document.createElement("article"); card.className = "estudo-example"; const h = document.createElement("h4"); h.textContent = `${i + 1}. ${ex.titulo}`; const prompt = document.createElement("p"); prompt.textContent = ex.enunciado; const ol = document.createElement("ol"); ex.passos.forEach(step => { const li = document.createElement("li"); li.textContent = step; ol.appendChild(li); }); const result = document.createElement("p"); result.className = "estudo-result"; result.textContent = ex.resultado; card.append(h, prompt, ol, result); examples.appendChild(card); });
   const exercises = section("Teste seu entendimento", "estudo-exercises");
   m.exercicios.forEach((ex, i) => { const card = document.createElement("article"); card.className = "estudo-exercise"; const h = document.createElement("h4"); h.textContent = `Questão ${i + 1}`; const q = document.createElement("p"); q.textContent = ex.pergunta; const details = document.createElement("details"); const summary = document.createElement("summary"); summary.textContent = "Ver resposta e resolução"; const answer = document.createElement("p"); answer.className = "estudo-answer"; answer.textContent = `Resposta: ${ex.resposta}`; const explanation = document.createElement("p"); explanation.textContent = ex.explicacao; details.append(summary, answer, explanation); card.append(h, q, details); exercises.appendChild(card); });
+  /* botão de calculadora em cada exemplo e exercício */
+  root.querySelectorAll(".estudo-example, .estudo-exercise").forEach(card => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn alt calc-abrir"; b.textContent = "Calculadora"; b.setAttribute("data-abre-calc", ""); b.setAttribute("aria-expanded", "false"); b.onclick = () => Calculadora.abrir(b);
+    const alvo = card.querySelector("p"); if (alvo) alvo.insertAdjacentElement("afterend", b); else card.appendChild(b);
+  });
   const ancora = $(".extra", main) || $(".lab", main); if (ancora) ancora.insertAdjacentElement("afterend", root); else main.appendChild(root);
 }
 
@@ -1616,7 +1621,7 @@ function layoutDidatico(m, main) {
       <textarea class="nota-txt" id="nota-${m.id}" rows="5" placeholder="O que você entendeu, uma dúvida, um exemplo seu…" aria-label="Anotações sobre ${m.nome}"></textarea>
       <div class="row"><button class="btn alt nota-copiar" type="button">Copiar</button><button class="btn alt nota-limpar" type="button">Limpar</button></div></section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
-  $("pre code", main).textContent = m.python; renderEstudo(m, main); montarVideo(m, main); montarNotas(m, main);
+  $("pre code", main).textContent = m.python; PythonLab.montar($(".pywrap", main), m.python); renderEstudo(m, main); montarVideo(m, main); montarNotas(m, main);
   broto = createBroto($(".guide", main)); broto.say(m.saudacao || "Oi! Eu sou o Broto. Mexe nos controles e eu te conto o que acontece.", "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };
@@ -1638,7 +1643,7 @@ function layoutDidatico(m, main) {
   tabs.forEach((t, i) => { t.onclick = () => escolher(t.dataset.ctx); t.onkeydown = e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const j = (i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length; escolher(tabs[j].dataset.ctx); tabs[j].focus(); } }; });
   pintar();
   const cp = $(".copy", main); let tm = 0;
-  cp.onclick = async () => { const ok = await copyText(m.python); if (ok) window.dispatchEvent(new CustomEvent("mc:copy", {detail: {module: m.id}})); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; clearTimeout(tm); tm = setTimeout(() => { cp.textContent = "Copiar código"; }, 1800); };
+  cp.onclick = async () => { const ok = await copyText((($(".py-code", main)) || {}).value || m.python); if (ok) window.dispatchEvent(new CustomEvent("mc:copy", {detail: {module: m.id}})); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; clearTimeout(tm); tm = setTimeout(() => { cp.textContent = "Copiar código"; }, 1800); };
 }
 const nav = $("#nav");
 { /* aba especial: o Campo Vivo cresce com o progresso */
