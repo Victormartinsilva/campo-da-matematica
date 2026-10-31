@@ -975,7 +975,7 @@ print(float(erro))                      # quanto a aproximação erra ali`,
       {t: "Deixe só a tangente (ordem 1) e ache um ponto de teste onde o erro passe de 1.", ok: s => s.n === 1 && s.err > 1, win: () => "Isso mesmo: uma reta só segura a curva por perto."},
       {t: "No sen x, com centro em 0, chegue em x ≈ 3 com erro menor que 0,01. Qual a menor ordem que serve?", ok: s => s.k === 0 && Math.abs(s.a) <= 0.15 && Math.abs(s.x - 3) <= 0.12 && s.err < 0.01, win: s => `Acertou! Precisou de ordem ${s.n}. Dá para tentar com menos?`}
     ];
-    const done = G.map(() => false); let k = 0, first = true, tm = 0, prev = null; const c = canvas(stage, 380);
+    const done = G.map((_, i) => !!Progress.get().goals["taylor:" + i]); let k = 0, first = true, tm = 0, prev = null; const c = canvas(stage, 380);
     /* o Broto comenta o que mudou, um instante depois de você parar de mexer */
     function react(s) {
       const p = prev; prev = s; if (!broto) return;
@@ -992,7 +992,8 @@ print(float(erro))                      # quanto a aproximação erra ali`,
       <p class="msg" role="status"></p><div class="formula" aria-label="Polinômio de Taylor"></div><p class="hint"></p>`);
     const pin = $(".pin", panel), msg = $(".msg", panel), fml = $(".formula", panel), hint = $(".hint", panel), meter = $(".meter", panel);
     extra.innerHTML = `<h3 class="goals-title">Desafios</h3><ol class="goals">${G.map((g, i) => `<li class="goal" data-i="${i}"><span class="goal-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13l5 5L20 6"/></svg></span><span>${g.t}</span></li>`).join("")}</ol><p class="goal-msg" role="status"></p>`;
-    const P = (F, n, a, x) => { let s = 0; for (let j = 0; j <= n; j++) s += F.dn(j, a) / fact(j) * (x - a) ** j; return s; };
+    done.forEach((d, i) => { if (d) $(`.goal[data-i="${i}"]`, extra).classList.add("done"); });
+    const P =(F, n, a, x) => { let s = 0; for (let j = 0; j <= n; j++) s += F.dn(j, a) / fact(j) * (x - a) ** j; return s; };
     function draw() {
       const F = FS[k], n = ns.get(), a = A(), x = XT(), fx = F.f(x), px = P(F, n, a, x), err = Math.abs(fx - px);
       const good = t => Math.abs(F.f(t) - P(F, n, a, t)) <= 0.05 * Math.max(1, Math.abs(F.f(t))), dt = (F.x1 - F.x0) / 600; let xl = a, xr = a;
@@ -1019,7 +1020,7 @@ print(float(erro))                      # quanto a aproximação erra ali`,
         done[i] = true; const li = $(`.goal[data-i="${i}"]`, extra); li.classList.add("done", "just"); $(".goal-msg", extra).textContent = gl.win(st);
         meter.classList.remove("flash"); void meter.offsetWidth; meter.classList.add("flash");
         if (broto) { clearTimeout(tm); broto.say(gl.win(st), "happy"); }
-        window.dispatchEvent(new CustomEvent("mc:goal", {detail: {module: "taylor", index: i, el: li}}));
+        window.dispatchEvent(new CustomEvent("mc:goal", {detail: {module: "taylor", index: i, total: G.length, el: li}}));
       } });
       const next = done.indexOf(false); extra.querySelectorAll(".goal").forEach((li, i) => li.classList.toggle("active", i === next));
       const now = {lvl, beyond, n, k, dist: Math.abs(x - a), w: xr - xl};
@@ -1159,6 +1160,7 @@ MODS.sort((a, b) => ID_ORDER.indexOf(a.id) - ID_ORDER.indexOf(b.id));
 
 /* ---------- navegação ---------- */
 const AREA = {"Cálculo": "calculo", "Álgebra linear": "algebra", "Estatística": "estatistica", "Machine learning": "ml", "Decisão": "decisao"};
+const AREAS_LIST = [...new Set(MODS.map(m => m.grupo))];
 let redraw = () => {}, curMod = null;
 function show(id) {
   if (onLeave) { onLeave(); onLeave = null; }
@@ -1176,6 +1178,8 @@ function show(id) {
     $("pre code", main).textContent = m.python;
   }
   redraw = m.build($(".stage", main), $(".panel", main), $(".extra", main));
+  main.insertAdjacentHTML("beforeend", finishHTML(m)); bindFinish();
+  Progress.get().visited[m.id] = true; Progress.save(); renderAll();
 }
 
 /* ---------- layout didático: gancho, laboratório primeiro, contextos em abas, Python com cópia ---------- */
@@ -1193,6 +1197,104 @@ async function copyText(text) {
   const t = document.createElement("textarea"); t.value = text; t.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(t); t.select();
   let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove(); return ok;
 }
+/* ---------- progresso: salvo no navegador, com cópia em memória se o armazenamento falhar ---------- */
+const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}});
+const Progress = (() => {
+  let s = emptyProgress(), ok = true;
+  try { const raw = localStorage.getItem("mc-progress"); if (raw) s = {...s, ...JSON.parse(raw)}; } catch (e) { ok = false; }
+  return {
+    get: () => s, persisted: () => ok,
+    save() { try { localStorage.setItem("mc-progress", JSON.stringify(s)); } catch (e) { ok = false; } },
+    reset() { s = emptyProgress(); this.save(); }
+  };
+})();
+const cnt = o => Object.keys(o).length, today = () => new Date().toLocaleDateString("sv-SE");
+const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toLocaleDateString("sv-SE"); };
+function streak() {
+  const days = new Set(Progress.get().days); let d = today(), n = 0; if (!days.has(d)) d = addDays(d, -1);
+  while (days.has(d)) { n++; d = addDays(d, -1); } return n;
+}
+const ICON_SVG = k => k === "wheat" ? `<svg viewBox="0 0 28 110" aria-hidden="true"><use href="#wheat" width="28" height="110"/></svg>` : `<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-${k}"/></svg>`;
+let badgeCache = null;
+function badges() {
+  if (badgeCache) return badgeCache;
+  const areaBadges = AREAS_LIST.filter(g => MODS.filter(m => m.grupo === g).length >= 3).map(g => ({id: "talhao-" + AREA[g], nome: `Talhão de ${g} completo`, desc: `Estude todos os assuntos de ${g}.`, icon: "wheat", ok: s => MODS.filter(m => m.grupo === g).every(m => s.done[m.id])}));
+  return badgeCache = [
+    {id: "primeira", nome: "Primeira espiga", desc: "Marque o primeiro assunto como estudado.", icon: "seed", ok: s => cnt(s.done) >= 1},
+    {id: "mao", nome: "Mão na terra", desc: "Cumpra o seu primeiro desafio.", icon: "star", ok: s => cnt(s.goals) >= 1},
+    {id: "taylor", nome: "Taylor de ponta a ponta", desc: "Cumpra os 3 desafios das Séries de Taylor.", icon: "star", ok: s => [0, 1, 2].every(i => s.goals["taylor:" + i])},
+    {id: "explorador", nome: "Explorador", desc: "Visite 10 assuntos.", icon: "seed", ok: s => cnt(s.visited) >= 10},
+    {id: "seq3", nome: "3 dias seguidos", desc: "Estude 3 dias em sequência.", icon: "flame", ok: () => streak() >= 3},
+    {id: "seq7", nome: "Semana de lavoura", desc: "Estude 7 dias em sequência.", icon: "flame", ok: () => streak() >= 7},
+    ...areaBadges,
+    {id: "safra", nome: "Safra cheia", desc: "Estude todos os assuntos.", icon: "wheat", ok: s => MODS.every(m => s.done[m.id])}
+  ];
+}
+function toast(text) {
+  let h = $("#toasts"); if (!h) { h = document.createElement("div"); h.id = "toasts"; h.setAttribute("aria-live", "polite"); document.body.appendChild(h); }
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = text; h.appendChild(t); confetti(innerWidth / 2, innerHeight - 70); setTimeout(() => t.remove(), 4200);
+}
+function checkBadges() {
+  const s = Progress.get(); let any = false;
+  for (const b of badges()) if (!s.badges[b.id] && b.ok(s)) { s.badges[b.id] = today(); any = true; toast(`Selo novo: ${b.nome}`); }
+  if (any) Progress.save(); return any;
+}
+function touchDay() {
+  const s = Progress.get(), d = today(); if (s.days.includes(d)) return;
+  s.days.push(d); Progress.save(); checkBadges(); renderCaderno();
+}
+function onGoal(d) {
+  const s = Progress.get(); s.goals[d.module + ":" + d.index] = today(); touchDay();
+  const mod = MODS.find(m => m.id === d.module);
+  if (mod && d.total && Array.from({length: d.total}, (_, i) => s.goals[d.module + ":" + i]).every(Boolean) && !s.done[mod.id]) { s.done[mod.id] = today(); toast(`${mod.nome}: assunto concluído!`); }
+  checkBadges(); Progress.save(); renderAll();
+  const f = $(".finish"); if (f && curMod) { f.outerHTML = finishHTML(curMod); bindFinish(); }
+}
+function finishHTML(m) {
+  const d = Progress.get().done[m.id];
+  return `<div class="finish ${d ? "is-done" : ""}"><p>${d ? "Assunto estudado. Mais uma espiga na plantação." : "Terminou este assunto? Marque e veja a plantação crescer."}</p><button class="btn ${d ? "alt" : ""}" type="button" id="finish">${d ? "Desmarcar" : "Marcar como estudado"}</button></div>`;
+}
+function bindFinish() { const f = $("#finish"); if (f && curMod) f.onclick = () => toggleDone(curMod); }
+function toggleDone(m) {
+  const s = Progress.get();
+  if (s.done[m.id]) delete s.done[m.id];
+  else { s.done[m.id] = today(); const r = $("#finish").getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); if (broto) broto.say("Mais uma espiga na plantação!", "happy"); }
+  touchDay(); checkBadges(); Progress.save(); renderAll();
+  $(".finish").outerHTML = finishHTML(m); bindFinish();
+}
+function renderAll() { renderTrail(); renderNav(); renderCaderno(); }
+function renderTrail() {
+  const s = Progress.get();
+  $("#trail").innerHTML = `<div class="trail-title">Mapa da trilha <small>${cnt(s.done)}/${MODS.length} estudados</small></div>` + AREAS_LIST.map(g => {
+    const ms = MODS.filter(m => m.grupo === g);
+    return `<div class="plot" data-area="${AREA[g]}"><span class="plot-name">${g} <b>${ms.filter(m => s.done[m.id]).length}/${ms.length}</b></span><div class="plants">` + ms.map(m => {
+      const st = s.done[m.id] ? 2 : s.visited[m.id] ? 1 : 0, lbl = ["ainda não visitado", "visitado", "estudado"][st], cur = curMod && curMod.id === m.id;
+      return `<button class="plant s${st}${cur ? " cur" : ""}" type="button" data-id="${m.id}" title="${m.nome} · ${lbl}" aria-label="${m.nome}: ${lbl}"${cur ? ' aria-current="true"' : ""}><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p${st}"/></svg></button>`;
+    }).join("") + `</div></div>`;
+  }).join("") + `<p class="trail-key"><span>terra: não visitado</span><span>broto: visitado</span><span>espiga: estudado</span></p>`;
+  $("#trail").querySelectorAll(".plant").forEach(b => b.onclick = () => {
+    show(b.dataset.id); $("#main").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
+    const again = $(`#trail .plant[data-id="${b.dataset.id}"]`); if (again) again.focus({preventScroll: true});
+  });
+}
+function renderNav() {
+  const s = Progress.get();
+  document.querySelectorAll("#nav .grp").forEach(d => { const ms = MODS.filter(m => AREA[m.grupo] === d.dataset.area); $(".cnt", d).textContent = `${ms.filter(m => s.done[m.id]).length}/${ms.length}`; });
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("done", !!s.done[b.dataset.id]));
+}
+let resetTm = 0;
+function renderCaderno() {
+  const s = Progress.get(), st = streak();
+  $("#caderno").innerHTML = `<h2>Meu caderno</h2>
+    <div class="cad-stats"><div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flame"/></svg><b>${st}</b><span>${st === 1 ? "dia seguido" : "dias seguidos"}</span></div>
+      <div class="stat"><b>${cnt(s.done)}/${MODS.length}</b><span>assuntos estudados</span></div><div class="stat"><b>${cnt(s.goals)}</b><span>${cnt(s.goals) === 1 ? "desafio cumprido" : "desafios cumpridos"}</span></div><div class="stat"><b>${s.days.length}</b><span>${s.days.length === 1 ? "dia de estudo" : "dias de estudo"}</span></div></div>
+    <ul class="badges">${badges().map(b => { const got = s.badges[b.id]; return `<li class="badge ${got ? "got" : "lock"}"><span class="stamp-ico" aria-hidden="true">${got ? ICON_SVG(b.icon) : "?"}</span><span class="b-txt"><b>${b.nome}</b><small>${got ? "Conquistado em " + got.split("-").reverse().join("/") : b.desc}</small></span></li>`; }).join("")}</ul>
+    ${Progress.persisted() ? "" : `<p class="cad-note">Este navegador não deixou guardar o progresso. Ele vale só enquanto esta aba estiver aberta.</p>`}
+    <button class="reset" type="button">Zerar progresso</button>`;
+  const r = $(".reset", $("#caderno"));
+  r.onclick = () => { if (r.dataset.sure) { Progress.reset(); badgeCache = null; renderAll(); $(".finish") && ($(".finish").outerHTML = finishHTML(curMod), bindFinish()); return; } r.dataset.sure = "1"; r.textContent = "Tem certeza? Clique de novo para apagar tudo"; clearTimeout(resetTm); resetTm = setTimeout(() => { delete r.dataset.sure; r.textContent = "Zerar progresso"; }, 4000); };
+}
+
 /* ---------- Broto, o guia de campo: plantinha que comenta o que você faz ---------- */
 let broto = null;
 const BROTO_SVG = `<svg class="broto" viewBox="0 0 120 140" role="img" aria-label="Broto, o guia de campo" data-mood="neutral">
@@ -1236,7 +1338,10 @@ function confetti(x, y) {
     el.animate([{transform: "translate(0,0) rotate(0)", opacity: 1}, {transform: `translate(${dx * 0.7}px,${dy}px) rotate(${r / 2}deg)`, opacity: 1, offset: .35}, {transform: `translate(${dx}px,${dy + 220}px) rotate(${r}deg)`, opacity: 0}], {duration: 1100 + Math.random() * 500, easing: "cubic-bezier(.2,.7,.4,1)"}).onfinish = () => el.remove();
   }
 }
-window.addEventListener("mc:goal", e => { const r = e.detail && e.detail.el && e.detail.el.getBoundingClientRect(); if (r) confetti(r.left + 20, r.top + 18); });
+window.addEventListener("mc:goal", e => {
+  const r = e.detail && e.detail.el && e.detail.el.getBoundingClientRect(); if (r) confetti(r.left + 20, r.top + 18);
+  if (e.detail) onGoal(e.detail);
+});
 
 function layoutDidatico(m, main) {
   const ctx = [["campo", "No campo", m.campo], ["dia", "No dia a dia", m.dia], ["trabalho", "No seu trabalho", IA[m.id]]];
@@ -1260,11 +1365,10 @@ function layoutDidatico(m, main) {
 }
 const nav = $("#nav");
 [...new Set(MODS.map(m => m.grupo))].forEach(g => {
-  const d = document.createElement("div"); d.className = "grp"; d.dataset.area = AREA[g]; d.innerHTML = `<h4>${g}</h4>`;
+  const d = document.createElement("div"); d.className = "grp"; d.dataset.area = AREA[g]; d.innerHTML = `<h4>${g}<span class="cnt"></span></h4>`;
   MODS.filter(m => m.grupo === g).forEach(m => { const b = document.createElement("button"); b.textContent = m.nome; b.dataset.id = m.id; b.onclick = () => { show(m.id); window.scrollTo({top: 0}); }; d.appendChild(b); });
   nav.appendChild(d);
 });
-$("#chips").innerHTML = [...new Set(MODS.map(m => m.grupo))].map(g => `<span data-area="${AREA[g]}">${g} · ${MODS.filter(m => m.grupo === g).length}</span>`).join("");
 
 /* curvas de nível: campo de altitude com algumas colinas, desenhado por marching squares */
 function contourSVG() {
@@ -1296,6 +1400,8 @@ document.body.insertAdjacentHTML("afterbegin", contourSVG());
 })();
 let first = location.hash.slice(1); try { first = first || localStorage.getItem("mc-mod"); } catch (e) {}
 show(first);
+$("#main").addEventListener("input", touchDay, true);
+$("#main").addEventListener("click", e => { if (e.target.closest("button, .tab")) touchDay(); }, true);
 const re = () => redraw();
 new ResizeObserver(re).observe($("#main"));
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", re);

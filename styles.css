@@ -36,11 +36,52 @@ a { color: var(--area-ink); }
 .theme { position: absolute; right: 0; top: -6px; z-index: 2; width: 44px; height: 44px; display: grid; place-items: center; background: var(--card); color: var(--ink); border: 2px solid var(--edge); border-radius: 50%; box-shadow: var(--hard-sm); cursor: pointer; }
 .theme:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--shadow); }
 .theme svg { width: 22px; height: 22px; }
-.chips { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); margin-top: var(--s-5); }
-.chips span { display: inline-flex; align-items: center; gap: 8px; font: 700 14px/1 var(--f-body); color: var(--ink); background: var(--card); border: 2px solid var(--edge); border-radius: var(--r-chip); padding: 7px 13px 7px 9px; box-shadow: var(--hard-sm); }
-.chips span::before { content: ""; width: 15px; height: 15px; background: var(--area-fill); border: 2px solid var(--edge); border-radius: 3px 6px 3px 7px; }
-.chips span:nth-child(odd) { transform: rotate(-1.5deg); }
-.chips span:nth-child(even) { transform: rotate(1.2deg); }
+/* mapa da trilha: cada assunto é uma planta no talhão da sua área */
+.trail { display: grid; gap: 7px; margin-top: var(--s-5); max-width: 560px; }
+.trail-title { display: flex; align-items: baseline; gap: 10px; font: 700 26px/1 var(--f-hand); color: var(--ink); }
+.trail-title small { font: 700 14px var(--f-body); color: var(--ink-soft); }
+.plot { display: flex; align-items: flex-end; gap: 10px; padding: 6px 10px 0; background: color-mix(in srgb, var(--area-fill) 26%, var(--card)); border: 2px solid var(--edge); border-bottom: 7px solid var(--soil); border-radius: 8px 14px 3px 3px; }
+.plot:nth-of-type(even) { margin-left: 14px; }
+.plot-name { flex: none; width: 128px; padding-bottom: 8px; font: 700 14px/1.15 var(--f-body); color: var(--ink); }
+.plot-name b { color: var(--area-ink); font-variant-numeric: tabular-nums; }
+.plants { display: flex; flex-wrap: wrap; gap: 0 2px; min-width: 0; }
+.plant { position: relative; width: 27px; height: 36px; padding: 0; border: 0; background: none; color: var(--ink-soft); cursor: pointer; transition: transform .15s ease; }
+.plant svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.plant.s1, .plant.s2 { color: var(--leaf); }
+.plant:hover { transform: translateY(-4px) rotate(-5deg); }
+.plant.cur { background: color-mix(in srgb, var(--card) 80%, transparent); outline: 2px dashed var(--terra); outline-offset: 1px; border-radius: 6px 6px 2px 2px; }
+.plant.cur::before { content: ""; position: absolute; left: 50%; top: -9px; margin-left: -5px; border: 5px solid transparent; border-top: 7px solid var(--terra); }
+.trail-key { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 2px 0 0; font: 700 11px var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* caderno: sequência, selos e contadores */
+.caderno { max-width: 1120px; margin: var(--s-7) auto 0; padding: var(--s-5); background: var(--card); border: 2px solid var(--edge); border-radius: var(--r-card); box-shadow: var(--hard); }
+.caderno h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; font-variation-settings: "SOFT" 100, "WONK" 1; margin-bottom: var(--s-4); }
+.cad-stats { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-bottom: var(--s-5); }
+.stat { display: flex; align-items: baseline; gap: 8px; padding: 8px 14px; background: var(--note-1); border: 2px solid var(--edge); border-radius: 4px 12px 6px 12px; box-shadow: var(--hard-sm); }
+.stat:nth-child(even) { background: var(--note-3); }
+.stat svg { width: 22px; height: 22px; align-self: center; color: var(--terra); }
+.stat b { font: 800 26px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 14px; color: var(--ink-soft); }
+.badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: var(--s-3); }
+.badge { display: flex; align-items: center; gap: var(--s-3); padding: 10px 12px; border: 2px solid var(--edge); border-radius: 8px 14px 8px 14px; background: var(--paper); }
+.badge.lock { border-style: dashed; border-color: var(--rule-strong); opacity: .72; }
+.stamp-ico { flex: none; width: 52px; height: 52px; display: grid; place-items: center; border: 3px double var(--terra); border-radius: 50%; color: var(--terra); transform: rotate(-8deg); font: 700 24px var(--f-hand); }
+.badge.got:nth-child(even) .stamp-ico { transform: rotate(7deg); color: var(--leaf); border-color: var(--leaf); }
+.badge.lock .stamp-ico { color: var(--ink-soft); border-color: var(--rule-strong); }
+.stamp-ico svg { width: 28px; height: 28px; fill: none; stroke: currentColor; }
+.b-txt { display: grid; gap: 1px; min-width: 0; }
+.b-txt b { font-size: 15px; }
+.b-txt small { font-size: 13px; color: var(--ink-soft); line-height: 1.3; }
+.cad-note { margin: var(--s-4) 0 0; padding: 8px 12px; background: var(--note-1); border-left: 5px solid var(--wheat); border-radius: 0 8px 8px 0; font-size: 14px; }
+.reset { margin-top: var(--s-4); font: 400 14px var(--f-body); color: var(--ink-soft); background: none; border: 0; padding: 4px 0; text-decoration: underline dotted; cursor: pointer; }
+
+/* assunto estudado e avisos */
+.finish { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; padding: var(--s-3) var(--s-4); border: 2px dashed var(--rule-strong); border-radius: 10px; animation: enterUp .5s .4s ease both; }
+.finish p { margin: 0; font: 700 25px/1.1 var(--f-hand); color: var(--ink-soft); }
+.finish.is-done { border-style: solid; border-color: var(--leaf); background: color-mix(in srgb, var(--leaf) 10%, transparent); }
+.finish.is-done p { color: var(--leaf); }
+#toasts { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; display: grid; gap: 8px; justify-items: center; pointer-events: none; width: min(92vw, 420px); }
+.toast { padding: 10px 18px; background: var(--card); border: 2px solid var(--edge); border-radius: 12px 6px 12px 6px; box-shadow: var(--hard); font: 700 24px/1.1 var(--f-hand); color: var(--terra); animation: enterUp .35s ease both; }
 
 /* ---------- estrutura ---------- */
 .shell { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: var(--s-6); align-items: start; }
@@ -52,6 +93,9 @@ nav .grp { display: grid; gap: 2px; }
 nav h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font: 700 25px/1 var(--f-hand); color: var(--area-ink); }
 nav h4::before { content: ""; width: 16px; height: 16px; background: var(--area-fill); border: 2px solid var(--edge); border-radius: 3px 7px 4px 8px; transform: rotate(-6deg); }
 nav button { display: block; width: 100%; text-align: left; font: 400 16px/1.3 var(--f-body); color: var(--ink); background: none; border: 0; border-left: 3px solid var(--rule); padding: 7px 10px 7px 12px; cursor: pointer; border-radius: 0 8px 8px 0; transition: background .15s, border-color .15s, transform .15s; }
+nav h4 .cnt { margin-left: auto; font: 700 13px var(--f-body); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+nav button.done::after { content: "\2713\FE0E"; float: right; font-weight: 700; color: var(--leaf); }
+nav button.done[aria-current="true"]::after { color: #1d140c; }
 nav button:hover { background: var(--paper-2); border-left-color: var(--area-fill); transform: translateX(2px); }
 nav button[aria-current="true"] { font-weight: 700; background: var(--area-fill); color: #1d140c; border-left-color: var(--edge); box-shadow: var(--hard-sm); }
 

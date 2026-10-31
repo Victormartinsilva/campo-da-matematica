@@ -37,6 +37,7 @@
   --note-3: #DDEBF0;
 
   /* quadro-negro do código */
+  --soil: #8B6B4A;
   --chalk-bg: #2E241B;
   --chalk-ink: #F1E7D2;
 
@@ -83,7 +84,7 @@
     --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
     --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
     --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
-    --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
+    --soil: #7A5C40; --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
     color-scheme: dark;
   }
 }
@@ -99,7 +100,7 @@
   --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
   --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
   --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
-  --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
+  --soil: #7A5C40; --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
   color-scheme: dark;
 }
 
