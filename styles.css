@@ -82,7 +82,17 @@ main h2 { font-size: clamp(32px, 5vw, 50px); font-weight: 800; letter-spacing: -
 .ctl { display: grid; gap: 4px; font-size: 15px; }
 .cl { font: 700 12px/1.2 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
 .ctl output { font: 700 16px var(--f-body); font-variant-numeric: tabular-nums; color: var(--area-ink); }
-input[type=range] { width: 100%; accent-color: var(--area-ink); }
+/* sliders de campo: trilho que enche com a cor do talhão e botão em forma de folha */
+.ctl output { display: inline-block; justify-self: start; transition: transform .14s ease; }
+.ctl output.bump { transform: translateY(-2px) scale(1.1); }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 30px; margin: 0; background: transparent; cursor: pointer; --fill: 50%; }
+input[type=range]::-webkit-slider-runnable-track { height: 11px; border: 2px solid var(--edge); border-radius: 7px; background: linear-gradient(var(--area-fill), var(--area-fill)) 0 / var(--fill) 100% no-repeat, var(--paper-2); }
+input[type=range]::-moz-range-track { height: 11px; border: 2px solid var(--edge); border-radius: 7px; background: var(--paper-2); }
+input[type=range]::-moz-range-progress { height: 11px; border-radius: 5px 0 0 5px; background: var(--area-fill); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; margin-top: -9px; background: var(--wheat); border: 2px solid var(--edge); border-radius: 50% 5px 50% 5px; box-shadow: 2px 2px 0 var(--shadow); transition: transform .12s ease; }
+input[type=range]::-moz-range-thumb { width: 20px; height: 20px; background: var(--wheat); border: 2px solid var(--edge); border-radius: 50% 5px 50% 5px; box-shadow: 2px 2px 0 var(--shadow); }
+input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2) rotate(-10deg); }
+input[type=range]:focus-visible { outline: 3px dashed var(--terra); outline-offset: 2px; border-radius: 8px; }
 select, input[type=number] { font: 400 16px var(--f-body); color: var(--ink); background: var(--paper); border: 2px solid var(--edge); border-radius: 6px; padding: 7px 9px; width: 100%; }
 .read { background: var(--paper-2); border: 2px dashed var(--rule-strong); border-radius: 8px; padding: var(--s-3) var(--s-4); font-size: 15.5px; display: grid; gap: 7px; min-width: 0; }
 .read b { font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -111,6 +121,63 @@ table.mx input { width: 76px; padding: 5px 6px; text-align: right; font: 400 14p
 .game .br { color: var(--leaf); font-weight: 700; }
 .bar { height: 11px; border-radius: 6px; background: var(--rule-soft); border: 1.5px solid var(--rule-strong); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--water); }
+
+/* ---------- layout didático ---------- */
+.gancho { margin: var(--s-3) 0 0; max-width: 24ch; font: 800 clamp(24px, 3.6vw, 34px)/1.15 var(--f-display); font-style: italic; color: var(--terra); font-variation-settings: "SOFT" 100, "WONK" 1; }
+.head .lead { font-size: 18px; }
+.more { margin-top: var(--s-3); font: 700 15px var(--f-body); color: var(--area-ink); background: none; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline wavy; text-underline-offset: 5px; text-decoration-thickness: 1.5px; }
+.more:hover { color: var(--terra); }
+.detalhes { margin-top: var(--s-3); max-width: 64ch; padding: var(--s-3) var(--s-4); background: var(--note-1); border: 2px solid var(--edge); border-radius: 4px 10px 6px 12px; box-shadow: var(--hard-sm); animation: rise .25s ease; }
+.detalhes p { margin: 0; font-size: 16px; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.ctx { background: var(--card); border: 2px solid var(--edge); border-radius: var(--r-card); box-shadow: var(--hard); overflow: hidden; }
+.tabs { display: flex; flex-wrap: wrap; border-bottom: 2px solid var(--edge); background: var(--paper-2); }
+.tab { display: inline-flex; align-items: center; gap: 8px; font: 700 15px var(--f-body); color: var(--ink); background: none; border: 0; border-right: 2px solid var(--edge); padding: 11px 18px; cursor: pointer; transition: background .15s; }
+.tab:last-child { border-right: 0; }
+.tab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tab:hover { background: var(--note-1); }
+.tab[aria-selected="true"] { background: var(--area-fill); color: #1d140c; }
+.tabpanel { padding: var(--s-4) var(--s-5); animation: rise .22s ease; }
+.tabpanel p { margin: 0; max-width: 68ch; }
+
+.py-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-2); }
+.py-head .py { margin: 0; }
+main h3.py { margin-bottom: 0; }
+
+.meter { display: grid; gap: 4px; }
+.meter-track { position: relative; display: flex; height: 16px; border: 2px solid var(--edge); border-radius: 9px; overflow: visible; background: var(--paper-2); }
+.meter-track i { display: block; height: 100%; }
+.meter-track .g { width: 50%; background: var(--leaf); border-radius: 7px 0 0 7px; }
+.meter-track .y { width: 25%; background: var(--wheat); }
+.meter-track .r { width: 25%; background: var(--alert); border-radius: 0 7px 7px 0; }
+.meter-track .pin { position: absolute; top: -9px; left: 0; width: 18px; height: 32px; margin-left: -9px; background: var(--card); border: 2.5px solid var(--edge); border-radius: 6px; box-shadow: 2px 2px 0 var(--shadow); transition: left .35s cubic-bezier(.3, 1.4, .5, 1); }
+.meter-lbl { display: flex; justify-content: space-between; font: 700 11px var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.meter.flash .meter-track { animation: flash .7s ease; }
+@keyframes flash { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 40% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--leaf) 55%, transparent); } }
+.msg { margin: 0; padding: 9px 12px; font-weight: 700; border-left: 5px solid var(--rule-strong); background: var(--paper-2); border-radius: 0 8px 8px 0; min-height: 3.2em; }
+.msg[data-level="ok"] { border-left-color: var(--leaf); }
+.msg[data-level="mid"] { border-left-color: var(--wheat); }
+.msg[data-level="bad"] { border-left-color: var(--alert); }
+.formula { padding: 10px 12px; background: var(--paper); border: 2px dashed var(--rule-strong); border-radius: 8px; overflow-x: auto; font-size: 17px; }
+.formula .katex { font-size: 1.05em; }
+.hint { margin: 0; font-size: 14px; color: var(--ink-soft); }
+
+.goals-title { font: 700 30px/1 var(--f-hand); color: var(--area-ink); margin-bottom: var(--s-2); }
+.extra:empty { display: none; }
+.extra { background: var(--note-1); border: 2px solid var(--edge); border-radius: 4px 12px 6px 14px; box-shadow: var(--hard); padding: var(--s-4) var(--s-5); }
+.goals { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.goal { display: flex; align-items: flex-start; gap: var(--s-3); padding: 8px 10px; border-radius: 8px; border: 2px solid transparent; transition: background .2s; }
+.goal.active { background: color-mix(in srgb, var(--card) 70%, transparent); border-color: var(--edge); border-style: dashed; }
+.goal-mark { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border: 2px solid var(--edge); border-radius: 50% 8px 50% 8px; background: var(--card); }
+.goal-mark svg { width: 18px; height: 18px; fill: none; stroke: var(--leaf); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 26; stroke-dashoffset: 26; }
+.goal.done .goal-mark { background: var(--leaf); }
+.goal.done .goal-mark svg { stroke: #fff; stroke-dashoffset: 0; transition: stroke-dashoffset .4s ease .1s; }
+.goal.done > span:last-child { text-decoration: line-through; text-decoration-color: var(--leaf); text-decoration-thickness: 2px; color: var(--ink-soft); }
+.goal.just { animation: pop .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes pop { 0% { transform: scale(.96); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.goal-msg { margin: var(--s-3) 0 0; min-height: 1.5em; font: 700 24px/1.1 var(--f-hand); color: var(--leaf); }
+@media (prefers-reduced-motion: reduce) { .detalhes, .tabpanel, .goal.just, .meter.flash .meter-track { animation: none !important; } }
 
 footer { max-width: 1120px; margin: var(--s-7) auto 0; font: 500 22px/1.3 var(--f-hand); color: var(--ink-soft); transform: rotate(-.6deg); }
 

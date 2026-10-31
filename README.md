@@ -13,7 +13,8 @@ Laboratório interativo para revisar a matemática da graduação em Engenharia 
 ## Estrutura
 
 - `index.html`: estrutura da página.
-- `styles.css`: tema claro e escuro, layout e componentes.
+- `tokens.css`: tokens de design (paleta de papel, cores por área, fontes, espaçamentos, tema escuro).
+- `styles.css`: layout e componentes, sempre lendo os tokens.
 - `app.js`: ferramentas de gráfico e interface, os módulos (cada um com sua aplicação, laboratório e código Python) e a navegação.
 
 ## Rodar localmente

@@ -8,9 +8,9 @@ let N = 0, onLeave = null;
 function ctl(panel, label, min, max, step, val, show, on) {
   const d = document.createElement("label"); d.className = "ctl";
   d.innerHTML = `<span class="cl">${label}</span><input id="c${N++}" type="range" min="${min}" max="${max}" step="${step}" value="${val}"><output></output>`;
-  const i = d.querySelector("input"), o = d.querySelector("output");
-  const upd = () => { o.textContent = show(+i.value); };
-  i.addEventListener("input", () => { upd(); on(+i.value); });
+  const i = d.querySelector("input"), o = d.querySelector("output"); let bump = 0;
+  const upd = () => { o.textContent = show(+i.value); i.style.setProperty("--fill", (i.value - min) / (max - min) * 100 + "%"); };
+  i.addEventListener("input", () => { upd(); on(+i.value); o.classList.add("bump"); clearTimeout(bump); bump = setTimeout(() => o.classList.remove("bump"), 160); });
   upd(); panel.appendChild(d);
   return {get: () => +i.value, set: v => { i.value = v; upd(); }};
 }
@@ -925,16 +925,44 @@ function heatImage(S) {
 }
 const fact = n => n <= 1 ? 1 : n * fact(n - 1);
 
-MODS.push({id: "taylor", grupo: "Cálculo", nome: "Séries de Taylor",
-  lead: "Perto de um ponto, uma função suave parece um polinômio. Com 1 termo é a tangente, com 2 é uma parábola que acompanha a curvatura, e cada termo novo estende a faixa em que a aproximação vale.",
-  campo: "Em torno do ponto de operação, a resposta da cultura a uma pequena mudança de dose ou de temperatura cabe numa reta ou numa parábola. Por isso modelos locais servem para ajuste fino e falham ao extrapolar.",
-  dia: "É como calculadoras e bibliotecas calculam sen, exp e log. A tangente (ordem 1) e a parábola (ordem 2) sustentam o método de Newton e as otimizações de segunda ordem.",
-  python: `import sympy as sp
+const frac = v => { for (let q = 1; q <= 720; q++) { const p = Math.round(v * q); if (p > 0 && p <= 24 && Math.abs(p / q - v) < 1e-9) return [p, q]; } return null; };
+const texNum = v => (+v.toFixed(4)).toString().replace(".", "{,}");
+/* monta o polinômio de Taylor em LaTeX: sem termos nulos, sem sinais duplicados, com frações e potências reais */
+function taylorTex(F, n, a) {
+  const base = Math.abs(a) < 1e-9 ? "x" : a > 0 ? `(x-${texNum(a)})` : `(x+${texNum(-a)})`, parts = []; let more = false;
+  for (let j = 0; j <= n; j++) {
+    const c = F.dn(j, a) / fact(j); if (Math.abs(c) < 1e-9) continue;
+    if (parts.length >= 6) { more = true; break; }
+    const v = Math.abs(c), pw = j === 0 ? "" : j === 1 ? base : `${base}^{${j}}`, fr = frac(v), sp = j === 0 ? "" : "\\," + pw; let body;
+    if (fr && fr[1] === 1) body = j === 0 ? `${fr[0]}` : fr[0] === 1 ? pw : `${fr[0]}${sp}`;
+    else if (fr) body = j === 0 ? `\\frac{${fr[0]}}{${fr[1]}}` : `\\frac{${fr[0] === 1 ? "" : fr[0] + "\\,"}${pw}}{${fr[1]}}`;
+    else if (v >= 0.001) body = `${texNum(v)}${sp}`;
+    else { const e = Math.floor(Math.log10(v)); body = `${texNum(v / 10 ** e)}\\cdot10^{${e}}${sp}`; }
+    parts.push({neg: c < 0, body});
+  }
+  if (!parts.length) return `P_{${n}}(x)=0`;
+  return `P_{${n}}(x)=${parts[0].neg ? "-" : ""}${parts[0].body}${parts.slice(1).map(p => (p.neg ? "-" : "+") + p.body).join("")}${more ? "+\\cdots" : ""}`;
+}
 
-x = sp.symbols('x')
-print(sp.series(sp.sin(x), x, 0, 8))    # x - x**3/6 + x**5/120 - x**7/5040 + O(x**8)
-print(sp.series(sp.exp(x), x, 1, 4))    # expansão em torno de x = 1`,
-  build(stage, panel) {
+MODS.push({id: "taylor", grupo: "Cálculo", nome: "Séries de Taylor",
+  gancho: "Por que uma reta serve para prever a curva aqui, mas não ali?",
+  resumo: "Perto de um ponto, qualquer curva suave parece um polinômio. Cada termo novo estica a faixa onde a aproximação vale.",
+  detalhes: "Cada termo vem de uma derivada no centro a: f(a) dá a altura, f′(a) a inclinação, f″(a) a curvatura, e assim por diante. Com um termo você tem a tangente. Com dois, uma parábola que acompanha a curva. A faixa verde do gráfico mostra onde o erro fica abaixo de 5% do tamanho da função. Longe do centro a aproximação se desfaz. Em funções como ln(1 + x) existe até um limite de distância que nenhum número de termos consegue ultrapassar.",
+  campo: "Em torno do ponto de operação, a resposta da cultura a uma pequena mudança de dose ou de temperatura cabe numa reta ou numa parábola. Por isso modelos locais servem para ajuste fino e falham quando você extrapola.",
+  dia: "É assim que calculadoras e bibliotecas calculam sen, exp e log. A tangente (ordem 1) e a parábola (ordem 2) sustentam o método de Newton e as otimizações de segunda ordem.",
+  python: `import sympy as sp                      # biblioteca de matemática simbólica
+
+x = sp.symbols('x')                     # x vira uma variável simbólica, não um número
+f = sp.sin(x)                           # a função que queremos aproximar
+a, n = 0, 7                             # centro da aproximação e ordem do polinômio
+
+serie = sp.series(f, x, a, n + 1)       # expande f em torno de a, até o termo de ordem n
+P = serie.removeO()                     # tira o resto O(x**8) e deixa só o polinômio
+print(P)                                # x - x**3/6 + x**5/120 - x**7/5040
+
+erro = abs(f.subs(x, 3) - P.subs(x, 3)) # compara f e P num ponto de teste, x = 3
+print(float(erro))                      # quanto a aproximação erra ali`,
+  build(stage, panel, extra) {
     const sc = {a0: -4.2, a1: 4.2, x0: -7, x1: 7, y0: -2.2, y1: 2.2};
     const FS = [
       {nome: "sen x", f: Math.sin, dn: (n, a) => [Math.sin(a), Math.cos(a), -Math.sin(a), -Math.cos(a)][n % 4], ...sc},
@@ -942,19 +970,48 @@ print(sp.series(sp.exp(x), x, 1, 4))    # expansão em torno de x = 1`,
       {nome: "eˣ", f: Math.exp, dn: (n, a) => Math.exp(a), a0: -2, a1: 2, x0: -4, x1: 4, y0: -2, y1: 20},
       {nome: "ln(1 + x)", f: x => Math.log(1 + x), dn: (n, a) => n === 0 ? Math.log(1 + a) : (n % 2 ? 1 : -1) * fact(n - 1) / Math.pow(1 + a, n), a0: 0, a1: 3, x0: -0.95, x1: 5, y0: -3, y1: 2.5}
     ];
-    let k = 0; const c = canvas(stage, 360); const R = readout(panel);
+    const G = [
+      {t: "Mova o ponto de teste até o erro ficar menor que 0,01, a pelo menos 0,5 de distância do centro.", ok: s => s.err < 0.01 && Math.abs(s.x - s.a) >= 0.5, win: () => "Acertou! Dá para confiar no polinômio nesse ponto."},
+      {t: "Deixe só a tangente (ordem 1) e ache um ponto de teste onde o erro passe de 1.", ok: s => s.n === 1 && s.err > 1, win: () => "Isso mesmo: uma reta só segura a curva por perto."},
+      {t: "No sen x, com centro em 0, chegue em x ≈ 3 com erro menor que 0,01. Qual a menor ordem que serve?", ok: s => s.k === 0 && Math.abs(s.a) <= 0.15 && Math.abs(s.x - 3) <= 0.12 && s.err < 0.01, win: s => `Acertou! Precisou de ordem ${s.n}. Dá para tentar com menos?`}
+    ];
+    const done = G.map(() => false); let k = 0; const c = canvas(stage, 380);
     const cen = a => (a - FS[k].a0) / (FS[k].a1 - FS[k].a0), A = () => FS[k].a0 + as.get() * (FS[k].a1 - FS[k].a0), XT = () => FS[k].x0 + xt.get() * (FS[k].x1 - FS[k].x0);
     const s = sel(panel, "Função", FS.map(f => f.nome), v => { k = v; as.set(cen(0)); xt.set(clamp((1 - FS[k].x0) / (FS[k].x1 - FS[k].x0), 0, 1)); draw(); }); panel.insertBefore(s.parentElement, panel.firstChild);
     const ns = ctl(panel, "Ordem do polinômio", 0, 12, 1, 3, v => v, draw), as = ctl(panel, "Centro a", 0, 1, 0.005, 0.5, v => fmt(FS[k].a0 + v * (FS[k].a1 - FS[k].a0), 2), draw), xt = ctl(panel, "Ponto de teste x", 0, 1, 0.005, 0.8, v => fmt(FS[k].x0 + v * (FS[k].x1 - FS[k].x0), 2), draw);
+    panel.insertAdjacentHTML("beforeend", `<div class="meter"><div class="meter-track" role="img" aria-label="Medidor de erro"><i class="g"></i><i class="y"></i><i class="r"></i><b class="pin"></b></div><div class="meter-lbl"><span>quase igual</span><span>perdida</span></div></div>
+      <p class="msg" role="status"></p><div class="formula" aria-label="Polinômio de Taylor"></div><p class="hint"></p>`);
+    const pin = $(".pin", panel), msg = $(".msg", panel), fml = $(".formula", panel), hint = $(".hint", panel), meter = $(".meter", panel);
+    extra.innerHTML = `<h3 class="goals-title">Desafios</h3><ol class="goals">${G.map((g, i) => `<li class="goal" data-i="${i}"><span class="goal-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13l5 5L20 6"/></svg></span><span>${g.t}</span></li>`).join("")}</ol><p class="goal-msg" role="status"></p>`;
     const P = (F, n, a, x) => { let s = 0; for (let j = 0; j <= n; j++) s += F.dn(j, a) / fact(j) * (x - a) ** j; return s; };
     function draw() {
-      const F = FS[k], n = ns.get(), a = A(), x = XT(), p = plane(c, F.x0, F.x1, F.y0, F.y1, "x", "y");
+      const F = FS[k], n = ns.get(), a = A(), x = XT(), fx = F.f(x), px = P(F, n, a, x), err = Math.abs(fx - px);
+      const good = t => Math.abs(F.f(t) - P(F, n, a, t)) <= 0.05 * Math.max(1, Math.abs(F.f(t))), dt = (F.x1 - F.x0) / 600; let xl = a, xr = a;
+      while (xr + dt <= F.x1 && good(xr + dt)) xr += dt; while (xl - dt >= F.x0 && good(xl - dt)) xl -= dt;
+      const p = plane(c, F.x0, F.x1, F.y0, F.y1, "x", "y"), g = p.g;
+      p.clip(); g.globalAlpha = 0.17; g.fillStyle = css("--leaf"); g.fillRect(p.X(xl), p.m.t, p.X(xr) - p.X(xl), p.h - p.m.t - p.m.b); g.restore(); g.globalAlpha = 1;
+      p.line(xl, F.y0, xl, F.y1, css("--leaf"), 1.5, [5, 4]); p.line(xr, F.y0, xr, F.y1, css("--leaf"), 1.5, [5, 4]);
+      if (p.X(xr) - p.X(xl) > 74) { g.font = `700 20px ${css("--f-hand")}`; g.fillStyle = css("--leaf"); g.textAlign = "left"; g.textBaseline = "top"; g.fillText("faixa boa", p.X(xl) + 8, p.m.t + 6); }
       p.curve(F.f, css("--curve"), 3); p.curve(t => P(F, n, a, t), css("--amber"), 2.5); p.dot(a, F.f(a), css("--good"), 6);
-      p.line(x, F.y0, x, F.y1, css("--muted"), 1, [4, 4]); p.dot(x, F.f(x), css("--curve"), 4); p.dot(x, P(F, n, a, x), css("--amber"), 4);
-      const co = Array.from({length: Math.min(n, 4) + 1}, (_, j) => `${fmt(F.dn(j, a) / fact(j), 4)}${j ? "·(x−a)" + (j > 1 ? "^" + j : "") : ""}`).join(" + ") + (n > 4 ? " + …" : "");
-      const fx = F.f(x), px = P(F, n, a, x), nome = n === 0 ? "constante" : n === 1 ? "a tangente em a" : n === 2 ? "a parábola que acompanha a curvatura" : "polinômio de ordem " + n;
-      R.innerHTML = `<div class="am">P${n === 1 ? "₁" : n === 2 ? "₂" : "ₙ"}(x) = ${co}</div><div>ordem ${n}: ${nome}</div><div>em x = ${fmt(x, 2)}: f = <b>${fmt(fx, 4)}</b> · P = <b>${fmt(px, 4)}</b></div>
-        <div class="${Math.abs(fx - px) < 0.01 * Math.max(1, Math.abs(fx)) ? "ok" : "no"}">erro absoluto: <b>${fmt(Math.abs(fx - px), 5)}</b></div><div>Azul = função, laranja = polinômio, ponto verde = centro. Longe do centro a aproximação se desfaz; mais termos alargam a faixa boa.${k === 3 ? " O ln(1+x) só converge perto do centro: a série tem raio limitado." : ""}</div>`;
+      p.line(x, F.y0, x, F.y1, css("--muted"), 1, [4, 4]); p.dot(x, fx, css("--curve"), 4.5); p.dot(x, px, css("--amber"), 4.5);
+      const rel = err / Math.max(1, Math.abs(fx)), lvl = rel < 0.01 ? "ok" : rel < 0.1 ? "mid" : "bad";
+      pin.style.left = clamp((Math.log10(Math.max(rel, 1e-4)) + 4) / 4, 0, 1) * 100 + "%"; meter.dataset.level = lvl;
+      $(".meter-track", panel).setAttribute("aria-label", `Medidor de erro: ${lvl === "ok" ? "bom" : lvl === "mid" ? "aceitável" : "aproximação perdida"}`);
+      const beyond = k === 3 && Math.abs(x - a) > 1 + a;
+      msg.dataset.level = lvl;
+      msg.textContent = lvl === "ok" ? (rel < 0.0005 ? "Colados: aqui a curva e o polinômio quase não se distinguem." : "Bateu. A aproximação funciona neste ponto.")
+        : lvl === "mid" ? "Dá para usar, mas já dá para ver a diferença."
+        : beyond ? "Aqui a série do ln(1 + x) nunca fecha: ela só vale até 1 + a de distância do centro. Mais termos não resolvem."
+        : n < 12 ? "Aqui a aproximação já se perdeu. Tente aumentar a ordem ou chegar mais perto do centro." : "Mesmo com ordem alta, esse ponto está longe demais do centro. Mova o centro para perto dele.";
+      tex(fml, taylorTex(F, n, a));
+      hint.textContent = `Faixa boa: de x = ${fmt(xl, 2)} até ${fmt(xr, 2)}. Diferença neste ponto: ${fmt(err, 4)}.`;
+      const st = {k, n, a, x, err};
+      G.forEach((gl, i) => { if (!done[i] && gl.ok(st)) {
+        done[i] = true; const li = $(`.goal[data-i="${i}"]`, extra); li.classList.add("done", "just"); $(".goal-msg", extra).textContent = gl.win(st);
+        meter.classList.remove("flash"); void meter.offsetWidth; meter.classList.add("flash");
+        window.dispatchEvent(new CustomEvent("mc:goal", {detail: {module: "taylor", index: i}}));
+      } });
+      const next = done.indexOf(false); extra.querySelectorAll(".goal").forEach((li, i) => li.classList.toggle("active", i === next));
     }
     draw(); return draw;
   }});
@@ -1097,12 +1154,50 @@ function show(id) {
   try { localStorage.setItem("mc-mod", m.id); } catch (e) {}
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === m.id));
   const main = $("#main"); main.dataset.area = AREA[m.grupo];
-  main.innerHTML = `<div><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="lead">${m.lead}</p></div>
+  if (m.gancho) layoutDidatico(m, main);
+  else {
+    main.innerHTML = `<div><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="lead">${m.lead}</p></div>
     <div class="uses"><section><h3>No campo</h3><p>${m.campo}</p></section><section><h3>No dia a dia</h3><p>${m.dia}</p></section><section class="me"><h3>No seu trabalho</h3><p>${IA[m.id]}</p></section></div>
     <div class="lab"><div class="stage"></div><div class="panel"></div></div>
     <div><h3 class="py">Em Python</h3><pre><code></code></pre></div>`;
+    $("pre code", main).textContent = m.python;
+  }
+  redraw = m.build($(".stage", main), $(".panel", main), $(".extra", main));
+}
+
+/* ---------- layout didático: gancho, laboratório primeiro, contextos em abas, Python com cópia ---------- */
+const ICONS = {
+  campo: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6z"/><path d="M12 15c0-3-2.5-5-6-5 0 3.5 2.5 5 6 5z"/></svg>`,
+  dia: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/></svg>`,
+  trabalho: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20M10 9l-2 2 2 2M14 9l2 2-2 2"/></svg>`
+};
+function tex(el, s) {
+  if (window.katex) { try { katex.render(s, el, {throwOnError: false}); return; } catch (e) {} }
+  el.textContent = s.replace(/\\[a-z]+|[{}]/g, "");
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  const t = document.createElement("textarea"); t.value = text; t.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(t); t.select();
+  let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove(); return ok;
+}
+function layoutDidatico(m, main) {
+  const ctx = [["campo", "No campo", m.campo], ["dia", "No dia a dia", m.dia], ["trabalho", "No seu trabalho", IA[m.id]]];
+  main.innerHTML = `<div class="head"><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="gancho">${m.gancho}</p>
+      <p class="lead">${m.resumo}</p>
+      <button class="more" type="button" aria-expanded="false" aria-controls="detalhes">Quero mais detalhes</button><div class="detalhes" id="detalhes" hidden><p>${m.detalhes}</p></div></div>
+    <div class="lab"><div class="stage"></div><div class="panel"></div></div>
+    <div class="extra"></div>
+    <section class="ctx" aria-label="Onde isso aparece"><div class="tabs" role="tablist">${ctx.map(([id, nome], i) => `<button class="tab" role="tab" type="button" id="tab-${id}" aria-selected="${i === 0}" aria-controls="pn-${id}" tabindex="${i === 0 ? 0 : -1}">${ICONS[id]}<span>${nome}</span></button>`).join("")}</div>
+      ${ctx.map(([id, , txt], i) => `<div class="tabpanel" role="tabpanel" id="pn-${id}" aria-labelledby="tab-${id}" ${i ? "hidden" : ""}><p>${txt}</p></div>`).join("")}</section>
+    <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
   $("pre code", main).textContent = m.python;
-  redraw = m.build($(".stage", main), $(".panel", main));
+  const more = $(".more", main), det = $("#detalhes", main);
+  more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };
+  const tabs = [...main.querySelectorAll(".tab")];
+  const pick = i => tabs.forEach((t, j) => { t.setAttribute("aria-selected", i === j); t.tabIndex = i === j ? 0 : -1; $("#" + t.getAttribute("aria-controls"), main).hidden = i !== j; });
+  tabs.forEach((t, i) => { t.onclick = () => pick(i); t.onkeydown = e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const j = (i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length; pick(j); tabs[j].focus(); } }; });
+  const cp = $(".copy", main); let tm = 0;
+  cp.onclick = async () => { const ok = await copyText(m.python); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; clearTimeout(tm); tm = setTimeout(() => { cp.textContent = "Copiar código"; }, 1800); };
 }
 const nav = $("#nav");
 [...new Set(MODS.map(m => m.grupo))].forEach(g => {
