@@ -50,7 +50,7 @@
 
   class ExplainerPlayer {
     constructor(host, script, opts = {}) {
-      this.host = host; this.script = script; this.opts = {legendas: true, autoplayNaTela: false, ...opts}; this.i = 0; this.legendas = this.opts.legendas; this.voz = "speechSynthesis" in window; this.som = this.voz && this.opts.som !== false; this.vozK = null;
+      this.host = host; this.script = script; this.opts = {legendas: true, autoplayNaTela: false, ...opts}; this.i = 0; this.legendas = this.opts.legendas; this.voz = "speechSynthesis" in window; this.som = this.voz && this.opts.som !== false; this.vozK = null; this.vozFalando = 0; this.segurando = false;
       if (!window.gsap) { host.innerHTML = `<p class="expl-aviso">Não consegui carregar o motor de animação. A transcrição está abaixo.</p>` + this.transcricaoHTML(this.compilar()); return; }
       this.pecas = this.compilar(); this.estatico = reduzido();
       this.montar(); this.hud = new Explainer.Hud(this); this.construirTimeline(); this.ligar(); this.sync();
@@ -138,25 +138,47 @@
       if (this.estatico) { q(".eb-play").hidden = true; q(".expl-sp").hidden = true; q(".eb-restart").hidden = true; this.ir(this.fimDe(this.pecas[0])); }
     }
     play() { if (this.estatico) return; if (this.tl.progress() >= 1) this.tl.restart(); else this.tl.play(); this.atualizarPlay(); }
-    pause() { this.tl.pause(); this.atualizarPlay(); }
-    alternar() { this.tl.paused() || this.tl.progress() >= 1 ? this.play() : this.pause(); }
+    pause() { this.segurando = false; this.tl.pause(); this.pararVoz(); this.atualizarPlay(); }
+    alternar() { if (this.segurando) return this.pause(); this.tl.paused() || this.tl.progress() >= 1 ? this.play() : this.pause(); }
     reiniciar() { if (this.estatico) return this.ir(this.fimDe(this.pecas[0])); this.tl.restart(); this.atualizarPlay(); }
-    ir(t) { if (this.voz) this.pararVoz(); const tocando = !this.tl.paused(); this.tl.time(Math.min(t, this.total)); if (!tocando) this.tl.pause(); this.sync(); this.atualizarPlay(); }
+    ir(t) { const tocando = !this.tl.paused() || this.segurando; this.segurando = false; if (this.voz) this.pararVoz(); this.tl.time(Math.min(t, this.total)); if (!tocando) this.tl.pause(); else if (this.tl.paused()) this.tl.play(); this.sync(); this.atualizarPlay(); }
     atual() { const t = this.tl.time(); let k = 0; this.pecas.forEach(p => { if (t >= p.start - 1e-6) k = p.k; }); return k; }
     anterior() { const p = this.pecas[this.atual()], t = this.tl.time(); this.irPeca(this.estatico || t - p.start < 1.5 ? Math.max(0, p.k - 1) : p.k); }
     proxima() { const k = this.atual(); if (k >= this.pecas.length - 1) return this.estatico ? null : this.ir(this.total); this.irPeca(k + 1); }
     irPeca(k) { const p = this.pecas[k]; this.ir(this.estatico ? this.fimDe(p) : p.start); }
     fimDe(p) { return p.start + p.dur - 0.01; }
     aoFim() { this.pararVoz(); this.atualizarPlay(); this.host.dispatchEvent(new CustomEvent("expl:fim", {bubbles: true, detail: {id: this.script.meta.id}})); }
-    atualizarPlay() { const tocando = !this.tl.paused() && this.tl.progress() < 1, b = this.host.querySelector(".eb-play"); this.host.classList.toggle("expl-tocando", tocando); b.setAttribute("aria-label", tocando ? "Pausar" : "Tocar"); }
+    atualizarPlay() { const tocando = (!this.tl.paused() || this.segurando) && this.tl.progress() < 1, b = this.host.querySelector(".eb-play"); this.host.classList.toggle("expl-tocando", tocando); b.setAttribute("aria-label", tocando ? "Pausar" : "Tocar"); }
 
     /* ---------- narração em voz (voz do navegador; áudio gravado entra depois) ---------- */
-    pararVoz() { if (this.voz) speechSynthesis.cancel(); this.vozK = null; }
+    /* Cada frase vira uma fala própria, enfileirada sem cortar a anterior. Se a fala passar do tempo da peça,
+       a linha do tempo espera o fim dela (segurando) em vez de pular para a cena seguinte. */
+    escolherVoz() {
+      if (this.vozEscolhida !== undefined) return this.vozEscolhida;
+      const vs = speechSynthesis.getVoices().filter(v => /^pt/i.test(v.lang)); if (!vs.length) return null;
+      const nota = v => (/pt-BR/i.test(v.lang) ? 20 : 0) + (/natural|neural|online/i.test(v.name) ? 40 : 0) + (/google/i.test(v.name) ? 15 : 0) + (/francisca|antonio|thalita|camila|vitoria|luciana|maria/i.test(v.name) ? 8 : 0) + (v.localService ? 0 : 3);
+      this.vozEscolhida = vs.sort((a, b) => nota(b) - nota(a))[0]; return this.vozEscolhida;
+    }
+    pararVoz() { if (this.voz) { this.vozGen = (this.vozGen || 0) + 1; speechSynthesis.cancel(); } this.vozK = null; this.vozFalando = 0; }
+    vozFim() { if (this.segurando) { this.segurando = false; this.tl.play(); this.atualizarPlay(); } }
     falar(p, t) {
-      const rel = t - p.start, resto = p.words.filter(w => w.e > rel + 0.05); this.vozK = p.k; if (!resto.length) return;
-      const u = new SpeechSynthesisUtterance(resto.map(w => w.t).join(" ")), vozes = speechSynthesis.getVoices();
-      u.lang = "pt-BR"; u.voice = vozes.find(v => /pt-BR/i.test(v.lang)) || vozes.find(v => /^pt/i.test(v.lang)) || null; u.rate = Math.min(1.5, Math.max(0.7, 0.92 * this.tl.timeScale()));
-      speechSynthesis.cancel(); speechSynthesis.speak(u);
+      this.vozK = p.k; const gen = this.vozGen = (this.vozGen || 0) + 1, ts = this.tl.timeScale(), rel = t - p.start;
+      const falas = p.frases.map(f => ({f, ws: f.words.filter(w => w.e > rel + 0.05)})).filter(x => x.ws.length);
+      speechSynthesis.cancel(); this.vozFalando = falas.length; if (!falas.length) return;
+      const voz = this.escolherVoz(), neural = voz && /natural|neural|online/i.test(voz.name), base = (neural ? 1 : 0.95) * (this.calibra || 1);
+      const planejado = (falas[falas.length - 1].ws.slice(-1)[0].e - falas[0].ws[0].s) / ts, completa = rel < 0.3; let ini = 0;
+      falas.forEach((x, i) => {
+        const u = new SpeechSynthesisUtterance(x.ws.map(w => w.t).join(" "));
+        u.lang = "pt-BR"; u.voice = voz; u.rate = Math.min(1.4, Math.max(0.8, base * ts)); u.pitch = 1;
+        if (i === 0) u.onstart = () => { if (gen === this.vozGen) ini = performance.now(); };
+        u.onend = u.onerror = ev => {
+          if (gen !== this.vozGen || (ev.type === "error" && /canceled|interrupted/.test(ev.error))) return;
+          if (--this.vozFalando > 0) return;
+          if (completa && ini && planejado > 1) this.calibra = Math.min(1.2, Math.max(0.85, (this.calibra || 1) * (1 + 0.5 * ((performance.now() - ini) / 1000 / planejado - 1)))); /* fala mais longa que a peça acelera um pouco a próxima */
+          this.vozFim();
+        };
+        speechSynthesis.speak(u);
+      });
     }
     destruir() { this.pararVoz(); if (this.io) this.io.disconnect(); if (this.tl) this.tl.kill(); }
 
@@ -168,7 +190,13 @@
       this.host.querySelector(".expl-tempo").textContent = `${fmtT(t)} / ${fmtT(this.total)}`;
       this.host.querySelectorAll(".seg").forEach(b => { const q = this.pecas[+b.dataset.k], f = Math.min(1, Math.max(0, (t - q.start) / q.dur)); b.style.setProperty("--f", f); b.classList.toggle("atual", q.k === k); });
       this.hud.atualizar(t, p, this.estatico);
-      if (this.voz) { const tocando = !this.tl.paused() && this.tl.progress() < 1 && !this.estatico; if (tocando && this.som) { if (this.vozK !== p.k) this.falar(p, t); } else if (this.vozK !== null) this.pararVoz(); }
+      if (this.voz) {
+        const tocando = !this.tl.paused() && this.tl.progress() < 1 && !this.estatico;
+        if (tocando && this.som) {
+          if (this.vozK !== p.k) this.falar(p, t);
+          else if (this.vozFalando > 0 && t >= p.start + p.words[p.words.length - 1].e) { this.segurando = true; this.tl.pause(); this.atualizarPlay(); }
+        } else if (!this.segurando && this.vozK !== null) this.pararVoz();
+      }
       if (!this.legendas) return;
       if (this.estatico) { if (this.fraseKey !== "e" + k) { this.fraseKey = "e" + k; this.cap.innerHTML = `<span class="frase">${p.words.map(w => `<span class="w on${w.hl ? " hl" : ""}">${esc(w.t)}</span>`).join(" ")}</span>`; } return; }
       const fr = p.frases.find(f => t >= f.s && t < f.e), chave = fr ? k + ":" + fr.s : "";
