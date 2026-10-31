@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demo do mini-vídeo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="player.css">
+<style>
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--f-body); padding: 24px max(16px, env(safe-area-inset-left, 0px)) 48px; }
+  main { max-width: 960px; margin: 0 auto; display: grid; gap: 16px; }
+  h1 { font: 800 clamp(28px, 5vw, 44px)/1.05 var(--f-display); margin: 0; }
+  p { margin: 0; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Demo do mini-vídeo</h1>
+  <p>Escolha o roteiro pela URL: <code>?v=teste</code> (padrão) ou <code>?v=taylor</code>. Espaço toca e pausa, as setas trocam de peça.</p>
+  <div id="player" data-area="calculo"></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
+<script src="player.js"></script>
+<script>
+  /* carrega o roteiro e a cena pedidos na URL e monta o player */
+  const v = new URLSearchParams(location.search).get("v") || "teste";
+  const carregar = src => new Promise((ok, erro) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => erro(new Error("Não achei " + src)); document.body.appendChild(s); });
+  carregar("../content/explainers/" + v + ".js").then(() => carregar("cenas/" + Explainers[v].meta.cena + "-cena.js"))
+    .then(() => { window.player = new Explainer.Player(document.getElementById("player"), Explainers[v]); })
+    .catch(e => { document.getElementById("player").textContent = e.message; });
+</script>
+</body>
+</html>
