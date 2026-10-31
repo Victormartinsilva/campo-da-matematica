@@ -124,11 +124,7 @@ const MODS = [];
 
 MODS.push({id: "funcao", grupo: "Cálculo", nome: "Funções",
   build(stage, panel, extra) {
-    const FN = [
-      {nome: "Frete: custo por distância (linear)", f: x => 120 + 3.5 * x, a: 0, b: 200, xu: "km", yu: "R$", eq: "C(x) = 120 + 3,5·x", xl: "distância (km)", yl: "custo (R$)"},
-      {nome: "Adubação: produtividade (quadrática)", f: x => 80 + 0.30 * x - 0.0009 * x * x, a: 0, b: 300, xu: "kg N/ha", yu: "sc/ha", eq: "y(x) = 80 + 0,30·x − 0,0009·x²", xl: "dose de N (kg/ha)", yl: "produtividade (sc/ha)"},
-      {nome: "Praga: população (exponencial)", f: t => 50 * Math.exp(0.22 * t), a: 0, b: 14, xu: "dias", yu: "indivíduos", eq: "N(t) = 50·e^(0,22·t)", xl: "tempo (dias)", yl: "população"}
-    ];
+    const FN = cenarios("funcao", ctxAtual).map(e => { const C = CURVA(e.curva); return {...e, f: C.f, eq: C.eq(e.simb[0], e.simb[1])}; });
     let k = 1; const c = canvas(stage); const R = readout(panel);
     const xs = ctl(panel, "Entrada x", 0, 1, 0.005, 0.5, v => fmt(FN[k].a + v * (FN[k].b - FN[k].a), 1) + " " + FN[k].xu, draw);
     const s = sel(panel, "Situação", FN.map(f => f.nome), v => { k = v; draw(); }); panel.insertBefore(s.parentElement, panel.firstChild); s.value = 1;
@@ -145,10 +141,10 @@ MODS.push({id: "funcao", grupo: "Cálculo", nome: "Funções",
     kit("funcao", extra, {
       state: () => { const F = FN[k], x = F.a + xs.get() * (F.b - F.a); return {k, x, y: F.f(x)}; },
       goals: [
-        {t: "Na adubação, ache uma dose em que a produtividade passe de 104 sc/ha.", ok: s => s.k === 1 && s.y > 104, win: () => "Achou o topo da curva: depois dele, mais adubo não ajuda."},
-        {t: "No frete, deixe o custo abaixo de R$ 300.", ok: s => s.k === 0 && s.y < 300, win: () => "Custo baixo: o frete cresce em linha reta com a distância."}
+        {t: `Em "${FN[1].nome}", ache uma entrada em que a saída passe de ${FN[1].meta} ${FN[1].yu}.`, ok: s => s.k === 1 && s.y > FN[1].meta, win: () => "Achou o topo da curva: depois dele, aumentar a entrada deixa de ajudar."},
+        {t: `Em "${FN[0].nome}", deixe a saída abaixo de ${FN[0].meta} ${FN[0].yu}.`, ok: s => s.k === 0 && s.y < FN[0].meta, win: () => "Saída baixa: nessa situação ela cresce em linha reta com a entrada."}
       ],
-      react: s => s.k === 2 ? ["A praga explode: cada dia multiplica a população.", "worried"] : s.k === 1 && s.y > 100 ? ["Está perto do topo da curva de produtividade.", "happy"] : ["Mude a entrada e acompanhe a saída.", "neutral"]
+      react: s => s.k === 2 ? ["O crescimento explode: cada passo multiplica o valor.", "worried"] : s.k === 1 && s.y > 0.96 * FN[1].meta ? ["Está perto do topo da curva.", "happy"] : ["Mude a entrada e acompanhe a saída.", "neutral"]
     });
     return draw;
   }});
@@ -192,11 +188,7 @@ MODS.push({id: "limite", grupo: "Cálculo", nome: "Limites",
 
 MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
   build(stage, panel, extra) {
-    const DF = [
-      {nome: "Produtividade × adubo", f: x => 80 + 0.30 * x - 0.0009 * x * x, df: x => 0.30 - 0.0018 * x, a: 0, b: 300, xu: "kg N/ha", yu: "sc/ha", x0: 100},
-      {nome: "Altura da planta × dias", f: t => 200 / (1 + Math.exp(-0.25 * (t - 20))), df: t => { const e = Math.exp(-0.25 * (t - 20)); return 50 * e / ((1 + e) ** 2); }, a: 0, b: 40, xu: "dia", yu: "cm", x0: 20},
-      {nome: "sen(x) (o clássico)", f: Math.sin, df: Math.cos, a: -6.28, b: 6.28, xu: "", yu: "", x0: 0}
-    ];
+    const DF = cenarios("derivada", ctxAtual).map(e => { const C = CURVA(e.curva); return {...e, f: C.f, df: C.df}; });
     let k = 0; const c = canvas(stage); const R = readout(panel);
     const c2 = canvas(stage, 170);
     const xs = ctl(panel, "Ponto x₀", 0, 1, 0.0025, 0.33, v => fmt(DF[k].a + v * (DF[k].b - DF[k].a), 2), draw);
@@ -222,7 +214,7 @@ MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
       state: () => { const F = DF[k], w = F.b - F.a, x0 = F.a + xs.get() * w, h = w * Math.pow(10, -hs.get()); return {k, x0, diff: Math.abs((F.f(x0 + h) - F.f(x0)) / h - F.df(x0))}; },
       goals: [
         {t: "Diminua h até a secante e a tangente diferirem menos que 0,001.", ok: s => s.diff < 0.001, win: () => "A secante virou tangente. Esse é o limite que define a derivada."},
-        {t: "Na altura da planta, ponha o ponto onde ela cresce mais rápido (perto de 20 dias).", ok: s => s.k === 1 && Math.abs(s.x0 - 20) < 1, win: () => "Aí está o pico de crescimento: a tangente é a mais inclinada."}
+        {t: `Em "${DF[1].nome}", ponha o ponto onde a taxa é máxima (perto de ${DF[1].x0} ${DF[1].xu}).`, ok: s => s.k === 1 && Math.abs(s.x0 - DF[1].x0) < 0.025 * (DF[1].b - DF[1].a), win: () => "Aí está o pico da taxa: a tangente é a mais inclinada."}
       ],
       react: s => s.diff < 0.001 ? ["Secante e tangente coladas.", "happy"] : s.diff > 1 ? ["Com h grande, a secante engana. Diminua h.", "worried"] : ["A secante está chegando perto da tangente.", "thinking"]
     });
@@ -231,46 +223,44 @@ MODS.push({id: "derivada", grupo: "Cálculo", nome: "Derivadas e tangentes",
 
 MODS.push({id: "maxmin", grupo: "Cálculo", nome: "Máximos e mínimos",
   build(stage, panel, extra) {
-    const A0 = 80, B = 0.30, C2 = 0.0009; const y = x => A0 + B * x - C2 * x * x;
-    const c = canvas(stage); const R = readout(panel); let x = 40;
-    const ps = ctl(panel, "Preço do milho", 30, 120, 1, 60, v => "R$ " + v + " / saca", draw);
-    const cs = ctl(panel, "Custo do nitrogênio", 2, 14, 0.5, 6, v => "R$ " + fmt(v, 1) + " / kg", draw);
-    const xs = ctl(panel, "Dose testada", 0, 300, 1, x, v => v + " kg N/ha", v => { x = v; draw(); });
+    const S = cenarios("maxmin", ctxAtual), {c0: A0, c1: B, c2: C2} = S.resp, XM = S.xmax, y = x => A0 + B * x - C2 * x * x, un = (v, u, d) => u.startsWith("R$") ? "R$ " + fmt(v, d) + u.slice(2) : fmt(v, d) + " " + u;
+    const lucroU = (S.yl.match(/\(([^)]+)\)/) || [])[1] || "", tol = Math.max(1, 0.01 * XM), otimo = (p, q) => clamp((B - q / p) / (2 * C2), 0, XM);
+    const c = canvas(stage); const R = readout(panel); let x = S.x0ini;
+    const ps = ctl(panel, S.preco.r, S.preco.min, S.preco.max, S.preco.step, S.preco.def, v => un(v, S.preco.un, S.preco.step < 1 ? 1 : 0), draw);
+    const cs = ctl(panel, S.custo.r, S.custo.min, S.custo.max, S.custo.step, S.custo.def, v => un(v, S.custo.un, S.custo.step < 1 ? 1 : 0), draw);
+    const xs = ctl(panel, S.testada, 0, XM, 1, x, v => v + " " + S.xu, v => { x = v; draw(); });
     const r = row(panel);
-    btn(r, "Dar um passo na subida", () => { const p = ps.get(), q = cs.get(); x = clamp(x + 0.5 * (p * (B - 2 * C2 * x) - q) / (2 * p * C2), 0, 300); xs.set(x); draw(); });
-    btn(r, "Reiniciar", () => { x = 40; xs.set(x); draw(); }, true);
+    btn(r, "Dar um passo na subida", () => { const p = ps.get(), q = cs.get(); x = clamp(x + 0.5 * (p * (B - 2 * C2 * x) - q) / (2 * p * C2), 0, XM); xs.set(x); draw(); });
+    btn(r, "Reiniciar", () => { x = S.x0ini; xs.set(x); draw(); }, true);
     function draw() {
       const p = ps.get(), q = cs.get(), L = z => p * y(z) - q * z, dL = z => p * (B - 2 * C2 * z) - q;
-      const xo = clamp((B - q / p) / (2 * C2), 0, 300), xm = B / (2 * C2), [lo, hi] = range(L, 0, 300), pad = (hi - lo) * 0.12;
-      const g = plane(c, 0, 300, lo - pad, hi + pad, "dose de N (kg/ha)", "lucro após adubo (R$/ha)");
+      const xo = otimo(p, q), xm = B / (2 * C2), [lo, hi] = range(L, 0, XM), pad = (hi - lo) * 0.12;
+      const g = plane(c, 0, XM, lo - pad, hi + pad, S.xl, S.yl);
       g.curve(L, css("--curve"));
       g.line(xm, lo - pad, xm, hi + pad, css("--amber"), 1.5, [6, 4]); g.line(xo, lo - pad, xo, hi + pad, css("--good"), 1.5, [6, 4]);
-      const m = dL(x); g.line(x - 50, L(x) - 50 * m, x + 50, L(x) + 50 * m, css("--amber"), 2);
+      const m = dL(x); g.line(x - XM / 6, L(x) - XM / 6 * m, x + XM / 6, L(x) + XM / 6 * m, css("--amber"), 2);
       g.dot(x, L(x), css("--amber")); g.dot(xo, L(xo), css("--good"), 6);
-      R.innerHTML = `<div>inclinação do lucro na dose testada: <b>${fmt(m, 2)}</b> R$/ha por kg</div>
-        <div class="ok">dose de lucro máximo: <b>${fmt(xo, 0)} kg/ha</b> (derivada = 0), lucro <b>R$ ${fmt(L(xo), 0)}</b></div>
-        <div class="am">dose de produção máxima: <b>${fmt(xm, 0)} kg/ha</b>, ${fmt(y(xm), 1)} sc/ha</div>
-        <div>Parar na dose de lucro economiza <b>${fmt(xm - xo, 0)} kg de N/ha</b> e perde só <b>${fmt(y(xm) - y(xo), 1)} sc/ha</b>.</div>
-        <div>Modelo ilustrativo: y = 80 + 0,30x − 0,0009x².</div>`;
+      R.innerHTML = `<div>inclinação do lucro no ponto testado: <b>${fmt(m, 2)}</b> ${lucroU} a mais para cada 1 ${S.xu} a mais</div>
+        <div class="ok">${S.ent} de lucro máximo: <b>${fmt(xo, 0)} ${S.xu}</b> (derivada = 0), lucro <b>${fmt(L(xo), 0)} ${lucroU}</b></div>
+        <div class="am">${S.ent} de resposta máxima: <b>${fmt(xm, 0)} ${S.xu}</b>, ${fmt(y(xm), 1)} ${S.yu}</div>
+        <div>Parar no ponto de lucro máximo economiza <b>${fmt(xm - xo, 0)} ${S.sub}</b> e perde só <b>${fmt(y(xm) - y(xo), 1)} ${S.yu}</b>.</div>
+        <div>Modelo ilustrativo: ${CURVA({tipo: "quad", p: S.resp}).eq("y", "x")}.</div>`;
     }
     draw();
     kit("maxmin", extra, {
-      state: () => { const p = ps.get(), q = cs.get(); return {p, x, xo: clamp((B - q / p) / (2 * C2), 0, 300)}; },
+      state: () => { const p = ps.get(), q = cs.get(); return {p, x, xo: otimo(p, q)}; },
       goals: [
-        {t: "Leve a dose testada até o ponto de lucro máximo (a até 3 kg/ha).", ok: s => Math.abs(s.x - s.xo) <= 3, win: () => "Topo do lucro. Aí a derivada vale zero."},
-        {t: "Suba o preço do milho acima de R$ 100 e ache a nova dose ótima.", ok: s => s.p > 100 && Math.abs(s.x - s.xo) <= 3, win: () => "Com milho mais caro, vale adubar mais. A dose ótima subiu."}
+        {t: `Leve o ponto testado até o lucro máximo (a até ${fmt(tol, 0)} ${S.xu}).`, ok: s => Math.abs(s.x - s.xo) <= tol, win: () => "Topo do lucro. Aí a derivada vale zero."},
+        {t: `Suba "${S.preco.r}" acima de ${S.precoAlto} e ache o novo ponto ótimo.`, ok: s => s.p > S.precoAlto && Math.abs(s.x - s.xo) <= tol, win: () => "Com cada unidade de resposta valendo mais, vale ir mais longe: o ponto ótimo subiu."}
       ],
-      react: s => Math.abs(s.x - s.xo) <= 3 ? ["Esse é o topo do lucro!", "happy"] : s.x > s.xo ? ["Passou da dose ótima: o último quilo custa mais do que rende.", "worried"] : ["Ainda dá para ganhar adubando mais.", "thinking"]
+      react: s => Math.abs(s.x - s.xo) <= tol ? ["Esse é o topo do lucro!", "happy"] : s.x > s.xo ? ["Passou do ponto ótimo: a última unidade custa mais do que rende.", "worried"] : ["Ainda dá para ganhar indo mais longe.", "thinking"]
     });
     return draw;
   }});
 
 MODS.push({id: "integral", grupo: "Cálculo", nome: "Integrais",
   build(stage, panel, extra) {
-    const PR = [
-      {nome: "Chuva: intensidade (mm/h) em 6 h", f: t => 12 * Math.exp(-t / 2), F: t => -24 * Math.exp(-t / 2), a: 0, b: 6, xl: "tempo (h)", yl: "mm/h", u: "mm"},
-      {nome: "Irrigação: vazão pulsante (L/min) em 10 min", f: t => 30 + 10 * Math.sin(t), F: t => 30 * t - 10 * Math.cos(t), a: 0, b: 10, xl: "tempo (min)", yl: "L/min", u: "L"}
-    ];
+    const PR = cenarios("integral", ctxAtual).map(e => { const C = CURVA(e.curva); return {...e, f: C.f, F: C.F}; });
     let k = 0, mt = 0; const c = canvas(stage); const R = readout(panel);
     const s = sel(panel, "Situação", PR.map(f => f.nome), v => { k = v; draw(); }); panel.insertBefore(s.parentElement, panel.firstChild);
     const ns = ctl(panel, "Número de retângulos", 1, 80, 1, 6, v => v, draw);
@@ -1326,7 +1316,15 @@ function layoutDidatico(m, main) {
     painel.innerHTML = ctxAtual === "todos" ? `<div class="ctx-todos">${CONTEXTOS.slice(1).map((c, i) => `<article class="ctx-nota n${i % 3}"><h4>${ICONS[c.id]}${c.nome}</h4><p>${T[c.id] || ""}</p></article>`).join("")}</div>` : `<p>${T[ctxAtual] || ""}</p>`;
     tabs.forEach(t => { const on = t.dataset.ctx === ctxAtual; t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1; });
   };
-  const escolher = id => { ctxAtual = id; try { localStorage.setItem("mc-ctx", id); } catch (e) {} pintar(); };
+  const labDe = c => ({todos: "agro", dia: "negocios"}[c] || c), lab = {stage: $(".stage", main), panel: $(".panel", main), extra: $(".extra", main)};
+  const reconstruir = () => {
+    if (!CENARIOS[m.id]) return;
+    if (onLeave) { onLeave(); onLeave = null; }
+    lab.stage.innerHTML = ""; lab.panel.innerHTML = ""; lab.extra.innerHTML = ""; N = 0;
+    redraw = m.build(lab.stage, lab.panel, lab.extra);
+    if (broto) broto.say("Troquei o cenário do laboratório para esse contexto.", "thinking");
+  };
+  const escolher = id => { const antes = labDe(ctxAtual); ctxAtual = id; try { localStorage.setItem("mc-ctx", id); } catch (e) {} pintar(); if (labDe(id) !== antes) reconstruir(); };
   tabs.forEach((t, i) => { t.onclick = () => escolher(t.dataset.ctx); t.onkeydown = e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const j = (i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length; escolher(tabs[j].dataset.ctx); tabs[j].focus(); } }; });
   pintar();
   const cp = $(".copy", main); let tm = 0;

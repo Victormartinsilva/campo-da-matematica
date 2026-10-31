@@ -17,6 +17,7 @@ Caderno interativo para revisar a matemática da graduação e levá-la a vário
 - `styles.css`: layout e componentes, sempre lendo os tokens.
 - `content.js`: o texto didático de cada assunto (gancho, resumo, detalhes e o Python comentado linha a linha).
 - `content/contextos.js`: a aplicação de cada assunto em cada contexto. Para criar um contexto novo, adicione-o em `CONTEXTOS` (app.js) e uma chave nova em cada assunto.
+- `content/cenarios.js` e `content/cenarios-outros.js`: os cenários dos laboratórios por contexto (curvas, unidades, rótulos e metas). Hoje cobrem Funções, Derivadas, Máximos e mínimos e Integrais. Os demais laboratórios ainda usam exemplos de agro.
 - `app.js`: ferramentas de gráfico e interface, os módulos (aplicações, laboratório, desafios e reações do Broto), o progresso e a navegação.
 
 ## Campo Vivo
