@@ -18,6 +18,18 @@ Laboratório interativo para revisar a matemática da graduação em Engenharia 
 - `content.js`: o texto didático de cada assunto (gancho, resumo, detalhes e o Python comentado linha a linha).
 - `app.js`: ferramentas de gráfico e interface, os módulos (aplicações, laboratório, desafios e reações do Broto), o progresso e a navegação.
 
+## Campo Vivo
+
+Aba "Meu campo" na navegação: um ecossistema em SVG que cresce com o seu estudo.
+
+- Concluir um assunto planta uma muda da espécie da área. Mexer no laboratório rega (uma vez por dia por assunto). Cumprir um desafio ou copiar o código aduba. Dias seguidos deixam o solo fértil e fazem nascer capim sozinho. Concluir assuntos libera biomas (pomar, mata ciliar). O tempo também faz crescer, com teto de 24 h desde a última visita.
+- `campo/config.js`: espécies, regras de L-System, biomas, assuntos ativos e pesos de crescimento. É o único arquivo para ajustar o jogo.
+- `campo/estado.js`: estado salvo em `mc-campo` (esquema versionado, com reset), tempo offline e crescimento.
+- `campo/lsystem.js`: expande as regras; cada estágio é uma iteração a mais.
+- `campo/cena.js`: cena SVG de cada bioma. `campo/campo.js`: aba, eventos do app e detalhe da planta. `campo/campo.css`: estilo.
+- O app fala com o Campo Vivo por eventos (`mc:done`, `mc:lab`, `mc:copy`, `mc:goal`) e por `CampoVivo.init(deps)`.
+- Protótipo: só Séries de Taylor e Regressão linear plantam. Para ligar outros assuntos, acrescente os ids em `assuntosAtivos` e a espécie da área em `areaEspecie`.
+
 ## Rodar localmente
 
 É uma página estática, sem build. Abra `index.html` no navegador ou sirva a pasta:

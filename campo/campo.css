@@ -1,0 +1,58 @@
+/* Campo Vivo: cena, biomas, plantas e painéis. Cores e formas vêm de tokens.css. */
+
+nav .grp.especial h4 { color: var(--leaf); }
+nav .grp.especial button { font-weight: 700; border-left-color: var(--leaf); }
+
+.campo { display: grid; gap: var(--s-5); }
+.campo-biomas { border: 2px solid var(--edge); border-radius: var(--r-card); box-shadow: var(--hard-sm); overflow: hidden; }
+.campo-biomas .tab[aria-disabled="true"] { opacity: .65; cursor: help; }
+.campo-cena { background: var(--card); border: 2px solid var(--edge); border-radius: var(--r-card); box-shadow: var(--hard); overflow: hidden; min-height: 0; }
+.campo-cena:empty { display: none; }
+.cena-svg { display: block; width: 100%; height: auto; }
+
+/* chão e céu de cada bioma */
+.cena-svg .ceu { fill: color-mix(in srgb, var(--water) 16%, var(--card)); }
+.cena-svg .terra { fill: color-mix(in srgb, var(--soil) 55%, var(--card)); }
+.cena-svg .grama { fill: color-mix(in srgb, var(--leaf) 38%, var(--card)); }
+.cena-svg .sol { fill: var(--wheat); stroke: var(--edge); stroke-width: 2; }
+.cena-svg .raio { stroke: var(--wheat); stroke-width: 3; stroke-linecap: round; }
+.cena-svg .sulco { fill: none; stroke: var(--soil); stroke-width: 2; stroke-dasharray: 6 8; opacity: .65; }
+.cena-svg .cerca { fill: none; stroke: var(--soil); stroke-width: 4; stroke-linecap: round; }
+.cena-svg .riacho { fill: color-mix(in srgb, var(--water) 55%, var(--card)); stroke: var(--water); stroke-width: 2; }
+.cena-svg .junco { fill: none; stroke: var(--leaf); stroke-width: 3; stroke-linecap: round; }
+
+/* plantas: o contorno de seleção não depende só de cor */
+.planta { cursor: pointer; outline: none; }
+.planta .anel { fill: none; stroke: transparent; }
+.planta:hover .anel { stroke: var(--edge); stroke-width: 2; stroke-dasharray: 4 3; }
+.planta:focus-visible .anel { stroke: var(--terra); stroke-width: 3; }
+.planta.sel .anel { stroke: var(--edge); stroke-width: 3; stroke-dasharray: none; fill: color-mix(in srgb, var(--card) 55%, transparent); }
+.planta .ramos { fill: none; stroke: var(--tronco); stroke-linecap: round; stroke-linejoin: round; }
+.planta .folhas { fill: var(--folha); stroke: var(--edge); stroke-width: .45px; }
+.planta .selo rect { fill: var(--card); stroke: var(--edge); stroke-width: 1.5; }
+.planta .selo text { font: 700 9px var(--f-body); fill: var(--ink); }
+
+/* crescimento: cada galho se desenha na ordem em que a planta cresceu */
+.ramos.draw { stroke-dasharray: 1; animation: crescer .9s ease-out both; }
+.folhas.draw-folha { animation: folhear .6s ease-out both; }
+@keyframes crescer { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes folhear { from { opacity: 0; } to { opacity: 1; } }
+
+/* painéis de texto */
+.campo-detalhe { background: var(--note-1); border: 2px solid var(--edge); border-radius: 4px 12px 6px 14px; box-shadow: var(--hard-sm); padding: var(--s-4) var(--s-5); }
+.campo-detalhe h3 { font: 700 28px/1 var(--f-hand); color: var(--area-ink); margin-bottom: var(--s-2); }
+.campo-detalhe p { margin: 0 0 var(--s-3); max-width: 68ch; }
+.campo-aviso { font-weight: 700; }
+.link { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--area-ink); text-align: left; text-decoration: underline wavy; text-underline-offset: 4px; text-decoration-thickness: 1.5px; cursor: pointer; }
+.link:hover { color: var(--terra); }
+.medidores { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.medidores li { display: grid; grid-template-columns: 96px minmax(80px, 160px) minmax(0, 1fr); gap: 10px; align-items: center; font-size: 15px; }
+.medidores span { font: 700 12px var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+@media (max-width: 560px) { .medidores li { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+meter { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; border: 2px solid var(--edge); border-radius: 8px; background: var(--paper-2); }
+meter::-webkit-meter-bar { background: transparent; border: 0; height: 100%; }
+meter::-webkit-meter-optimum-value, meter::-webkit-meter-suboptimum-value, meter::-webkit-meter-even-less-good-value { background: var(--leaf); border-radius: 6px; }
+meter::-moz-meter-bar { background: var(--leaf); border-radius: 6px; }
+.campo-lista h3 { font: 700 28px/1 var(--f-hand); color: var(--area-ink); margin-bottom: var(--s-2); }
+.campo-lista ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.campo-lista .link[aria-pressed="true"] { color: var(--terra); text-decoration-style: solid; }

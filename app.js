@@ -1179,6 +1179,16 @@ function show(id) {
   Progress.get().visited[m.id] = true; Progress.save(); renderAll();
 }
 
+/* aba do Campo Vivo: ocupa o lugar de um assunto */
+function showCampo() {
+  if (onLeave) { onLeave(); onLeave = null; }
+  if (broto) { broto.dispose(); broto = null; }
+  curMod = null; redraw = () => {}; try { localStorage.setItem("mc-mod", "campo"); } catch (e) {}
+  document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === "campo"));
+  const main = $("#main"); main.dataset.area = "calculo"; main.innerHTML = "";
+  onLeave = CampoVivo.montar(main); renderAll();
+}
+
 /* ---------- layout didático: gancho, laboratório primeiro, contextos em abas, Python com cópia ---------- */
 const ICONS = {
   campo: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6z"/><path d="M12 15c0-3-2.5-5-6-5 0 3.5 2.5 5 6 5z"/></svg>`,
@@ -1243,7 +1253,7 @@ function touchDay() {
 function onGoal(d) {
   const s = Progress.get(); s.goals[d.module + ":" + d.index] = today(); touchDay();
   const mod = MODS.find(m => m.id === d.module);
-  if (mod && d.total && Array.from({length: d.total}, (_, i) => s.goals[d.module + ":" + i]).every(Boolean) && !s.done[mod.id]) { s.done[mod.id] = today(); toast(`${mod.nome}: assunto concluído!`); }
+  if (mod && d.total && Array.from({length: d.total}, (_, i) => s.goals[d.module + ":" + i]).every(Boolean) && !s.done[mod.id]) { s.done[mod.id] = today(); toast(`${mod.nome}: assunto concluído!`); window.dispatchEvent(new CustomEvent("mc:done", {detail: {module: mod.id, done: true}})); }
   checkBadges(); Progress.save(); renderAll();
   const f = $(".finish"); if (f && curMod) { f.outerHTML = finishHTML(curMod); bindFinish(); }
 }
@@ -1257,6 +1267,7 @@ function toggleDone(m) {
   if (s.done[m.id]) delete s.done[m.id];
   else { s.done[m.id] = today(); const r = $("#finish").getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); if (broto) broto.say("Mais uma espiga na plantação!", "happy"); }
   touchDay(); checkBadges(); Progress.save(); renderAll();
+  window.dispatchEvent(new CustomEvent("mc:done", {detail: {module: m.id, done: !!s.done[m.id]}}));
   $(".finish").outerHTML = finishHTML(m); bindFinish();
 }
 function renderAll() { renderTrail(); renderNav(); renderCaderno(); }
@@ -1276,7 +1287,7 @@ function renderTrail() {
 }
 function renderNav() {
   const s = Progress.get();
-  document.querySelectorAll("#nav .grp").forEach(d => { const ms = MODS.filter(m => AREA[m.grupo] === d.dataset.area); $(".cnt", d).textContent = `${ms.filter(m => s.done[m.id]).length}/${ms.length}`; });
+  document.querySelectorAll("#nav .grp[data-area]").forEach(d => { const ms = MODS.filter(m => AREA[m.grupo] === d.dataset.area); $(".cnt", d).textContent = `${ms.filter(m => s.done[m.id]).length}/${ms.length}`; });
   document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("done", !!s.done[b.dataset.id]));
 }
 let resetTm = 0;
@@ -1384,9 +1395,13 @@ function layoutDidatico(m, main) {
   const pick = i => tabs.forEach((t, j) => { t.setAttribute("aria-selected", i === j); t.tabIndex = i === j ? 0 : -1; $("#" + t.getAttribute("aria-controls"), main).hidden = i !== j; });
   tabs.forEach((t, i) => { t.onclick = () => pick(i); t.onkeydown = e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const j = (i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length; pick(j); tabs[j].focus(); } }; });
   const cp = $(".copy", main); let tm = 0;
-  cp.onclick = async () => { const ok = await copyText(m.python); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; clearTimeout(tm); tm = setTimeout(() => { cp.textContent = "Copiar código"; }, 1800); };
+  cp.onclick = async () => { const ok = await copyText(m.python); if (ok) window.dispatchEvent(new CustomEvent("mc:copy", {detail: {module: m.id}})); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; clearTimeout(tm); tm = setTimeout(() => { cp.textContent = "Copiar código"; }, 1800); };
 }
 const nav = $("#nav");
+{ /* aba especial: o Campo Vivo cresce com o progresso */
+  const d = document.createElement("div"); d.className = "grp especial"; d.innerHTML = `<h4>Campo Vivo</h4>`;
+  const b = document.createElement("button"); b.textContent = "Meu campo"; b.dataset.id = "campo"; b.onclick = () => { showCampo(); window.scrollTo({top: 0}); }; d.appendChild(b); nav.appendChild(d);
+}
 [...new Set(MODS.map(m => m.grupo))].forEach(g => {
   const d = document.createElement("div"); d.className = "grp"; d.dataset.area = AREA[g]; d.innerHTML = `<h4>${g}<span class="cnt"></span></h4>`;
   MODS.filter(m => m.grupo === g).forEach(m => { const b = document.createElement("button"); b.textContent = m.nome; b.dataset.id = m.id; b.onclick = () => { show(m.id); window.scrollTo({top: 0}); }; d.appendChild(b); });
@@ -1422,8 +1437,9 @@ document.body.insertAdjacentHTML("afterbegin", contourSVG());
   });
 })();
 let first = location.hash.slice(1); try { first = first || localStorage.getItem("mc-mod"); } catch (e) {}
-show(first);
-$("#main").addEventListener("input", touchDay, true);
+CampoVivo.init({mods: MODS, progress: Progress, streak, today, toast, area: AREA, abrir: id => { show(id); $("#main").scrollIntoView({block: "start"}); }});
+if (first === "campo") showCampo(); else show(first);
+$("#main").addEventListener("input", () => { touchDay(); if (curMod) window.dispatchEvent(new CustomEvent("mc:lab", {detail: {module: curMod.id}})); }, true);
 $("#main").addEventListener("click", e => { if (e.target.closest("button, .tab")) touchDay(); }, true);
 const re = () => redraw();
 new ResizeObserver(re).observe($("#main"));
