@@ -38,7 +38,7 @@ LABS_V2.taylor = function (stage, panel, extra) {
   const rb = row(panel), bAn = btn(rb, "Animar a ordem", () => {
     if (anim) return parar();
     ns.set(0); bAn.textContent = "Parar"; bAn.setAttribute("aria-pressed", "true"); draw();
-    anim = setInterval(() => { const n = ns.get() + 1; ns.set(n); draw(); if (n >= 8) parar(); }, 1000);
+    anim = setInterval(() => { const n = ns.get() + 1; ns.set(n); draw(); if (n >= 8) { parar(); draw(); } }, 1000);
   }, true);
   function parar() { clearInterval(anim); anim = 0; bAn.textContent = "Animar a ordem"; bAn.setAttribute("aria-pressed", "false"); }
   const oldLeave = onLeave; onLeave = () => { clearInterval(anim); anim = 0; clearTimeout(tm); if (oldLeave) oldLeave(); };
@@ -94,7 +94,8 @@ LABS_V2.taylor = function (stage, panel, extra) {
     tex(fml, taylorTex(F, n, a));
     hint.textContent = `Faixa boa: de x = ${fmt(xl, 2)} até ${fmt(xr, 2)}. Diferença neste ponto: ${fmt(err, 4)}. Arraste no gráfico o ponto verde (centro a) ou o azul (ponto de teste x).`;
     const st = {k, n, a, x, err}; let won = false;
-    G.forEach((gl, i) => { if (!done[i] && gl.ok(st)) { won = true;
+    /* durante a animação os desafios esperam: a ordem passa por valores que não são escolha sua */
+    G.forEach((gl, i) => { if (!anim && !done[i] && gl.ok(st)) { won = true;
       done[i] = true; const li = $(`.goal[data-i="${i}"]`, extra); li.classList.add("done", "just"); $(".goal-msg", extra).textContent = gl.win(st);
       meter.classList.remove("flash"); void meter.offsetWidth; meter.classList.add("flash");
       if (broto) { clearTimeout(tm); broto.say(gl.win(st), "happy"); }
