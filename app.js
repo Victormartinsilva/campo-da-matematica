@@ -1313,6 +1313,8 @@ const FISICA_LABS = {vetores: buildVectorLab, "leis-newton": buildNewtonLab, pro
 FISICA_MODULOS.forEach(m => MODS.push({...m, grupo: "Física", build(stage, panel, extra) { return FISICA_LABS[m.id](stage, panel, extra); }}));
 
 MODS.forEach(m => Object.assign(m, CONTENT[m.id]));
+/* laboratórios reescritos em arquivos próprios (labs/*.js) substituem o build do assunto */
+MODS.forEach(m => { if (window.LABS_V2 && LABS_V2[m.id]) m.build = LABS_V2[m.id]; });
 MODS.sort((a, b) => ID_ORDER.indexOf(a.id) - ID_ORDER.indexOf(b.id));
 
 /* ---------- navegação ---------- */
@@ -1366,7 +1368,7 @@ async function copyText(text) {
   let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove(); return ok;
 }
 /* ---------- progresso: salvo no navegador, com cópia em memória se o armazenamento falhar ---------- */
-const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}});
+const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}, notas: {}, videos: {}});
 const Progress = (() => {
   let s = emptyProgress(), ok = true;
   try { const raw = localStorage.getItem("mc-progress"); if (raw) s = {...s, ...JSON.parse(raw)}; } catch (e) { ok = false; }
@@ -1449,7 +1451,14 @@ function renderTrail() {
 function renderNav() {
   const s = Progress.get();
   document.querySelectorAll("#nav .grp[data-area]").forEach(d => { const ms = MODS.filter(m => AREA[m.grupo] === d.dataset.area); $(".cnt", d).textContent = `${ms.filter(m => s.done[m.id]).length}/${ms.length}`; });
-  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("done", !!s.done[b.dataset.id]));
+  document.querySelectorAll("#nav button").forEach(b => { b.classList.toggle("done", !!s.done[b.dataset.id]); b.classList.toggle("nota", !!((s.notas || {})[b.dataset.id] || {}).t); });
+}
+/* bloco "Minhas anotações" do caderno: lista dos assuntos anotados e exportação */
+function notasCaderno(s) {
+  const n = s.notas || {}, com = MODS.filter(m => n[m.id] && n[m.id].t), esc = t => t.replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+  if (!com.length) return `<div class="notas-resumo"><h3 class="py">Minhas anotações</h3><p class="cad-vazio">Você ainda não anotou nada. Cada assunto tem um campo "Minhas anotações" no fim da página.</p></div>`;
+  return `<div class="notas-resumo"><h3 class="py">Minhas anotações</h3><ul class="notas-lista">${com.map(m => `<li><button class="link" type="button" data-nota-ir="${m.id}">${esc(m.nome)}</button><p>${esc(n[m.id].t.trim().slice(0, 140))}${n[m.id].t.trim().length > 140 ? "…" : ""}</p></li>`).join("")}</ul>
+    <div class="row"><button class="btn alt notas-copiar" type="button">Copiar tudo (Markdown)</button><button class="btn alt notas-baixar" type="button">Baixar .md</button></div></div>`;
 }
 let resetTm = 0;
 function renderCaderno() {
@@ -1459,7 +1468,9 @@ function renderCaderno() {
       <div class="stat"><b>${cnt(s.done)}/${MODS.length}</b><span>assuntos estudados</span></div><div class="stat"><b>${cnt(s.goals)}</b><span>${cnt(s.goals) === 1 ? "desafio cumprido" : "desafios cumpridos"}</span></div><div class="stat"><b>${s.days.length}</b><span>${s.days.length === 1 ? "dia de estudo" : "dias de estudo"}</span></div></div>
     <ul class="badges">${badges().map(b => { const got = s.badges[b.id]; return `<li class="badge ${got ? "got" : "lock"}"><span class="stamp-ico" aria-hidden="true">${got ? ICON_SVG(b.icon) : "?"}</span><span class="b-txt"><b>${b.nome}</b><small>${got ? "Conquistado em " + got.split("-").reverse().join("/") : b.desc}</small></span></li>`; }).join("")}</ul>
     ${Progress.persisted() ? "" : `<p class="cad-note">Este navegador não deixou guardar o progresso. Ele vale só enquanto esta aba estiver aberta.</p>`}
+    ${notasCaderno(s)}
     <button class="reset" type="button">Zerar progresso</button>`;
+  ligarNotasCaderno();
   const r = $(".reset", $("#caderno"));
   r.onclick = () => { if (r.dataset.sure) { Progress.reset(); badgeCache = null; renderAll(); $(".finish") && ($(".finish").outerHTML = finishHTML(curMod), bindFinish()); return; } r.dataset.sure = "1"; r.textContent = "Tem certeza? Clique de novo para apagar tudo"; clearTimeout(resetTm); resetTm = setTimeout(() => { delete r.dataset.sure; r.textContent = "Zerar progresso"; }, 4000); };
 }
@@ -1568,6 +1579,30 @@ function montarVideo(m, main) {
   };
 }
 
+/* anotações pessoais por assunto, guardadas junto do progresso */
+const notaDe = id => ((Progress.get().notas || {})[id] || {}).t || "";
+function salvarNota(id, texto) {
+  const s = Progress.get(); s.notas = s.notas || {};
+  if (texto.trim()) s.notas[id] = {t: texto, em: today()}; else delete s.notas[id];
+  Progress.save(); renderNav(); renderCaderno();
+}
+function notasEmMarkdown() {
+  const n = Progress.get().notas || {}, partes = MODS.filter(m => n[m.id] && n[m.id].t).map(m => `## ${m.nome} (${m.grupo})\n\n${n[m.id].t.trim()}\n`);
+  return partes.length ? `# Minhas anotações\n\n${partes.join("\n")}` : "";
+}
+function montarNotas(m, main) {
+  const ta = $(".nota-txt", main), st = $(".notas-st", main); if (!ta) return; ta.value = notaDe(m.id); let tm = 0;
+  ta.addEventListener("input", () => { st.textContent = "Salvando…"; clearTimeout(tm); tm = setTimeout(() => { salvarNota(m.id, ta.value); st.textContent = Progress.persisted() ? "Salvo neste navegador" : "Não consegui guardar: vale só enquanto a aba estiver aberta"; }, 400); });
+  $(".nota-copiar", main).onclick = async e => { const b = e.currentTarget, ok = ta.value.trim() ? await copyText(ta.value) : false; b.textContent = ok ? "Copiado!" : "Nada para copiar"; setTimeout(() => { b.textContent = "Copiar"; }, 1600); };
+  $(".nota-limpar", main).onclick = e => { const b = e.currentTarget; if (!ta.value) return; if (b.dataset.sure) { ta.value = ""; salvarNota(m.id, ""); st.textContent = "Anotação apagada"; delete b.dataset.sure; b.textContent = "Limpar"; return; } b.dataset.sure = "1"; b.textContent = "Apagar mesmo?"; setTimeout(() => { delete b.dataset.sure; b.textContent = "Limpar"; }, 3000); };
+}
+function ligarNotasCaderno() {
+  const root = $("#caderno"), cp = $(".notas-copiar", root), bx = $(".notas-baixar", root); if (!cp) return;
+  cp.onclick = async () => { const ok = await copyText(notasEmMarkdown()); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; setTimeout(() => { cp.textContent = "Copiar tudo (Markdown)"; }, 1600); };
+  bx.onclick = () => { const url = URL.createObjectURL(new Blob([notasEmMarkdown()], {type: "text/markdown"})), a = document.createElement("a"); a.href = url; a.download = "minhas-anotacoes.md"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
+  root.querySelectorAll("[data-nota-ir]").forEach(b => b.onclick = () => { show(b.dataset.notaIr); $("#main").scrollIntoView({block: "start"}); });
+}
+
 function layoutDidatico(m, main) {
   main.innerHTML = `<div class="head"><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="gancho">${m.gancho}</p>
       <p class="lead">${m.resumo}</p>
@@ -1577,8 +1612,11 @@ function layoutDidatico(m, main) {
     <div class="extra"></div>
     <section class="ctx" aria-label="Onde isso aparece"><p class="ctx-titulo">Onde isso aparece</p><div class="tabs" role="tablist" aria-label="Contexto">${CONTEXTOS.map(c => `<button class="tab" role="tab" type="button" id="tab-${c.id}" data-ctx="${c.id}" aria-selected="${c.id === ctxAtual}" aria-controls="pn-ctx" tabindex="${c.id === ctxAtual ? 0 : -1}">${ICONS[c.id]}<span>${c.nome}</span></button>`).join("")}</div>
       <div class="tabpanel" role="tabpanel" id="pn-ctx"></div></section>
+    <section class="notas" aria-label="Minhas anotações"><div class="notas-head"><h3 class="py">Minhas anotações</h3><span class="notas-st" role="status" aria-live="polite"></span></div>
+      <textarea class="nota-txt" id="nota-${m.id}" rows="5" placeholder="O que você entendeu, uma dúvida, um exemplo seu…" aria-label="Anotações sobre ${m.nome}"></textarea>
+      <div class="row"><button class="btn alt nota-copiar" type="button">Copiar</button><button class="btn alt nota-limpar" type="button">Limpar</button></div></section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
-  $("pre code", main).textContent = m.python; renderEstudo(m, main); montarVideo(m, main);
+  $("pre code", main).textContent = m.python; renderEstudo(m, main); montarVideo(m, main); montarNotas(m, main);
   broto = createBroto($(".guide", main)); broto.say(m.saudacao || "Oi! Eu sou o Broto. Mexe nos controles e eu te conto o que acontece.", "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };
@@ -1644,7 +1682,7 @@ document.body.insertAdjacentHTML("afterbegin", contourSVG());
 let first = location.hash.slice(1); try { first = first || localStorage.getItem("mc-mod"); } catch (e) {}
 CampoVivo.init({mods: MODS, progress: Progress, streak, today, toast, area: AREA, abrir: id => { show(id); $("#main").scrollIntoView({block: "start"}); }});
 if (first === "campo") showCampo(); else show(first);
-$("#main").addEventListener("input", () => { touchDay(); if (curMod) window.dispatchEvent(new CustomEvent("mc:lab", {detail: {module: curMod.id}})); }, true);
+$("#main").addEventListener("input", e => { touchDay(); if (e.target.matches && e.target.matches(".nota-txt")) return; if (curMod) window.dispatchEvent(new CustomEvent("mc:lab", {detail: {module: curMod.id}})); }, true);
 $("#main").addEventListener("click", e => { if (e.target.closest("button, .tab")) touchDay(); }, true);
 const re = () => redraw();
 new ResizeObserver(re).observe($("#main"));
