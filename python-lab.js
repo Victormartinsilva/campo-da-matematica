@@ -8,10 +8,11 @@ const PythonLab = (() => {
     self.onmessage = async e => {
       const {id, code} = e.data;
       try {
-        if (!py) { self.postMessage({id, tipo: "estado", t: "Baixando o Python (só na primeira vez, uns 10 MB)…"}); py = await loadPyodide(); }
+        if (!py) { self.postMessage({id, tipo: "estado", t: "Baixando o Python (só na primeira vez, uns 10 MB)…"}); py = await loadPyodide(); py.runPython("import warnings; warnings.filterwarnings('ignore')"); }
+        self.postMessage({id, tipo: "estado", t: "Preparando as bibliotecas do código (na primeira vez baixa pandas e outras)…"}); await py.loadPackagesFromImports(code);
         self.postMessage({id, tipo: "pronto"});
         py.setStdout({batched: s => self.postMessage({id, tipo: "out", t: s})}); py.setStderr({batched: s => self.postMessage({id, tipo: "err", t: s})});
-        await py.loadPackagesFromImports(code); await py.runPythonAsync(code); self.postMessage({id, tipo: "fim"});
+        await py.runPythonAsync(code); self.postMessage({id, tipo: "fim"});
       } catch (err) { self.postMessage({id, tipo: "erro", t: String((err && err.message) || err)}); }
     };`;
   let worker = null, pronto = false, seq = 0;
