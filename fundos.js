@@ -72,7 +72,7 @@ const Fundos = (() => {
     const raiz = document.documentElement;
     if (!area || !CENAS[area]) { if (el) el.hidden = true; delete raiz.dataset.fundo; return; }
     if (!el) { el = document.createElement("div"); el.id = "fundo"; el.setAttribute("aria-hidden", "true"); document.body.prepend(el); }
-    if (el.dataset.area !== area) { el.dataset.area = area; el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">${CENAS[area]()}</svg>`; }
+    if (el.dataset.area !== area) { el.dataset.area = area; el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" fill="none">${CENAS[area]()}</svg>`; }
     el.hidden = false; raiz.dataset.fundo = area;
   }
   return {montar};
