@@ -68,7 +68,7 @@ Explainers.jogos = {
         {"t":"combinação.","s":5.08,"e":5.54,"hl":true}
       ],
       "dur": 6.74,
-      "terminal": {"cmd":"A = [[2,6], [4,4]]   # ganhos do motorista 1\nB = [[2,4], [6,4]]   # ganhos do motorista 2","at":0.52,"dur":2.4},
+      "terminal": {"cmd":"A = [[2,6], [4,4]]   # motorista 1\nB = [[2,4], [6,4]]   # motorista 2","at":0.52,"dur":2.4},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"mapa","dur":0.6},
         {"at":0.52,"acao":"desenhar","alvo":"tab-grade","dur":1.2},
@@ -105,7 +105,7 @@ Explainers.jogos = {
         {"t":"2.","s":7.68,"e":7.96,"hl":false}
       ],
       "dur": 9.16,
-      "terminal": {"cmd":"A[:, 0].argmax()   # 1: contra a rodovia, a terra","at":3.4,"dur":1.6},
+      "terminal": {"cmd":"A[:, 0].argmax()   # 1 = terra","at":3.4,"dur":1.6},
       "scene": [
         {"at":0.9,"acao":"destacar","alvo":"guia-braco","dur":0.8},
         {"at":5.12,"acao":"aparecer","alvo":"foco-col1","dur":0.6},
@@ -138,7 +138,7 @@ Explainers.jogos = {
         {"t":"conta.","s":7.04,"e":7.38,"hl":false}
       ],
       "dur": 8.58,
-      "terminal": {"cmd":"B[0, :].argmax()   # 1: motorista 2 contra a rodovia","at":5.2,"dur":1.8},
+      "terminal": {"cmd":"A[:, 1].argmax()   # 0 = rodovia","at":0.2,"dur":1.6},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"foco-col1","dur":0.5},
         {"at":0.2,"acao":"aparecer","alvo":"foco-col2","dur":0.6},
@@ -245,6 +245,7 @@ Explainers.jogos = {
       "terminal": {"cmd":"q = (4 - 6) / (2 - 4 - 6 + 4)   # 0.5","at":0.2,"dur":2.2},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"tabela","dur":0.6},
+        {"at":0.2,"acao":"sumir","alvo":"balao","dur":0.3},
         {"at":0.2,"acao":"aparecer","alvo":"misto","dur":0.5},
         {"at":1.86,"acao":"aparecer","alvo":"moeda","dur":0.7},
         {"at":2.44,"acao":"aparecer","alvo":"m-1","dur":0.7},
@@ -280,7 +281,7 @@ Explainers.jogos = {
         {"t":"5.","s":7.08,"e":7.36,"hl":false}
       ],
       "dur": 8.56,
-      "terminal": {"cmd":"A = [[5, 1], [7, 3]]   # Nash: baixar e baixar","at":0.2,"dur":1.8},
+      "terminal": {"cmd":"A = [[5, 1], [7, 3]]   # Nash: (1, 1)","at":0.2,"dur":1.8},
       "status": {"tipo":"alerta","texto":"NASH (3, 3) PIOR QUE (5, 5)","at":5.3},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"misto","dur":0.6},
@@ -290,8 +291,7 @@ Explainers.jogos = {
         {"at":3.44,"acao":"aparecer","alvo":"nash-d","dur":0.7},
         {"at":5.68,"acao":"aparecer","alvo":"otimo-d","dur":0.7}
       ],
-      "why": "Equilíbrio de Nash não é necessariamente o melhor resultado para todos.",
-      "example": {"at":1.48,"titulo":"No trabalho","texto":"Duas empresas fixando preço, ou dois anunciantes num leilão: o ganho de cada um depende da escolha do outro, e a mesma tabela serve."}
+      "why": "Equilíbrio de Nash não é necessariamente o melhor resultado para todos."
     }
   ],
   "outro": {
@@ -323,6 +323,6 @@ Explainers.jogos = {
     ],
     "cta": "Agora mexa no laboratório",
     "alvoLab": ".lab",
-    "terminal": {"cmd":"import numpy as np                          # matrizes\n\nA = np.array([[5, 1], [7, 3]])              # ganhos de quem escolhe a linha\nB = np.array([[5, 7], [1, 3]])              # ganhos de quem escolhe a coluna\nfor i in range(2):                          # cada linha\n    for j in range(2):                      # cada coluna\n        if A[i, j] == A[:, j].max() and B[i, j] == B[i, :].max():   # melhor resposta dos dois\n            print(\"Nash:\", i, j)            # equilíbrio de Nash puro","at":0.2,"dur":4.5}
+    "terminal": {"cmd":"import numpy as np\nA = np.array([[5, 1], [7, 3]])  # linha\nB = np.array([[5, 7], [1, 3]])  # coluna\nfor i in range(2):\n    for j in range(2):\n        l = A[i, j] == A[:, j].max()\n        c = B[i, j] == B[i, :].max()\n        if l and c: print(\"Nash:\", i, j)","at":0.2,"dur":4.5}
   }
 };

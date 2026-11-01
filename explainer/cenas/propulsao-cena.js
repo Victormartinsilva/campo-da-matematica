@@ -59,17 +59,17 @@ Cenas.propulsao = {
 </g>
 <g id="cena-eq">
   <g id="f-dv" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="215" y="130" text-anchor="start" font-size="32" fill="var(--ink)" >Δv =</text></g>
-  <g id="f-ve" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="290" y="130" text-anchor="start" font-size="32" fill="var(--terra)" >vₑ</text></g>
+  <g id="f-ve" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="290" y="130" text-anchor="start" font-size="32" fill="var(--terra)" >v<tspan dy="5" font-size="0.7em">e</tspan><tspan dy="-5">​</tspan></text></g>
   <g id="f-ln" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="335" y="130" text-anchor="start" font-size="32" fill="var(--ink)" >· ln</text></g>
-  <g id="f-raz" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="405" y="130" text-anchor="start" font-size="32" fill="var(--ink)" >( m₀ / m_f )</text></g>
+  <g id="f-raz" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="405" y="130" text-anchor="start" font-size="32" fill="var(--ink)" >( m<tspan dy="5" font-size="0.7em">0</tspan><tspan dy="-5">​</tspan> / m<tspan dy="5" font-size="0.7em">f</tspan><tspan dy="-5">​</tspan> )</text></g>
   <g id="massas" stroke-linejoin="round" filter="url(#rough)">
     <g fill="var(--a-fisica-fill)" stroke="var(--ink)" stroke-width="3.5"><rect x="235" y="235" width="62" height="34"/><rect x="235" y="269" width="62" height="34"/><rect x="235" y="303" width="62" height="34"/><rect x="235" y="337" width="62" height="34"/></g>
     <rect x="335" y="337" width="62" height="34" fill="var(--wheat)" stroke="var(--ink)" stroke-width="3.5"/>
     <path d="M303 354H328M320 346L329 354L320 362" fill="none" stroke="var(--terra)" stroke-width="3.5" stroke-linecap="round"/>
-    <g style="font-family:var(--f-hand)" fill="var(--ink)" stroke="none"><text x="266" y="224" text-anchor="middle" font-size="24" fill="var(--ink)" >m₀</text><text x="366" y="326" text-anchor="middle" font-size="24" fill="var(--ink)" >m_f</text></g>
+    <g style="font-family:var(--f-hand)" fill="var(--ink)" stroke="none"><text x="266" y="224" text-anchor="middle" font-size="24" fill="var(--ink)" >m<tspan dy="5" font-size="0.7em">0</tspan><tspan dy="-5">​</tspan></text><text x="366" y="326" text-anchor="middle" font-size="24" fill="var(--ink)" >m<tspan dy="5" font-size="0.7em">f</tspan><tspan dy="-5">​</tspan></text></g>
   </g>
-  <g id="n-ve" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="430" y="232" text-anchor="start" font-size="22" fill="var(--terra)" >vₑ = 2.000 m/s</text></g>
-  <g id="n-raz" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="430" y="270" text-anchor="start" font-size="22" fill="var(--ink)" >m₀ / m_f = 4</text></g>
+  <g id="n-ve" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="430" y="232" text-anchor="start" font-size="22" fill="var(--terra)" >v<tspan dy="5" font-size="0.7em">e</tspan><tspan dy="-5">​</tspan> = 2.000 m/s</text></g>
+  <g id="n-raz" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="430" y="270" text-anchor="start" font-size="22" fill="var(--ink)" >m<tspan dy="5" font-size="0.7em">0</tspan><tspan dy="-5">​</tspan> / m<tspan dy="5" font-size="0.7em">f</tspan><tspan dy="-5">​</tspan> = 4</text></g>
   <g id="n-res" style="font-family:var(--f-hand)" fill="var(--ink)"><text x="430" y="314" text-anchor="start" font-size="22" fill="var(--ink)" >Δv = 2.000·ln 4</text><text x="430" y="346" text-anchor="start" font-size="28" fill="var(--leaf)" >= 2,8 km/s</text></g>
 </g>
 <g id="guia" stroke-linecap="round" stroke-linejoin="round">

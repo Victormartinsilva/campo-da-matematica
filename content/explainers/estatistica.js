@@ -62,8 +62,8 @@ Explainers.estatistica = {
       "terminal": {"cmd":"a = [58, 62, 55, 66, 59]\nb = [65, 71, 62, 69, 68]","at":2.38,"dur":2},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"duvida","dur":0.5},
-        {"at":0.2,"acao":"mover","alvo":"botao-a","dur":1,"para":{"x":0,"y":109}},
-        {"at":0.2,"acao":"mover","alvo":"botao-b","dur":1,"para":{"x":0,"y":109}},
+        {"at":0.2,"acao":"mover","alvo":"botao-a","dur":1,"para":{"x":0,"y":63}},
+        {"at":0.2,"acao":"mover","alvo":"botao-b","dur":1,"para":{"x":0,"y":63}},
         {"at":2.38,"acao":"desenhar","alvo":"eixo","dur":0.9},
         {"at":3.14,"acao":"aparecer","alvo":"eixo-rot","dur":0.6},
         {"at":4.16,"acao":"aparecer","alvo":"pontos-a","dur":0.8},
@@ -249,7 +249,7 @@ Explainers.estatistica = {
         {"t":"sorte.","s":7.86,"e":8.2,"hl":true}
       ],
       "dur": 9.4,
-      "terminal": {"cmd":"(p < 0.05).mean()   # perto de 0.05, sem efeito real","at":3.52,"dur":2},
+      "terminal": {"cmd":"(p < 0.05).mean()   # ~0.05 sem efeito","at":3.52,"dur":2},
       "status": {"tipo":"alerta","texto":"3,4% DE FALSOS POSITIVOS","at":5.24},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"sino","dur":0.6},
@@ -287,7 +287,7 @@ Explainers.estatistica = {
         {"t":"42%.","s":7.94,"e":8.22,"hl":true}
       ],
       "dur": 9.42,
-      "terminal": {"cmd":"poder = (p < 0.05).mean()   # 500 repetições","at":2.44,"dur":2},
+      "terminal": {"cmd":"poder = (p < 0.05).mean()","at":2.44,"dur":2},
       "status": {"tipo":"ok","texto":"MAIS REPETIÇÕES, MAIS PODER","at":1.66},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"sim","dur":0.6},
@@ -330,6 +330,6 @@ Explainers.estatistica = {
     ],
     "cta": "Agora mexa no laboratório",
     "alvoLab": ".lab",
-    "terminal": {"cmd":"import numpy as np                          # sorteios\nfrom scipy import stats                     # testes estatísticos\n\nrng = np.random.default_rng()               # gerador de números aleatórios\na = rng.normal(60, 6, 5)                    # cultivar A: média 60, desvio 6, 5 parcelas\nb = rng.normal(64, 6, 5)                    # cultivar B: 4 sc/ha melhor de verdade\nprint(stats.ttest_ind(a, b, equal_var=False))   # teste de Welch: estatística e p-valor","at":0.2,"dur":4.5}
+    "terminal": {"cmd":"import numpy as np\nfrom scipy import stats\nrng = np.random.default_rng()\na = rng.normal(60, 6, 5)  # cultivar A\nb = rng.normal(64, 6, 5)  # B: +4 sc/ha\nt = stats.ttest_ind(a, b,\n                    equal_var=False)\nprint(t)   # estatística e p-valor","at":0.2,"dur":4.5}
   }
 };

@@ -323,6 +323,6 @@ Explainers.propulsao = {
       ],
       "cta": "Agora mexa no laboratório",
       "alvoLab": ".lab",
-      "terminal": {"cmd":"massa = 6000.0                              # massa instantânea em kg\nempuxo = 12000.0                            # empuxo resultante em N\naceleracao = empuxo / massa                # a = F / m\nprint(f\"Aceleração: {aceleracao:.2f} m/s²\")\n\nimport math\nve, razao = 2000.0, 4.0                  # exaustão em m/s e m₀/m_f\ndv = ve * math.log(razao)                  # Tsiolkovsky\nprint(f\"Δv: {dv:.0f} m/s\")","at":1,"dur":5}
+      "terminal": {"cmd":"massa = 6000.0   # kg\nempuxo = 12000.0   # N\naceleracao = empuxo / massa\nprint(f\"Aceleração: {aceleracao:.2f} m/s²\")\n\nimport math\nve, razao = 2000.0, 4.0   # m/s e m₀/m_f\ndv = ve * math.log(razao)\nprint(f\"Δv: {dv:.0f} m/s\")","at":1,"dur":5}
   }
 };

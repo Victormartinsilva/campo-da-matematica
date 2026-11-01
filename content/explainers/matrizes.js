@@ -251,6 +251,8 @@ Explainers.matrizes = {
       "terminal": {"cmd":"det(A2) = 2·2 − 4·1 = 0","at":3.64,"dur":1.8},
       "status": {"tipo":"erro","texto":"SINGULAR: SEM RECEITA ÚNICA","at":6.38},
       "scene": [
+        {"at":0.2,"acao":"sumir","alvo":"qtd1","dur":0.5},
+        {"at":0.2,"acao":"sumir","alvo":"qtd2","dur":0.5},
         {"at":0.2,"acao":"sumir","alvo":"conf-1","dur":0.5},
         {"at":0.2,"acao":"sumir","alvo":"conf-2","dur":0.5},
         {"at":0.2,"acao":"sumir","alvo":"ck-1","dur":0.5},
@@ -290,7 +292,7 @@ Explainers.matrizes = {
         {"t":"kg.","s":8.1,"e":8.38,"hl":false}
       ],
       "dur": 9.58,
-      "terminal": {"cmd":"np.linalg.solve(A, b)   # kg de ureia, MAP e KCl","at":0.2,"dur":2},
+      "terminal": {"cmd":"np.linalg.solve(A, b)   # kg por ha","at":0.2,"dur":2},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"receita","dur":0.6},
         {"at":0.2,"acao":"sumir","alvo":"sing-card","dur":0.5},
@@ -340,6 +342,6 @@ Explainers.matrizes = {
     ],
     "cta": "Agora mexa no laboratório",
     "alvoLab": ".lab",
-    "terminal": {"cmd":"import numpy as np                          # álgebra linear\n\nA = np.array([[.45, .11, 0],                # linha N: teor de N em ureia, MAP e KCl\n              [0,   .52, 0],                # linha P2O5\n              [0,   0,   .60]])             # linha K2O\nb = np.array([100, 80, 60])                 # meta em kg de nutriente por hectare\nprint(np.linalg.solve(A, b))                # kg de ureia, MAP e KCl que fecham a meta","at":1,"dur":4.5}
+    "terminal": {"cmd":"import numpy as np\nA = np.array([[.45, .11, 0],  # N\n              [0, .52, 0],    # P2O5\n              [0, 0, .60]])   # K2O\nb = np.array([100, 80, 60])   # kg/ha\nprint(np.linalg.solve(A, b))  # kg","at":1,"dur":4.5}
   }
 };
