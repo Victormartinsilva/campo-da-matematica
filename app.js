@@ -1428,7 +1428,7 @@ function bindFinish() { const f = $("#finish"); if (f && curMod) f.onclick = () 
 function toggleDone(m) {
   const s = Progress.get();
   if (s.done[m.id]) delete s.done[m.id];
-  else { s.done[m.id] = today(); const r = $("#finish").getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); if (broto) broto.say("Mais uma espiga na plantação!", "happy"); }
+  else { s.done[m.id] = today(); const r = $("#finish").getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); if (broto) broto.say("Assunto concluído. Bom trabalho!", "happy"); }
   touchDay(); checkBadges(); Progress.save(); renderAll();
   window.dispatchEvent(new CustomEvent("mc:done", {detail: {module: m.id, done: !!s.done[m.id]}}));
   $(".finish").outerHTML = finishHTML(m); bindFinish();

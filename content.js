@@ -104,7 +104,7 @@ x = (np.arange(n) + .5) * L/n               # centro de cada célula
 X, Y = np.meshgrid(x, x)                    # todas as posições (x, y)
 r = 5 + 20*np.exp(-((X-30)**2 + (Y-65)**2)/(2*22**2))   # chuva em mm em cada célula
 V = (r/1000).sum() * (L/n)**2               # mm viram m e multiplicam a área da célula
-print(V)                                    # volume total em m3, perto de 110`
+print(V)                                    # volume total em m3, perto de 102`
   },
   gradiente: {
     gancho: "A partir de onde você está, em que direção as coisas melhoram mais depressa?",

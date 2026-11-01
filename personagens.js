@@ -2,11 +2,12 @@
    "corpo" é desenhado em 120 x 140, com o rosto no centro (60, 90). Os grupos lf-l e lf-r giram em torno de (60, 56)
    conforme o humor (orelhas, antenas, folhas). */
 const Personagens = {
-  calculo: {nome: "Broto", corpo: `
-    <g class="lf-l"><path d="M60 56C44 54 30 42 26 26C44 26 58 38 60 56Z" fill="var(--area-ink)" stroke="var(--edge)" stroke-width="2.5" stroke-linejoin="round"/><path d="M58 52C50 44 40 36 31 29" fill="none" stroke="var(--edge)" stroke-width="1.5" opacity=".45"/></g>
-    <g class="lf-r"><g transform="translate(120 0) scale(-1 1)"><path d="M60 56C44 54 30 42 26 26C44 26 58 38 60 56Z" fill="var(--area-ink)" stroke="var(--edge)" stroke-width="2.5" stroke-linejoin="round"/><path d="M58 52C50 44 40 36 31 29" fill="none" stroke="var(--edge)" stroke-width="1.5" opacity=".45"/></g></g>
-    <ellipse cx="60" cy="90" rx="33" ry="35" fill="var(--area-fill)" stroke="var(--edge)" stroke-width="3"/>
-    <ellipse cx="48" cy="72" rx="8" ry="4.500" fill="#fff" opacity=".3" transform="rotate(-25 48 72)"/>`},
+  calculo: {nome: "Delta", corpo: `
+    <g class="lf-l"><path d="M50 54L34 30" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="27" r="5.500" fill="var(--wheat)" stroke="var(--edge)" stroke-width="2.500"/></g>
+    <g class="lf-r"><path d="M70 54Q80 36 96 40" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round"/><path d="M96 40l-7-4M96 40l-5 7" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round"/></g>
+    <path d="M60 48L110 124H10Z" fill="var(--area-fill)" stroke="var(--edge)" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M60 60L96 118H24Z" fill="none" stroke="var(--edge)" stroke-width="1.500" stroke-linejoin="round" opacity=".22"/>
+    <ellipse cx="52" cy="76" rx="6" ry="3.500" fill="#fff" opacity=".35" transform="rotate(-50 52 76)"/>`},
   algebra: {nome: "Grade", corpo: `
     <g class="lf-l" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M50 56L36 28M36 28l1.500 9M36 28l8.500 3.500"/></g>
     <g class="lf-r" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M70 56L84 28M84 28l-1.500 9M84 28l-8.500 3.500"/></g>
