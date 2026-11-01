@@ -1442,12 +1442,14 @@ function renderTrail() {
       const st = s.done[m.id] ? 2 : s.visited[m.id] ? 1 : 0, lbl = ["ainda não visitado", "visitado", "estudado"][st], cur = curMod && curMod.id === m.id;
       return `<button class="plant s${st}${cur ? " cur" : ""}" type="button" data-id="${m.id}" title="${m.nome} · ${lbl}" aria-label="${m.nome}: ${lbl}"${cur ? ' aria-current="true"' : ""}><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p${st}"/></svg></button>`;
     }).join("") + `</div></div>`;
-  }).join("") + `<p class="trail-key"><span>terra: não visitado</span><span>broto: visitado</span><span>espiga: estudado</span></p>`;
+  }).join("") + `<p class="trail-key"><span class="k"><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p0"/></svg>Não visto</span><span class="k"><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p1"/></svg>Visto: você abriu o assunto</span><span class="k"><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p2"/></svg>Estudado: completou os desafios</span></p>`;
   $("#trail").querySelectorAll(".plant").forEach(b => b.onclick = () => {
     show(b.dataset.id); $("#main").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
     const again = $(`#trail .plant[data-id="${b.dataset.id}"]`); if (again) again.focus({preventScroll: true});
   });
 }
+/* trocar de assunto não leva a página ao topo: só sobe se o começo do conteúdo já ficou para trás */
+function manterNoConteudo() { const r = $("#main").getBoundingClientRect(); if (r.top < 0) window.scrollTo({top: window.scrollY + r.top - 12, behavior: "auto"}); }
 function renderNav() {
   const s = Progress.get();
   document.querySelectorAll("#nav .grp[data-area]").forEach(d => { const ms = MODS.filter(m => AREA[m.grupo] === d.dataset.area); $(".cnt", d).textContent = `${ms.filter(m => s.done[m.id]).length}/${ms.length}`; });
@@ -1648,11 +1650,11 @@ function layoutDidatico(m, main) {
 const nav = $("#nav");
 { /* aba especial: o Campo Vivo cresce com o progresso */
   const d = document.createElement("div"); d.className = "grp especial"; d.innerHTML = `<h4>Campo Vivo</h4>`;
-  const b = document.createElement("button"); b.textContent = "Meu campo"; b.dataset.id = "campo"; b.onclick = () => { showCampo(); window.scrollTo({top: 0}); }; d.appendChild(b); nav.appendChild(d);
+  const b = document.createElement("button"); b.textContent = "Meu campo"; b.dataset.id = "campo"; b.onclick = () => { showCampo(); manterNoConteudo(); }; d.appendChild(b); nav.appendChild(d);
 }
 [...new Set(MODS.map(m => m.grupo))].forEach(g => {
   const d = document.createElement("div"); d.className = "grp"; d.dataset.area = AREA[g]; d.innerHTML = `<h4>${g}<span class="cnt"></span></h4>`;
-  MODS.filter(m => m.grupo === g).forEach(m => { const b = document.createElement("button"); b.textContent = m.nome; b.dataset.id = m.id; b.onclick = () => { show(m.id); window.scrollTo({top: 0}); }; d.appendChild(b); });
+  MODS.filter(m => m.grupo === g).forEach(m => { const b = document.createElement("button"); b.textContent = m.nome; b.dataset.id = m.id; b.onclick = () => { show(m.id); manterNoConteudo(); }; d.appendChild(b); });
   nav.appendChild(d);
 });
 
