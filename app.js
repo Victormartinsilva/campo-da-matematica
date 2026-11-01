@@ -1368,7 +1368,7 @@ async function copyText(text) {
   let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove(); return ok;
 }
 /* ---------- progresso: salvo no navegador, com cópia em memória se o armazenamento falhar ---------- */
-const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}, notas: {}, videos: {}, trilha: {}});
+const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}, notas: {}, videos: {}, trilha: {}, cartoes: {}});
 const Progress = (() => {
   let s = emptyProgress(), ok = true;
   try { const raw = localStorage.getItem("mc-progress"); if (raw) s = {...s, ...JSON.parse(raw)}; } catch (e) { ok = false; }
@@ -1470,9 +1470,11 @@ function renderCaderno() {
       <div class="stat"><b>${cnt(s.done)}/${MODS.length}</b><span>assuntos estudados</span></div><div class="stat"><b>${cnt(s.goals)}</b><span>${cnt(s.goals) === 1 ? "desafio cumprido" : "desafios cumpridos"}</span></div><div class="stat"><b>${s.days.length}</b><span>${s.days.length === 1 ? "dia de estudo" : "dias de estudo"}</span></div></div>
     <ul class="badges">${badges().map(b => { const got = s.badges[b.id]; return `<li class="badge ${got ? "got" : "lock"}"><span class="stamp-ico" aria-hidden="true">${got ? ICON_SVG(b.icon) : "?"}</span><span class="b-txt"><b>${b.nome}</b><small>${got ? "Conquistado em " + got.split("-").reverse().join("/") : b.desc}</small></span></li>`; }).join("")}</ul>
     ${Progress.persisted() ? "" : `<p class="cad-note">Este navegador não deixou guardar o progresso. Ele vale só enquanto esta aba estiver aberta.</p>`}
+    ${cartoesCaderno()}
     ${notasCaderno(s)}
     <button class="reset" type="button">Zerar progresso</button>`;
   ligarNotasCaderno();
+  $(".cart-hoje", $("#caderno"))?.addEventListener("click", () => Cartoes.abrir(mapaEmOrdemDeFoco(), "Revisar hoje"));
   const r = $(".reset", $("#caderno"));
   r.onclick = () => { if (r.dataset.sure) { Progress.reset(); badgeCache = null; renderAll(); $(".finish") && ($(".finish").outerHTML = finishHTML(curMod), bindFinish()); return; } r.dataset.sure = "1"; r.textContent = "Tem certeza? Clique de novo para apagar tudo"; clearTimeout(resetTm); resetTm = setTimeout(() => { delete r.dataset.sure; r.textContent = "Zerar progresso"; }, 4000); };
 }
@@ -1617,12 +1619,19 @@ function trilhaHTML(m) {
   const passos = [["intuicao", "Intuição", ".head"], ["lab", "Mãos na massa", ".lab"], ...(temEstudo(m) ? [["exemplos", "Exemplos", ".estudo-examples"], ["questoes", "Questões", ".estudo-exercises"]] : []), ["revisao", "Revisão", ".revisao"]];
   return `<nav class="trilha" aria-label="Trilha deste assunto"><ol>${passos.map(([id, nome, alvo], i) => `<li><button type="button" data-passo="${id}" data-alvo="${alvo}"><span class="t-n">${i + 1}</span><span class="t-t">${nome}</span><span class="t-s" aria-hidden="true"></span></button></li>`).join("")}</ol></nav>`;
 }
+/* cartões de revisão: botão do assunto e bloco "Revisar hoje" no Meu caderno */
+function rotuloCartoes(m) { const c = Cartoes.contar([m]); return c.pendentes ? `Cartões deste assunto (${c.pendentes} para rever)` : "Cartões deste assunto (em dia)"; }
+const mapaEmOrdemDeFoco = () => [...MODS].sort((a, b) => (b.grupo === "Machine learning") - (a.grupo === "Machine learning"));
+function cartoesCaderno() {
+  const c = Cartoes.contar(MODS), msg = c.vencidos ? `<b>${c.vencidos}</b> para rever hoje e ${c.novos} novos.` : c.novos ? `Nenhum atrasado. ${c.novos} cartões novos esperando.` : "Tudo em dia por hoje.";
+  return `<div class="cart-resumo"><h3 class="py">Cartões de revisão</h3><p>${msg}</p><p class="cart-nota">Machine learning entra primeiro. Até 10 cartões novos por sessão.</p><button class="btn cart-hoje" type="button" ${c.pendentes ? "" : "disabled"}>Revisar hoje</button></div>`;
+}
 function revisaoHTML(m) {
   const f = Array.isArray(m.formulas) ? m.formulas : [], esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
   return `<section class="revisao" aria-label="Revisão rápida"><h3 class="py">Revise em um minuto</h3>
     <p class="revisao-q"><b>Pergunta de ouro</b>${m.gancho}</p>
     ${f.length ? `<ul class="revisao-f">${f.map(x => `<li><span>${esc(x.nome)}</span><code>${esc(x.expressao)}</code></li>`).join("")}</ul>` : ""}
-    <p>Sem olhar a página, responda a pergunta de ouro com as suas palavras.</p><button class="btn alt revisao-escrever" type="button">Escrever minha explicação</button></section>`;
+    <p>Sem olhar a página, responda a pergunta de ouro com as suas palavras.</p><div class="revisao-acoes"><button class="btn cart-abrir" type="button">${rotuloCartoes(m)}</button><button class="btn alt revisao-escrever" type="button">Escrever minha explicação</button></div></section>`;
 }
 function estadoTrilha(m, main) {
   const s = Progress.get(); s.trilha = s.trilha || {}; const t = s.trilha[m.id] || {}, goals = [...main.querySelectorAll(".goals .goal")], gf = goals.filter(g => g.classList.contains("done")).length;
@@ -1647,10 +1656,12 @@ function montarTrilha(m, main) {
   main.querySelectorAll(".estudo-exercise details").forEach((d, i) => d.addEventListener("toggle", () => { if (!d.open) return; const x = t(); x.q = x.q || {}; if (!x.q[i]) { x.q[i] = 1; Progress.save(); } pintarTrilha(); }));
   const ex = [...main.querySelectorAll(".estudo-example")];
   if (ex.length && "IntersectionObserver" in window) { const vistos = new Set(), io = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) vistos.add(e.target); }); if (vistos.size === ex.length) { const x = t(); if (!x.ex) { x.ex = today(); Progress.save(); } io.disconnect(); pintarTrilha(); } }, {threshold: .5}); ex.forEach(e => io.observe(e)); const old = onLeave; onLeave = () => { io.disconnect(); if (old) old(); }; }
+  $(".cart-abrir", main)?.addEventListener("click", () => Cartoes.abrir([m], m.nome));
   $(".revisao-escrever", main)?.addEventListener("click", () => { const ta = $(".nota-txt", main); ta.scrollIntoView({block: "center"}); ta.focus(); });
   main.addEventListener("expl:fim", pintarTrilha);
   pintarTrilha();
 }
+window.addEventListener("mc:cartoes", () => { renderCaderno(); const b = $(".cart-abrir", $("#main")); if (b && curMod) b.textContent = rotuloCartoes(curMod); });
 window.addEventListener("mc:goal", () => setTimeout(pintarTrilha, 0));
 window.addEventListener("mc:done", () => setTimeout(pintarTrilha, 0));
 

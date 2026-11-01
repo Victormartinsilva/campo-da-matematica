@@ -506,3 +506,38 @@ nav .grp.especial h4 { font-size: 20px; opacity: .85; }
 #fundo { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 #fundo[hidden] { display: none; }
 html[data-fundo] .contours { display: none; }
+
+/* ---------- cartões de revisão ---------- */
+.revisao-acoes { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+.cart-resumo { margin-top: var(--s-5); display: grid; gap: var(--s-2); justify-items: start; }
+.cart-resumo .py { margin: 0; }
+.cart-resumo p { margin: 0; }
+.cart-nota { font-size: 14px; color: var(--ink-soft); }
+.btn:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
+body.cart-aberto { overflow: hidden; }
+.cart-fundo { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, #000 62%, transparent); backdrop-filter: blur(4px); }
+.cart { width: min(640px, 100%); max-height: calc(100vh - 32px); display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: var(--s-3); padding: var(--s-4); background: var(--paper); border: 2px solid var(--edge); border-radius: var(--r-card); box-shadow: var(--hard); }
+.cart-topo { display: flex; align-items: center; gap: var(--s-3); }
+.cart-t { font: 700 22px/1 var(--f-hand); color: var(--area-ink); margin-right: auto; }
+.cart-n { font: 700 13px var(--f-body); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.cart-x { width: 34px; height: 34px; padding: 0; font: 700 22px/1 var(--f-body); color: var(--ink); background: var(--card); border: 2px solid var(--edge); border-radius: 8px; cursor: pointer; }
+.cart-barra { height: 8px; background: var(--rule-soft); border: 1.5px solid var(--rule-strong); border-radius: 6px; overflow: hidden; }
+.cart-barra i { display: block; height: 100%; width: 0; background: var(--area-fill); transition: width .3s ease; }
+.cart-corpo { display: grid; gap: var(--s-3); grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
+.cart-card { display: grid; align-content: center; gap: var(--s-3); min-height: 240px; padding: var(--s-5); text-align: left; color: var(--ink); background: var(--card); border: 2px solid var(--edge); border-radius: 6px 18px 8px 16px; box-shadow: var(--hard-sm); cursor: pointer; overflow-y: auto; }
+.cart-card.virado { background: var(--note-1); cursor: default; }
+.cart-tag { font: 700 12px var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--area-ink); }
+.cart-txt { font: 600 21px/1.4 var(--f-display); white-space: pre-line; overflow-wrap: anywhere; }
+.cart-txt.mono { font-family: var(--f-mono); font-size: 16px; font-weight: 500; }
+.cart-dica { font-size: 14px; color: var(--ink-soft); }
+.cart-notas { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3); }
+.cart-notas button { padding: 12px 8px; font: 700 16px var(--f-body); color: #1d140c; border: 2px solid var(--edge); border-radius: 10px; cursor: pointer; box-shadow: var(--hard-sm); }
+.cart-notas button b { margin-right: 6px; opacity: .6; }
+.cart-notas .n0 { background: color-mix(in srgb, var(--alert) 55%, var(--card)); }
+.cart-notas .n1 { background: var(--wheat); }
+.cart-notas .n2 { background: var(--area-fill); }
+.cart-fim { display: grid; gap: var(--s-3); justify-items: start; padding: var(--s-5); background: var(--card); border: 2px solid var(--edge); border-radius: var(--r-card); }
+.cart-fim p { margin: 0; }
+.cart-fim-t { font: 700 26px/1.1 var(--f-display); }
+.cart button:focus-visible { outline: 3px dashed var(--terra); outline-offset: 3px; }
+@media (max-width: 480px) { .cart-card { padding: var(--s-4); min-height: 200px; } .cart-txt { font-size: 18px; } }
