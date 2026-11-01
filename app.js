@@ -1368,7 +1368,7 @@ async function copyText(text) {
   let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove(); return ok;
 }
 /* ---------- progresso: salvo no navegador, com cópia em memória se o armazenamento falhar ---------- */
-const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}, notas: {}, videos: {}});
+const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}, notas: {}, videos: {}, trilha: {}});
 const Progress = (() => {
   let s = emptyProgress(), ok = true;
   try { const raw = localStorage.getItem("mc-progress"); if (raw) s = {...s, ...JSON.parse(raw)}; } catch (e) { ok = false; }
@@ -1588,7 +1588,7 @@ const notaDe = id => ((Progress.get().notas || {})[id] || {}).t || "";
 function salvarNota(id, texto) {
   const s = Progress.get(); s.notas = s.notas || {};
   if (texto.trim()) s.notas[id] = {t: texto, em: today()}; else delete s.notas[id];
-  Progress.save(); renderNav(); renderCaderno();
+  Progress.save(); renderNav(); renderCaderno(); pintarTrilha();
 }
 function notasEmMarkdown() {
   const n = Progress.get().notas || {}, partes = MODS.filter(m => n[m.id] && n[m.id].t).map(m => `## ${m.nome} (${m.grupo})\n\n${n[m.id].t.trim()}\n`);
@@ -1607,20 +1607,65 @@ function ligarNotasCaderno() {
   root.querySelectorAll("[data-nota-ir]").forEach(b => b.onclick = () => { show(b.dataset.notaIr); $("#main").scrollIntoView({block: "start"}); });
 }
 
+/* trilha de aprendizagem: intuição, mãos na massa, exemplos, questões e revisão. A barra mostra onde a pessoa está em cada passo. */
+const temEstudo = m => Array.isArray(m.exemplos) && Array.isArray(m.exercicios);
+function trilhaHTML(m) {
+  const passos = [["intuicao", "Intuição", ".head"], ["lab", "Mãos na massa", ".lab"], ...(temEstudo(m) ? [["exemplos", "Exemplos", ".estudo-examples"], ["questoes", "Questões", ".estudo-exercises"]] : []), ["revisao", "Revisão", ".revisao"]];
+  return `<nav class="trilha" aria-label="Trilha deste assunto"><ol>${passos.map(([id, nome, alvo], i) => `<li><button type="button" data-passo="${id}" data-alvo="${alvo}"><span class="t-n">${i + 1}</span><span class="t-t">${nome}</span><span class="t-s" aria-hidden="true"></span></button></li>`).join("")}</ol></nav>`;
+}
+function revisaoHTML(m) {
+  const f = Array.isArray(m.formulas) ? m.formulas : [], esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+  return `<section class="revisao" aria-label="Revisão rápida"><h3 class="py">Revise em um minuto</h3>
+    <p class="revisao-q"><b>Pergunta de ouro</b>${m.gancho}</p>
+    ${f.length ? `<ul class="revisao-f">${f.map(x => `<li><span>${esc(x.nome)}</span><code>${esc(x.expressao)}</code></li>`).join("")}</ul>` : ""}
+    <p>Sem olhar a página, responda a pergunta de ouro com as suas palavras.</p><button class="btn alt revisao-escrever" type="button">Escrever minha explicação</button></section>`;
+}
+function estadoTrilha(m, main) {
+  const s = Progress.get(); s.trilha = s.trilha || {}; const t = s.trilha[m.id] || {}, goals = [...main.querySelectorAll(".goals .goal")], gf = goals.filter(g => g.classList.contains("done")).length;
+  const qs = main.querySelectorAll(".estudo-exercise"), qa = Object.keys(t.q || {}).length, temVideo = !!main.querySelector(".video-wrap");
+  return {
+    intuicao: temVideo ? [!!(s.videos || {})[m.id], ""] : [!!t.d, ""],
+    lab: goals.length ? [gf === goals.length, `${gf}/${goals.length}`] : [false, ""],
+    exemplos: [!!t.ex, ""],
+    questoes: qs.length ? [qa >= qs.length, `${qa}/${qs.length}`] : [false, ""],
+    revisao: [!!notaDe(m.id) || !!s.done[m.id], ""]
+  };
+}
+function pintarTrilha() {
+  const m = curMod, main = $("#main"); if (!m || !main.querySelector(".trilha")) return;
+  const est = estadoTrilha(m, main);
+  main.querySelectorAll(".trilha button").forEach(b => { const [ok, txt] = est[b.dataset.passo] || [false, ""]; b.classList.toggle("feito", ok); b.querySelector(".t-s").textContent = ok ? "✓" : txt; b.setAttribute("aria-label", `${b.querySelector(".t-t").textContent}${ok ? ", concluído" : txt ? ", " + txt : ""}`); });
+}
+function montarTrilha(m, main) {
+  const t = () => { const s = Progress.get(); s.trilha = s.trilha || {}; return (s.trilha[m.id] = s.trilha[m.id] || {}); };
+  main.querySelectorAll(".trilha button").forEach(b => b.onclick = () => { const alvo = main.querySelector(b.dataset.alvo); if (alvo) alvo.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"}); });
+  $(".more", main)?.addEventListener("click", () => { const x = t(); if (!x.d) { x.d = today(); Progress.save(); } pintarTrilha(); });
+  main.querySelectorAll(".estudo-exercise details").forEach((d, i) => d.addEventListener("toggle", () => { if (!d.open) return; const x = t(); x.q = x.q || {}; if (!x.q[i]) { x.q[i] = 1; Progress.save(); } pintarTrilha(); }));
+  const ex = [...main.querySelectorAll(".estudo-example")];
+  if (ex.length && "IntersectionObserver" in window) { const vistos = new Set(), io = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) vistos.add(e.target); }); if (vistos.size === ex.length) { const x = t(); if (!x.ex) { x.ex = today(); Progress.save(); } io.disconnect(); pintarTrilha(); } }, {threshold: .5}); ex.forEach(e => io.observe(e)); const old = onLeave; onLeave = () => { io.disconnect(); if (old) old(); }; }
+  $(".revisao-escrever", main)?.addEventListener("click", () => { const ta = $(".nota-txt", main); ta.scrollIntoView({block: "center"}); ta.focus(); });
+  main.addEventListener("expl:fim", pintarTrilha);
+  pintarTrilha();
+}
+window.addEventListener("mc:goal", () => setTimeout(pintarTrilha, 0));
+window.addEventListener("mc:done", () => setTimeout(pintarTrilha, 0));
+
 function layoutDidatico(m, main) {
   main.innerHTML = `<div class="head"><p class="eyebrow">${m.grupo}</p><h2>${m.nome}</h2><p class="gancho">${m.gancho}</p>
       <p class="lead">${m.resumo}</p>
       <button class="more" type="button" aria-expanded="false" aria-controls="detalhes">Quero mais detalhes</button><div class="detalhes" id="detalhes" hidden><p>${m.detalhes}</p></div></div>
+    ${trilhaHTML(m)}
     ${videoHTML(m)}
     <div class="lab"><div class="stage"></div><div class="side"><div class="guide"></div><div class="panel"></div></div></div>
     <div class="extra"></div>
     <section class="ctx" aria-label="Onde isso aparece"><p class="ctx-titulo">Onde isso aparece</p><div class="tabs" role="tablist" aria-label="Contexto">${CONTEXTOS.map(c => `<button class="tab" role="tab" type="button" id="tab-${c.id}" data-ctx="${c.id}" aria-selected="${c.id === ctxAtual}" aria-controls="pn-ctx" tabindex="${c.id === ctxAtual ? 0 : -1}">${ICONS[c.id]}<span>${c.nome}</span></button>`).join("")}</div>
       <div class="tabpanel" role="tabpanel" id="pn-ctx"></div></section>
+    <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>
+    ${revisaoHTML(m)}
     <section class="notas" aria-label="Minhas anotações"><div class="notas-head"><h3 class="py">Minhas anotações</h3><span class="notas-st" role="status" aria-live="polite"></span></div>
       <textarea class="nota-txt" id="nota-${m.id}" rows="5" placeholder="O que você entendeu, uma dúvida, um exemplo seu…" aria-label="Anotações sobre ${m.nome}"></textarea>
-      <div class="row"><button class="btn alt nota-copiar" type="button">Copiar</button><button class="btn alt nota-limpar" type="button">Limpar</button></div></section>
-    <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
-  $("pre code", main).textContent = m.python; PythonLab.montar($(".pywrap", main), m.python); renderEstudo(m, main); montarVideo(m, main); montarNotas(m, main);
+      <div class="row"><button class="btn alt nota-copiar" type="button">Copiar</button><button class="btn alt nota-limpar" type="button">Limpar</button></div></section>`;
+  $("pre code", main).textContent = m.python; PythonLab.montar($(".pywrap", main), m.python); renderEstudo(m, main); montarVideo(m, main); montarNotas(m, main); montarTrilha(m, main);
   broto = createBroto($(".guide", main), AREA[m.grupo]); broto.say(m.saudacao || `Oi! Eu sou ${(Personagens[AREA[m.grupo]] || Personagens.calculo).nome}. Mexe nos controles e eu te conto o que acontece.`, "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };
