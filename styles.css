@@ -623,3 +623,17 @@ body.cart-aberto { overflow: hidden; }
 .lp-previa details { border: 1.5px solid var(--rule-strong); border-radius: 8px; padding: 4px 8px; background: var(--card); }
 .lp-previa summary { cursor: pointer; font: 700 14px var(--f-mono); }
 .lp-previa small { font: 400 12px var(--f-body); color: var(--ink-soft); }
+
+/* foco: ícone menor e mais baixo, fundo totalmente opaco */
+.foco { bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+.foco-pill { align-items: flex-end; padding: 6px 14px 4px 8px; background-color: var(--card); opacity: 1; backdrop-filter: none; }
+.foco[data-estado="foco"] .foco-pill { background-color: color-mix(in srgb, var(--note-1) 100%, #000 0%); }
+.foco[data-estado="pausa"] .foco-pill { background-color: var(--note-3); }
+.foco-cuidador { display: block; margin-bottom: 2px; }
+.foco-cuidador .broto { width: 30px; }
+.foco-minip { width: 28px; height: 38px; }
+.foco-minip .foco-svg { height: 40px; }
+.foco-gotas { height: 32px; margin-bottom: 4px; }
+.foco-tempo { align-self: center; padding-left: 4px; }
+.foco-painel { background-color: var(--card); bottom: 56px; }
+@media (max-width: 860px) { .foco { bottom: max(60px, env(safe-area-inset-bottom, 0px)); } }
