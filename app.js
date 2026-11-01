@@ -1312,13 +1312,15 @@ function buildRocketLab(stage, panel, extra) {
 const FISICA_LABS = {vetores: buildVectorLab, "leis-newton": buildNewtonLab, propulsao: buildRocketLab, gravidade: buildOrbitLab, manobras: buildManeuverLab, "fisica-engenharia": buildAgricultureLab};
 FISICA_MODULOS.forEach(m => MODS.push({...m, grupo: "Física", build(stage, panel, extra) { return FISICA_LABS[m.id](stage, panel, extra); }}));
 
+/* matéria Programação e dados: cada arquivo prog/*.js registra seus módulos em MODULOS_PROG */
+(window.MODULOS_PROG || []).forEach(m => { MODS.push({grupo: "Programação e dados", ...m}); ID_ORDER.push(m.id); });
 MODS.forEach(m => Object.assign(m, CONTENT[m.id]));
 /* laboratórios reescritos em arquivos próprios (labs/*.js) substituem o build do assunto */
 MODS.forEach(m => { if (window.LABS_V2 && LABS_V2[m.id]) m.build = LABS_V2[m.id]; });
 MODS.sort((a, b) => ID_ORDER.indexOf(a.id) - ID_ORDER.indexOf(b.id));
 
 /* ---------- navegação ---------- */
-const AREA = {"Cálculo": "calculo", "Álgebra linear": "algebra", "Estatística": "estatistica", "Machine learning": "ml", "Decisão": "decisao", "Física": "fisica"};
+const AREA = {"Cálculo": "calculo", "Álgebra linear": "algebra", "Estatística": "estatistica", "Machine learning": "ml", "Decisão": "decisao", "Física": "fisica", "Programação e dados": "prog"};
 const AREAS_LIST = [...new Set(MODS.map(m => m.grupo))];
 let redraw = () => {}, curMod = null;
 function show(id) {
@@ -1634,7 +1636,7 @@ function cartoesCaderno() {
 }
 /* fontes oficiais para aprofundar (links verificados em content/fontes-ml.js) */
 function fontesHTML(m) {
-  const lista = typeof FONTES_ML !== "undefined" && FONTES_ML[m.id]; if (!lista || !lista.length) return "";
+  const lista = m.fontes || (typeof FONTES_ML !== "undefined" && FONTES_ML[m.id]); if (!lista || !lista.length) return "";
   const esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
   return `<section class="fontes" aria-label="Para aprofundar"><h3 class="py">Para aprofundar</h3><p class="fontes-lead">Fontes oficiais, do mais introdutório ao mais avançado. Abrem em outra aba.</p><ol class="fontes-lista">${lista.map(f => `<li><a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer"><b>${esc(f.titulo)}</b></a><span class="fontes-meta">${esc(f.origem)} · ${f.idioma === "pt" ? "português" : "inglês"} · ${esc(f.nivel)}</span><span class="fontes-estude">${esc(f.estude)}</span></li>`).join("")}</ol></section>`;
 }

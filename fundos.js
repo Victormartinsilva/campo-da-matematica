@@ -54,6 +54,15 @@ const Fundos = (() => {
       nos.forEach((c, i) => c.forEach(p => { const on = r() > .7; s += `<circle cx="${f(p[0])}" cy="${f(p[1])}" r="${on ? 9 : 6}" fill="var(${on ? "--wheat" : "--area-fill"})" fill-opacity="${on ? .38 : .22}" stroke="var(--area-ink)" stroke-opacity=".3" stroke-width="1.5"/>`; }));
       return s;
     },
+    /* linhas de código com a indentação de verdade, uma tabela e chaves flutuando */
+    prog() {
+      const r = rng(21); let s = ""; const tokens = ["--area-ink", "--terra", "--water", "--wheat", "--leaf"];
+      const blocos = [[90, 120, 8], [W * .58, 380, 9]];
+      blocos.forEach(([x0, y0, n]) => { let ind = 0; for (let i = 0; i < n; i++) { const y = y0 + i * 30; ind = Math.max(0, Math.min(3, ind + Math.floor(r() * 3) - 1)); let x = x0 + ind * 26; const seg = 1 + Math.floor(r() * 3); for (let k = 0; k < seg; k++) { const w = 30 + Math.floor(r() * 90); s += `<rect x="${x}" y="${y}" width="${w}" height="7" rx="3.500" fill="var(${tokens[Math.floor(r() * tokens.length)]})" fill-opacity="${f(.14 + r() * .12)}"/>`; x += w + 10; } s += `<text x="${x0 - 34}" y="${y + 8}" font-size="11" fill="var(--ink)" fill-opacity=".22" font-family="var(--f-mono)">${i + 1}</text>`; } });
+      for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) s += `<rect x="${W * .66 + j * 92}" y="${96 + i * 34}" width="92" height="34" fill="${i === 0 ? "var(--area-fill)" : "none"}" fill-opacity="${i === 0 ? .14 : 0}" stroke="var(--area-ink)" stroke-opacity=".2"/>`;
+      [["{", .1, .72, 120], ["}", .86, .22, 110], ["()", .38, .08, 70], ["[ ]", .1, .08, 60]].forEach(([t, x, y, sz]) => { s += `<text x="${W * x}" y="${H * y}" font-size="${sz}" font-family="var(--f-mono)" fill="var(--area-ink)" fill-opacity=".09">${t}</text>`; });
+      return s;
+    },
     /* árvore de decisão com losangos e um tabuleiro ao fundo */
     decisao() {
       let s = ""; const T = 90;

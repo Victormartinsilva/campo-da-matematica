@@ -31,6 +31,7 @@
   --a-ml-fill: #E0795A;        --a-ml-ink: #B5482A;
   --a-decisao-fill: #C77C9F;   --a-decisao-ink: #8A3A5C;
   --a-fisica-fill: #8FB5CC;    --a-fisica-ink: #315D78;
+  --a-prog-fill: #55BFA6;      --a-prog-ink: #1B7A66;
 
   /* post-its */
   --note-1: #FBEFC4;
@@ -85,6 +86,7 @@
     --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
     --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
     --a-fisica-fill: #8FB5CC;    --a-fisica-ink: #A8CBE0;
+    --a-prog-fill: #55BFA6;      --a-prog-ink: #78D7BF;
     --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
     --soil: #7A5C40; --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
     color-scheme: dark;
@@ -102,6 +104,7 @@
   --a-ml-fill: #E0795A;        --a-ml-ink: #F0906C;
   --a-decisao-fill: #C77C9F;   --a-decisao-ink: #DE94B3;
     --a-fisica-fill: #8FB5CC;    --a-fisica-ink: #A8CBE0;
+  --a-prog-fill: #55BFA6;      --a-prog-ink: #78D7BF;
   --note-1: #4A3D1E; --note-2: #34281F; --note-3: #1F3340;
   --soil: #7A5C40; --chalk-bg: #17100B; --chalk-ink: #F1E7D2;
   color-scheme: dark;
@@ -114,3 +117,4 @@
 [data-area="ml"]         { --area-fill: var(--a-ml-fill);         --area-ink: var(--a-ml-ink); }
 [data-area="decisao"]    { --area-fill: var(--a-decisao-fill);    --area-ink: var(--a-decisao-ink); }
 [data-area="fisica"]     { --area-fill: var(--a-fisica-fill);     --area-ink: var(--a-fisica-ink); }
+[data-area="prog"]       { --area-fill: var(--a-prog-fill);       --area-ink: var(--a-prog-ink); }

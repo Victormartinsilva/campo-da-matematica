@@ -40,5 +40,11 @@ const Personagens = {
     <circle cx="60" cy="90" r="37" fill="var(--area-fill)" stroke="var(--edge)" stroke-width="3"/>
     <circle cx="60" cy="90" r="30" fill="none" stroke="var(--edge)" stroke-width="1.500" opacity=".28"/>
     <path d="M60 53V60M60 120V127M23 90H30M90 90H97" stroke="var(--edge)" stroke-width="2.500" stroke-linecap="round" opacity=".55"/>
-    <ellipse cx="46" cy="68" rx="7" ry="4" fill="#fff" opacity=".3" transform="rotate(-30 46 68)"/>`}
+    <ellipse cx="46" cy="68" rx="7" ry="4" fill="#fff" opacity=".3" transform="rotate(-30 46 68)"/>`},
+  prog: {nome: "Chaveta", corpo: `
+    <g class="lf-l"><path d="M50 56C42 56 44 48 44 43C44 38 40 37 36 37C40 37 44 36 44 31C44 26 42 18 50 18" fill="none" stroke="var(--edge)" stroke-width="3.500" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g class="lf-r"><path d="M70 56C78 56 76 48 76 43C76 38 80 37 84 37C80 37 76 36 76 31C76 26 78 18 70 18" fill="none" stroke="var(--edge)" stroke-width="3.500" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <rect x="24" y="54" width="72" height="62" rx="12" fill="var(--area-fill)" stroke="var(--edge)" stroke-width="3"/>
+    <rect x="31" y="61" width="58" height="48" rx="7" fill="var(--card)" fill-opacity=".22"/>
+    <path d="M40 118h40" stroke="var(--edge)" stroke-width="3" stroke-linecap="round"/><rect x="82" y="104" width="5" height="9" fill="var(--edge)"/>`}
 };

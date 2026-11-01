@@ -8,7 +8,7 @@ const CAMPO_CONFIG = {
   assuntosAtivos: ["taylor", "regressao"],
 
   /* espécie de cada área da matemática */
-  areaEspecie: {calculo: "arvore", ml: "arbusto"},
+  areaEspecie: {calculo: "arvore", ml: "arbusto", prog: "arbusto"},
 
   /* L-System: axiom é o começo, regras reescrevem cada letra a cada estágio.
      F = andar e desenhar, + e - = girar, [ e ] = abrir e fechar um galho, X = ponta que só cresce.

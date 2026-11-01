@@ -1,9 +1,9 @@
 /* Foco: cronômetro de estudo (pomodoro) que faz uma muda crescer enquanto a página fica aberta e à vista.
    Sessão completa vira uma planta adulta na horta do Campo Vivo. Sair da página por mais de 1 minuto interrompe a sessão. */
 const Foco = (() => {
-  const OPC = {foco: [15, 25, 50], pausa: [5, 10]}, AUSENTE_MS = 60000, CHAVE = "mc-foco";
+  const OPC = {foco: [5, 15, 25, 50], pausa: [2, 5, 10]}, AUSENTE_MS = 60000, CHAVE = "mc-foco";
   let areaAtual = "calculo", chaveCuidador = "", estagioVisto = 0, festaTm = 0, D = null, el = null, estado = "parado", durMs = 0, acumMs = 0, ultimo = 0, ausenteDesde = 0, suspenso = false, assunto = null, esp = null, timer = 0, aberto = false;
-  const cfg = {foco: 25, pausa: 5};
+  const cfg = {foco: 5, pausa: 2};
   try { Object.assign(cfg, JSON.parse(localStorage.getItem(CHAVE) || "{}")); } catch (e) {}
   const salvarCfg = () => { try { localStorage.setItem(CHAVE, JSON.stringify(cfg)); } catch (e) {} };
   const mmss = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
@@ -87,7 +87,7 @@ const Foco = (() => {
   function init(deps) {
     D = deps; if (el) return;
     el = document.createElement("div"); el.className = "foco"; el.dataset.estado = "parado";
-    el.innerHTML = `<button class="foco-pill" type="button" aria-expanded="false"><span class="foco-cuidador" aria-hidden="true"></span><span class="foco-gotas" aria-hidden="true"><i></i><i></i><i></i></span><span class="foco-minip" aria-hidden="true"></span><span class="foco-tempo">25:00</span></button>
+    el.innerHTML = `<button class="foco-pill" type="button" aria-expanded="false"><span class="foco-cuidador" aria-hidden="true"></span><span class="foco-gotas" aria-hidden="true"><i></i><i></i><i></i></span><span class="foco-minip" aria-hidden="true"></span><span class="foco-tempo">05:00</span></button>
       <div class="foco-painel" role="group" aria-label="Cronômetro de foco" hidden>
         <div class="foco-topo"><b>Sessão de foco</b><button class="foco-fechar" type="button" aria-label="Fechar o painel de foco">×</button></div>
         <div class="foco-planta"></div><p class="foco-msg" role="status" aria-live="polite">Estude sem sair da página e a muda cresce.</p>

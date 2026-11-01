@@ -600,3 +600,26 @@ body.cart-aberto { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .foco[data-estado="foco"] .foco-gotas i { animation: none; } .foco-cuidador .broto .sway { animation: none; } }
 .calc { bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 64px); }
 @media (max-width: 860px) { .foco { bottom: max(64px, env(safe-area-inset-bottom, 0px)); } }
+
+/* ---------- laboratório de código (Programação e dados) ---------- */
+.lp { display: grid; gap: var(--s-3); }
+.lp-lbl { font: 700 13px var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--area-ink); }
+.lp-code { width: 100%; min-height: 120px; resize: vertical; padding: var(--s-3) var(--s-4); color: var(--chalk-ink); background: var(--chalk-bg); border: 2px solid var(--edge); border-radius: var(--r-card); font: 400 14px/1.6 var(--f-mono); tab-size: 4; white-space: pre; overflow: auto; }
+.lp-code:focus-visible { outline: 3px dashed var(--terra); outline-offset: 3px; }
+.lp-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+.lp-st { font: 700 13px var(--f-body); color: var(--ink-soft); }
+.lp-saida { min-height: 2.5em; }
+.lp-out { margin: 0; padding: var(--s-3) var(--s-4); color: var(--chalk-ink); background: var(--chalk-bg); border: 2px solid var(--edge); border-left: 8px solid var(--leaf); border-radius: var(--r-card); font: 400 14px/1.6 var(--f-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.lp-out.erro { border-left-color: var(--alert); color: #ffd9d2; }
+.lp-n { margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); }
+.lp-tab-wrap { overflow: auto; max-height: 320px; border: 2px solid var(--edge); border-radius: 8px; background: var(--card); }
+.lp-tab { border-collapse: collapse; width: 100%; font: 400 13.5px var(--f-mono); }
+.lp-tab th, .lp-tab td { padding: 5px 10px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
+.lp-tab th { position: sticky; top: 0; background: var(--paper-2); font-weight: 700; }
+.lp-tab td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.lp-mais { margin: 4px 8px; font-size: 12px; color: var(--ink-soft); }
+.lp-dica { margin: 0; font-size: 13px; color: var(--ink-soft); }
+.lp-previa { display: grid; gap: var(--s-2); }
+.lp-previa details { border: 1.5px solid var(--rule-strong); border-radius: 8px; padding: 4px 8px; background: var(--card); }
+.lp-previa summary { cursor: pointer; font: 700 14px var(--f-mono); }
+.lp-previa small { font: 400 12px var(--f-body); color: var(--ink-soft); }
