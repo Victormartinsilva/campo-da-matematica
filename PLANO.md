@@ -222,3 +222,40 @@ Olhando a página de assunto, há muita informação empilhada. Proposta:
 3. Horta com foco.
 4. Melhorias de design (modo passo a passo primeiro).
 5. Depois: ligação entre matérias e o módulo de políticas públicas com a base de leis.
+
+---
+
+# Fase 5: nova matéria "Programação e dados" (do iniciante à base para IA)
+
+Pedido: um quadrado novo no mapa que ensine Python, R, SQL, bancos transacionais e analíticos, ferramentas como Fabric e Databricks e suas aplicações em dados, em um guia que vai do iniciante até os conceitos básicos para começar em IA.
+
+## Módulos propostos (11)
+
+| # | Módulo | O que ensina | Laboratório |
+|---|---|---|---|
+| 1 | Como o computador pensa | variáveis, tipos, condições, laços, funções | Python no navegador (já existe) com desafios |
+| 2 | Python para dados | listas, dicionários, numpy, pandas, gráficos | tabela editável e execução de código |
+| 3 | R e Python lado a lado | quando usar cada um, tidyverse contra pandas | o mesmo problema nas duas linguagens (R mostrado, Python executável) |
+| 4 | SQL do zero | SELECT, WHERE, ORDER BY, funções de agregação | editor de SQL que roda no navegador sobre tabelas de exemplo |
+| 5 | SQL para análise | JOIN, GROUP BY, subconsultas, janelas | editor de SQL com desafios |
+| 6 | Bancos transacionais (OLTP) | tabelas, chaves, normalização, índices, ACID | simulador de transação com rollback |
+| 7 | Bancos analíticos (OLAP) | armazém de dados, esquema estrela, colunar, ETL e ELT | comparação linha contra coluna |
+| 8 | Lakehouse e medalhão | Delta, camadas bronze, prata e ouro, qualidade de dados | pipeline em três camadas, passo a passo |
+| 9 | Fabric e Databricks na prática | espaços de trabalho, notebooks, pipelines, catálogo, governança | mapa interativo das peças de cada plataforma |
+| 10 | Do dado ao modelo | atributos, treino e teste, métricas, vazamento de dados | pequeno fluxo de ML sobre uma tabela |
+| 11 | Primeiros passos em IA | IA, ML, aprendizado profundo, LLMs, RAG, guardrails: o que cada um é | linha do tempo e mapa de conceitos |
+
+Cada módulo seguiria o padrão dos outros: gancho, resumo, fórmulas e conceitos-chave, 2 exemplos, 3 questões, 3 erros comuns, fontes oficiais, cartões de revisão, vídeo e tema/guia próprios da matéria.
+
+## Pontos de decisão
+
+1. **Nome e guia da matéria:** "Programação e dados" com um guia próprio (sugestão: **Cursor**, um cursor piscando com rosto, ou **Chaveta**, um par de chaves {}). Cor própria no mapa e fundo de código e tabelas.
+2. **SQL no navegador:** dá para rodar SQL de verdade (SQLite compilado para o navegador), sem servidor. Carregaria uma biblioteca de cerca de 1 MB sob demanda, só quando você abrir um módulo de SQL.
+3. **R:** rodar R no navegador é possível, mas é pesado (dezenas de MB). Sugestão: mostrar o código R com a saída esperada e o equivalente em Python executável.
+4. **Fontes oficiais:** Python (docs.python.org), pandas, R (CRAN e tidyverse), SQLite e PostgreSQL, Microsoft Fabric e Learn, Databricks e Delta Lake, Kimball (esquema estrela), cada link verificado como nas fontes de ML.
+5. **Ordem de construção:** módulos 1, 2, 4, 5 primeiro (a base), depois 6 a 9 (bancos e plataformas), por fim 3, 10 e 11.
+
+## Ícones
+
+- Os ícones dos contextos (Todos, Agro e ambiente, Políticas públicas, Engenharia, Dados e IA, Negócios, Dia a dia) já foram refeitos, com traço mais detalhado e um destaque suave de cor.
+- Os ícones de cada assunto da nova matéria seguiriam o padrão dos outros, em três estágios.
