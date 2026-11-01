@@ -72,3 +72,57 @@ Cada etapa vira um commit separado e eu mostro antes de enviar.
 - Vídeos: falta a narração ser ouvida em voz neural no seu navegador; hoje depende das vozes instaladas.
 - Labs: ainda há cenários de agro em vários laboratórios (múltiplas, gradiente, matrizes, estatística, regressão, embeddings, atenção, token, jogos, ideia) que faltam adaptar aos outros contextos.
 - Python: vários exemplos de código ainda têm números e nomes de agro; os que têm linhas `nome = número` já ganham controles de ajuste.
+
+---
+
+# Fase 2: um vídeo por assunto e conteúdo mais forte
+
+## Situação em números
+
+- 29 assuntos. 4 já têm vídeo (limites, derivadas, Taylor, integrais). Faltam 25; o assunto "Trilha e ferramentas" é um guia de ferramentas e não precisa de vídeo, então são 24.
+- Todos os assuntos, menos "Trilha e ferramentas", já têm fórmulas, 2 exemplos e 3 exercícios.
+
+## Vídeos: 24 restantes em 6 lotes (um lote por matéria)
+
+| Lote | Assuntos | Vídeos |
+|---|---|---|
+| Cálculo | grande ideia, funções, regras de derivação, máximos e mínimos, Newton, integrais múltiplas, gradientes | 7 |
+| Álgebra linear | matrizes e sistemas | 1 |
+| Física | vetores, leis de Newton, propulsão, gravidade, manobras, física aplicada | 6 |
+| Estatística | experimentos | 1 |
+| Machine learning | regressão, otimizadores, overfitting, classificação, redes, embeddings, atenção, token | 8 |
+| Decisão | teoria dos jogos | 1 |
+
+Cada vídeo segue o padrão dos 4 atuais: 8 peças de 7 a 10 s, cena desenhada à mão, metáfora neutra (não só agro), guia da matéria, termina com chamada para o laboratório.
+
+## Decisão importante: a voz
+
+Hoje a voz é a do navegador, e a qualidade depende do que está instalado. Três caminhos:
+
+1. **Manter a voz do navegador** (como está, com a espera pela fala). Sem custo, qualidade variável.
+2. **Gerar áudio fixo por vídeo** com uma voz neural em português e guardar os arquivos no projeto. Mesma voz para todo mundo, sincronia exata, funciona offline. Exige gerar 24 a 28 arquivos de áudio uma vez; depende de uma ferramenta de voz que rode na sua máquina.
+3. **Você grava a sua voz.** Mais pessoal, dá mais trabalho.
+
+Recomendo o caminho 2 depois de fechar os roteiros.
+
+## Melhorias de conteúdo (proposta)
+
+| Ideia | O que muda para quem estuda | Esforço |
+|---|---|---|
+| Erros comuns | Em cada assunto, 3 confusões típicas e como evitá-las | baixo |
+| Glossário ao passar o mouse | Termos como "limite", "gradiente", "logit" ganham definição curta em qualquer página | médio |
+| Exercícios que corrigem | Você digita a resposta e ela confere (com tolerância), em vez de só revelar | médio |
+| Mais questões em níveis | De 3 para 6 por assunto: básico, médio, desafio | médio |
+| Cartões de revisão | Fórmulas e perguntas viram cartões com repetição espaçada no "Meu caderno" | médio |
+| Pré-requisitos e ligações | "Antes de estudar isto" e "onde isto reaparece" (derivada em gradiente em redes neurais) | médio |
+| Projeto da matéria | Um mini-projeto por matéria, usando os dados do contexto escolhido | alto |
+| Python neutro e com desafios | Exemplos sem agro e um pequeno desafio de código por assunto | médio |
+| Títulos e textos por contexto | "Experimentos de campo" e outros títulos mudam com o contexto | baixo |
+
+## Ordem sugerida
+
+1. Lote de vídeos de Cálculo (completa a matéria mais longa) e, em paralelo, "Erros comuns" e títulos por contexto.
+2. Decidir a voz e gerar o áudio dos vídeos prontos.
+3. Lotes de Física, ML, Álgebra, Estatística e Decisão.
+4. Exercícios que corrigem, mais questões e cartões de revisão.
+5. Glossário, ligações entre assuntos e projetos por matéria.
