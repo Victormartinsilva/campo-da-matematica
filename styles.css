@@ -541,3 +541,14 @@ body.cart-aberto { overflow: hidden; }
 .cart-fim-t { font: 700 26px/1.1 var(--f-display); }
 .cart button:focus-visible { outline: 3px dashed var(--terra); outline-offset: 3px; }
 @media (max-width: 480px) { .cart-card { padding: var(--s-4); min-height: 200px; } .cart-txt { font-size: 18px; } }
+
+/* ---------- fontes oficiais ---------- */
+.fontes { display: grid; gap: var(--s-3); }
+.fontes .py { margin: 0; }
+.fontes-lead { margin: 0; font-size: 15px; color: var(--ink-soft); }
+.fontes-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); counter-reset: f; }
+.fontes-lista li { counter-increment: f; display: grid; gap: 2px; padding: 10px 14px 10px 44px; position: relative; background: var(--card); border: 2px solid var(--edge); border-radius: 4px 12px 6px 12px; box-shadow: var(--hard-sm); }
+.fontes-lista li::before { content: counter(f); position: absolute; left: 12px; top: 10px; width: 22px; height: 22px; display: grid; place-items: center; font: 700 12px var(--f-body); background: var(--area-fill); color: #1d140c; border: 2px solid var(--edge); border-radius: 50%; }
+.fontes-lista a { color: var(--area-ink); font-size: 17px; }
+.fontes-meta { font: 700 12px var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.fontes-estude { font-size: 15px; }

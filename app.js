@@ -1626,6 +1626,12 @@ function cartoesCaderno() {
   const c = Cartoes.contar(MODS), msg = c.vencidos ? `<b>${c.vencidos}</b> para rever hoje e ${c.novos} novos.` : c.novos ? `Nenhum atrasado. ${c.novos} cartões novos esperando.` : "Tudo em dia por hoje.";
   return `<div class="cart-resumo"><h3 class="py">Cartões de revisão</h3><p>${msg}</p><p class="cart-nota">Machine learning entra primeiro. Até 10 cartões novos por sessão.</p><button class="btn cart-hoje" type="button" ${c.pendentes ? "" : "disabled"}>Revisar hoje</button></div>`;
 }
+/* fontes oficiais para aprofundar (links verificados em content/fontes-ml.js) */
+function fontesHTML(m) {
+  const lista = typeof FONTES_ML !== "undefined" && FONTES_ML[m.id]; if (!lista || !lista.length) return "";
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+  return `<section class="fontes" aria-label="Para aprofundar"><h3 class="py">Para aprofundar</h3><p class="fontes-lead">Fontes oficiais, do mais introdutório ao mais avançado. Abrem em outra aba.</p><ol class="fontes-lista">${lista.map(f => `<li><a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer"><b>${esc(f.titulo)}</b></a><span class="fontes-meta">${esc(f.origem)} · ${f.idioma === "pt" ? "português" : "inglês"} · ${esc(f.nivel)}</span><span class="fontes-estude">${esc(f.estude)}</span></li>`).join("")}</ol></section>`;
+}
 function revisaoHTML(m) {
   const f = Array.isArray(m.formulas) ? m.formulas : [], esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
   return `<section class="revisao" aria-label="Revisão rápida"><h3 class="py">Revise em um minuto</h3>
@@ -1676,6 +1682,7 @@ function layoutDidatico(m, main) {
     <section class="ctx" aria-label="Onde isso aparece"><p class="ctx-titulo">Onde isso aparece</p><div class="tabs" role="tablist" aria-label="Contexto">${CONTEXTOS.map(c => `<button class="tab" role="tab" type="button" id="tab-${c.id}" data-ctx="${c.id}" aria-selected="${c.id === ctxAtual}" aria-controls="pn-ctx" tabindex="${c.id === ctxAtual ? 0 : -1}">${ICONS[c.id]}<span>${c.nome}</span></button>`).join("")}</div>
       <div class="tabpanel" role="tabpanel" id="pn-ctx"></div></section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>
+    ${fontesHTML(m)}
     ${revisaoHTML(m)}
     <section class="notas" aria-label="Minhas anotações"><div class="notas-head"><h3 class="py">Minhas anotações</h3><span class="notas-st" role="status" aria-live="polite"></span></div>
       <textarea class="nota-txt" id="nota-${m.id}" rows="5" placeholder="O que você entendeu, uma dúvida, um exemplo seu…" aria-label="Anotações sobre ${m.nome}"></textarea>
