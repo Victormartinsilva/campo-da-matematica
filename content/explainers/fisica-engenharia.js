@@ -28,7 +28,7 @@ Explainers["fisica-engenharia"] = {
         {"t":"aderência.","s":7.26,"e":7.72,"hl":true}
       ],
       "dur": 8.92,
-      "terminal": {"cmd":"P = F * v   # potência = força × velocidade","at":3,"dur":2.2},
+      "terminal": {"cmd":"P = F * v   # potência","at":3,"dur":2.2},
       "scene": [
         {"at":0.2,"acao":"aparecer","alvo":"guia","dur":0.7},
         {"at":1.16,"acao":"aparecer","alvo":"solo","dur":0.6},
@@ -104,8 +104,7 @@ Explainers["fisica-engenharia"] = {
         {"at":5.3,"acao":"aparecer","alvo":"trab-w3","dur":0.7},
         {"at":5.62,"acao":"destacar","alvo":"guia-braco","dur":1}
       ],
-      "why": "Trabalho é a energia entregue pela força ao longo do caminho.",
-      "example": {"at":0.96,"titulo":"No dia a dia","texto":"Empurrar um carrinho de feira com 20 N por 100 m entrega 2000 J de trabalho."}
+      "why": "Trabalho é a energia entregue pela força ao longo do caminho."
     },
     {
       "id": "potencia",
@@ -137,7 +136,6 @@ Explainers["fisica-engenharia"] = {
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena3","dur":0.5},
         {"at":0.2,"acao":"aparecer","alvo":"pot-f1","dur":0.6},
-        {"at":3.12,"acao":"aparecer","alvo":"pot-v","dur":0.6},
         {"at":4.08,"acao":"aparecer","alvo":"pot-f2","dur":0.6},
         {"at":6.56,"acao":"aparecer","alvo":"pot-barra","dur":0.5},
         {"at":6.94,"acao":"aparecer","alvo":"pot-f3","dur":0.6},
@@ -170,12 +168,11 @@ Explainers["fisica-engenharia"] = {
         {"t":"newtons.","s":6.4,"e":6.74,"hl":false}
       ],
       "dur": 7.94,
-      "terminal": {"cmd":"F_max = mu * m * g   # 0.65 · 6000 · 9.81 = 38259 N","at":0.8,"dur":2.4},
+      "terminal": {"cmd":"F_max = mu * m * g   # 38259 N","at":0.8,"dur":2.4},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena4","dur":0.5},
         {"at":1.02,"acao":"aparecer","alvo":"ad-l1","dur":0.6},
-        {"at":3.52,"acao":"aparecer","alvo":"pe-mu","dur":0.5},
-        {"at":4.16,"acao":"aparecer","alvo":"ad-l2","dur":0.6},
+        {"at":3.52,"acao":"aparecer","alvo":"ad-l2","dur":0.6},
         {"at":5.38,"acao":"aparecer","alvo":"pe-fmax","dur":0.7},
         {"at":6.08,"acao":"aparecer","alvo":"ad-l3","dur":0.6},
         {"at":6.4,"acao":"destacar","alvo":"guia-braco","dur":1}
@@ -212,7 +209,6 @@ Explainers["fisica-engenharia"] = {
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena5","dur":0.5},
         {"at":0.2,"acao":"sumir","alvo":"f-demand","dur":0.5},
-        {"at":0.2,"acao":"sumir","alvo":"pe-mu","dur":0.1},
         {"at":1.34,"acao":"aparecer","alvo":"f-demand2","dur":0.7},
         {"at":1.34,"acao":"aparecer","alvo":"sl-l1","dur":0.6},
         {"at":2.74,"acao":"aparecer","alvo":"sl-l2","dur":0.6},
@@ -260,15 +256,13 @@ Explainers["fisica-engenharia"] = {
         {"at":0.2,"acao":"sumir","alvo":"poeira","dur":0.5},
         {"at":0.2,"acao":"sumir","alvo":"pe-fmax","dur":0.5},
         {"at":0.9,"acao":"aparecer","alvo":"chuva","dur":0.7},
-        {"at":2.56,"acao":"aparecer","alvo":"sm-mu","dur":0.6},
         {"at":4.54,"acao":"aparecer","alvo":"pe-fmax2","dur":0.7},
         {"at":4.54,"acao":"aparecer","alvo":"sm-barras","dur":0.7},
         {"at":5.96,"acao":"aparecer","alvo":"f-demand","dur":0.6},
         {"at":5.96,"acao":"aparecer","alvo":"sm-dem","dur":0.6},
         {"at":7.94,"acao":"destacar","alvo":"sm-dem","dur":0.9}
       ],
-      "why": "Solo molhado derruba o teto e consome a folga.",
-      "example": {"at":3.52,"titulo":"No campo","texto":"Na lama, μ pode cair para 0,3. O trator que arava no seco passa a patinar com o mesmo implemento."}
+      "why": "Solo molhado derruba o teto e consome a folga."
     },
     {
       "id": "telemetria",
@@ -294,7 +288,7 @@ Explainers["fisica-engenharia"] = {
         {"t":"quilowatts.","s":6.82,"e":7.22,"hl":true}
       ],
       "dur": 8.42,
-      "terminal": {"cmd":"P = forca * velocidade   # arrays do sensor","at":0.8,"dur":2.2},
+      "terminal": {"cmd":"P = forca * velocidade","at":0.8,"dur":2.2},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena7","dur":0.5},
         {"at":0.2,"acao":"sumir","alvo":"maquina","dur":0.5},
@@ -333,8 +327,6 @@ Explainers["fisica-engenharia"] = {
         {"at":0.2,"acao":"sumir","alvo":"cena8","dur":0.5},
         {"at":0.2,"acao":"aparecer","alvo":"solo","dur":0.6},
         {"at":0.2,"acao":"aparecer","alvo":"maquina","dur":0.7},
-        {"at":0.78,"acao":"aparecer","alvo":"fim-a","dur":0.6},
-        {"at":1.54,"acao":"aparecer","alvo":"fim-b","dur":0.6},
         {"at":5.74,"acao":"destacar","alvo":"guia-braco","dur":1.2}
       ],
       "cta": "Agora mexa no laboratório",

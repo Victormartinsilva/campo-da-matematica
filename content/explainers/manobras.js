@@ -25,7 +25,7 @@ Explainers.manobras = {
         {"t":"igual.","s":6.18,"e":6.52,"hl":true}
       ],
       "dur": 7.72,
-      "terminal": {"cmd":"rumo = atan2(vy, vx)   # 0° antes e depois do giro","at":0.6,"dur":2.4},
+      "terminal": {"cmd":"rumo = atan2(vy, vx)   # sempre 0°","at":0.6,"dur":2.4},
       "status": {"tipo":"ok","texto":"GIRAR NÃO MUDA O RUMO","at":5.3},
       "scene": [
         {"at":0.2,"acao":"aparecer","alvo":"guia","dur":0.7},
@@ -80,8 +80,7 @@ Explainers.manobras = {
         {"at":5.68,"acao":"aparecer","alvo":"par-tau","dur":0.6},
         {"at":6.7,"acao":"destacar","alvo":"guia-braco","dur":1}
       ],
-      "why": "Torque muda a atitude; sem força resultante, a velocidade fica.",
-      "example": {"at":3.52,"titulo":"No dia a dia","texto":"Ao girar o volante com as duas mãos, cada mão puxa para um lado. Há torque e a força resultante é quase zero."}
+      "why": "Torque muda a atitude; sem força resultante, a velocidade fica."
     },
     {
       "id": "impulso",
@@ -108,7 +107,7 @@ Explainers.manobras = {
         {"t":"segundo.","s":6.76,"e":7.16,"hl":false}
       ],
       "dur": 8.36,
-      "terminal": {"cmd":"dv = F * dt / m   # 20·4/1000 = 0.08 m/s","at":0.6,"dur":2.4},
+      "terminal": {"cmd":"dv = 20 * 4 / 1000   # 0.08 m/s","at":0.6,"dur":2.4},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena2","dur":0.5},
         {"at":0.9,"acao":"aparecer","alvo":"imp-nave","dur":0.7},
@@ -186,7 +185,7 @@ Explainers.manobras = {
         {"t":"circulariza.","s":6.44,"e":6.96,"hl":true}
       ],
       "dur": 8.16,
-      "terminal": {"cmd":"a = (r1 + r2) / 2   # semieixo da elipse de transferência","at":0.6,"dur":2.4},
+      "terminal": {"cmd":"a = (r1 + r2) / 2   # semieixo","at":0.6,"dur":2.4},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena4","dur":0.5},
         {"at":0.52,"acao":"aparecer","alvo":"h-terra","dur":0.5},
@@ -225,7 +224,7 @@ Explainers.manobras = {
         {"t":"missão.","s":6.58,"e":6.92,"hl":false}
       ],
       "dur": 8.12,
-      "terminal": {"cmd":"dv_total = dv1 + dv2   # 2426 + 1467 = 3893 m/s","at":0.6,"dur":2.4},
+      "terminal": {"cmd":"dv_total = 2426 + 1467   # 3893 m/s","at":0.6,"dur":2.4},
       "status": {"tipo":"ok","texto":"ORÇAMENTO: 3893 m/s","at":5.76},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena5","dur":0.5},
@@ -262,7 +261,7 @@ Explainers.manobras = {
         {"t":"metros.","s":7.34,"e":7.68,"hl":false}
       ],
       "dur": 8.88,
-      "terminal": {"cmd":"y = vy * dt   # 10 · 4 = 40 m de desvio lateral","at":0.6,"dur":2.4},
+      "terminal": {"cmd":"y = vy * dt   # 10 · 4 = 40 m","at":0.6,"dur":2.4},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena6","dur":0.5},
         {"at":0.2,"acao":"aparecer","alvo":"s7-nave","dur":0.6},
@@ -299,7 +298,7 @@ Explainers.manobras = {
         {"t":"caminho.","s":6.94,"e":7.34,"hl":false}
       ],
       "dur": 8.54,
-      "terminal": {"cmd":"torque != 0 e F_res = 0   # a órbita fica igual","at":0.6,"dur":2.4},
+      "terminal": {"cmd":"torque != 0, F_res = 0","at":0.6,"dur":2.4},
       "scene": [
         {"at":0.2,"acao":"sumir","alvo":"cena7","dur":0.5},
         {"at":0.2,"acao":"desenhar","alvo":"sat-orb","dur":1},
