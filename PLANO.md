@@ -126,3 +126,46 @@ Recomendo o caminho 2 depois de fechar os roteiros.
 3. Lotes de Física, ML, Álgebra, Estatística e Decisão.
 4. Exercícios que corrigem, mais questões e cartões de revisão.
 5. Glossário, ligações entre assuntos e projetos por matéria.
+
+---
+
+# Fase 3: revisão de layout e tema (feedback de 01/11)
+
+## O que você apontou
+
+| # | Problema | Causa provável | Proposta |
+|---|---|---|---|
+| 1 | Com a tela em 100%, o vídeo fica cortado | O palco do vídeo é 16:9 e mais a barra de controles e a barra de trilha fixa passam da altura da janela | Limitar a altura do vídeo à janela (largura calculada pela altura disponível), controles sempre visíveis e botão de tela cheia |
+| 2 | Os controles do laboratório ficam longe do gráfico: você desce para ajustar e não vê o gráfico mexer | O painel fica abaixo do gráfico em janelas menos largas, ou o gráfico sai da tela ao rolar | Gráfico fixo no topo enquanto você ajusta os controles (em janelas largas, painel ao lado e gráfico fixo; em janelas estreitas, gráfico fixo em cerca de 40% da altura e controles embaixo) |
+| 3 | O ícone do guia de Cálculo parece um limão e os textos dos balões e cartões ainda vêm do tema antigo | O Broto é uma bolinha verde com folhas; as falas citam plantação, espiga, "Eu sou o Broto" | Redesenhar o guia de Cálculo com tema de matemática (ver abaixo) e revisar as falas, avisos, medalhas e rótulos |
+| 4 | O fundo ainda parece relevo de terra em todas as matérias | As curvas de nível do hero e do fundo são as mesmas em todas | Um fundo inteiro por matéria, no lugar do relevo (ver abaixo) |
+| 5 | Revisão geral do layout | Várias mudanças seguidas sem uma passada de conjunto | Auditoria de layout página por página, com checklist e correções |
+
+## Fundo por matéria (substitui o relevo de terra)
+
+| Matéria | Fundo |
+|---|---|
+| Cálculo | Curvas e tangentes suaves (famílias de funções), sem relevo |
+| Álgebra linear | Grade de plano cartesiano com vetores e transformações sutis |
+| Física | Espaço: estrelas, órbitas elípticas, nebulosa discreta; papel milimetrado só no palco |
+| Estatística | Nuvem de pontos e curvas de distribuição |
+| Machine learning | Rede de nós e conexões |
+| Decisão | Tabuleiro e árvore de decisão em losangos |
+
+Os fundos mudam o site inteiro, inclusive a página inicial quando você passa o mouse nos blocos do mapa. Eles respeitam o tema claro e escuro e o modo de movimento reduzido.
+
+## Novo guia de Cálculo
+
+Proposta de nomes e formas, para você escolher: **Tangente** (um lápis com olhos que desenha uma reta), **Curvinha** (uma curva suave com rosto) ou **Delta** (um triângulo com rosto, do símbolo de variação). Os outros cinco guias ficam como estão.
+
+## Revisão de vocabulário do tema antigo
+
+Trocar "plantação", "espiga", "talhão", "Broto" e semelhantes nas falas do guia, avisos, medalhas, o "Campo Vivo" e legendas. O Campo Vivo pode manter a metáfora da planta, já que ele é um recurso à parte, mas com o nome e os textos de caderno de estudo.
+
+## Ordem
+
+1. Vídeo cortado e controles junto do gráfico (itens 1 e 2): correções de layout, o que mais atrapalha o uso.
+2. Fundos por matéria (item 4).
+3. Novo guia de Cálculo e revisão do vocabulário (item 3).
+4. Auditoria de layout página por página (item 5).
+5. Retomar os vídeos que pararam por limite de uso.
