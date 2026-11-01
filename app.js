@@ -1328,7 +1328,7 @@ function show(id) {
   const m = MODS.find(x => x.id === id) || MODS[0]; curMod = m; N = 0;
   try { localStorage.setItem("mc-mod", m.id); } catch (e) {}
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === m.id));
-  const main = $("#main"); main.dataset.area = AREA[m.grupo];
+  const main = $("#main"); main.dataset.area = document.documentElement.dataset.area = AREA[m.grupo];
   layoutDidatico(m, main);
   redraw = m.build($(".stage", main), $(".panel", main), $(".extra", main));
   main.insertAdjacentHTML("beforeend", finishHTML(m)); bindFinish();
@@ -1479,13 +1479,7 @@ function renderCaderno() {
 
 /* ---------- Broto, o guia de campo: plantinha que comenta o que você faz ---------- */
 let broto = null;
-const BROTO_SVG = `<svg class="broto" viewBox="0 0 120 140" role="img" aria-label="Broto, o guia de campo" data-mood="neutral">
-  <ellipse cx="60" cy="128" rx="38" ry="7" fill="var(--paper-2)" stroke="var(--edge)" stroke-width="2"/>
-  <g class="sway">
-    <g class="lf-l"><path d="M60 56C44 54 30 42 26 26C44 26 58 38 60 56Z" fill="var(--area-ink)" stroke="var(--edge)" stroke-width="2.5" stroke-linejoin="round"/><path d="M58 52C50 44 40 36 31 29" fill="none" stroke="var(--edge)" stroke-width="1.5" opacity=".45"/></g>
-    <g class="lf-r"><g transform="translate(120 0) scale(-1 1)"><path d="M60 56C44 54 30 42 26 26C44 26 58 38 60 56Z" fill="var(--area-ink)" stroke="var(--edge)" stroke-width="2.5" stroke-linejoin="round"/><path d="M58 52C50 44 40 36 31 29" fill="none" stroke="var(--edge)" stroke-width="1.5" opacity=".45"/></g></g>
-    <ellipse cx="60" cy="90" rx="33" ry="35" fill="var(--area-fill)" stroke="var(--edge)" stroke-width="3"/>
-    <ellipse cx="48" cy="72" rx="8" ry="4.5" fill="#fff" opacity=".3" transform="rotate(-25 48 72)"/>
+const BROTO_FACES = `
     <g class="f f-neutral"><g class="eyes"><ellipse cx="49" cy="86" rx="3.5" ry="4.8" fill="var(--edge)"/><ellipse cx="71" cy="86" rx="3.5" ry="4.8" fill="var(--edge)"/></g>
       <path d="M53 100Q60 105 67 100" fill="none" stroke="var(--edge)" stroke-width="2.8" stroke-linecap="round"/><ellipse cx="41" cy="96" rx="5.5" ry="3.2" fill="var(--terra)" opacity=".35"/><ellipse cx="79" cy="96" rx="5.5" ry="3.2" fill="var(--terra)" opacity=".35"/></g>
     <g class="f f-happy"><path d="M43 87Q49 78 55 87M65 87Q71 78 77 87" fill="none" stroke="var(--edge)" stroke-width="3.2" stroke-linecap="round"/>
@@ -1497,9 +1491,12 @@ const BROTO_SVG = `<svg class="broto" viewBox="0 0 120 140" role="img" aria-labe
       <circle cx="51" cy="84" r="2.5" fill="var(--edge)"/><circle cx="73" cy="84" r="2.5" fill="var(--edge)"/><path d="M62 74Q69 69 77 74" fill="none" stroke="var(--edge)" stroke-width="3" stroke-linecap="round"/>
       <path d="M55 101H66" fill="none" stroke="var(--edge)" stroke-width="2.8" stroke-linecap="round"/>
       <circle cx="92" cy="62" r="3" fill="var(--ink-soft)"/><circle cx="100" cy="50" r="4.2" fill="var(--ink-soft)"/><circle cx="110" cy="34" r="6" fill="var(--ink-soft)"/></g>
-  </g></svg>`;
-function createBroto(host) {
-  host.innerHTML = `${BROTO_SVG}<div class="bubble"><p role="status" aria-live="polite"></p></div>`;
+`;
+const BROTO_SVG = area => { const p = Personagens[area] || Personagens.calculo; return `<svg class="broto" viewBox="0 0 120 140" role="img" aria-label="${p.nome}, o guia de campo" data-mood="neutral" data-guia="${area || "calculo"}">
+  <ellipse cx="60" cy="128" rx="38" ry="7" fill="var(--paper-2)" stroke="var(--edge)" stroke-width="2"/>
+  <g class="sway">${p.corpo}${BROTO_FACES}</g></svg>`; };
+function createBroto(host, area) {
+  host.innerHTML = `${BROTO_SVG(area)}<div class="bubble"><p role="status" aria-live="polite"></p></div>`;
   const svg = $(".broto", host), bubble = $(".bubble", host), p = $("p", bubble); let idle = 0, back = 0;
   const arm = () => { clearTimeout(idle); idle = setTimeout(() => say("Hmm… parou? Mexe num controle e eu comento.", "thinking", true), 16000); };
   function say(text, mood = "neutral", keepIdle) {
@@ -1624,7 +1621,7 @@ function layoutDidatico(m, main) {
       <div class="row"><button class="btn alt nota-copiar" type="button">Copiar</button><button class="btn alt nota-limpar" type="button">Limpar</button></div></section>
     <div class="pywrap"><div class="py-head"><h3 class="py">Em Python</h3><button class="btn alt copy" type="button">Copiar código</button></div><pre><code></code></pre></div>`;
   $("pre code", main).textContent = m.python; PythonLab.montar($(".pywrap", main), m.python); renderEstudo(m, main); montarVideo(m, main); montarNotas(m, main);
-  broto = createBroto($(".guide", main)); broto.say(m.saudacao || "Oi! Eu sou o Broto. Mexe nos controles e eu te conto o que acontece.", "happy");
+  broto = createBroto($(".guide", main), AREA[m.grupo]); broto.say(m.saudacao || `Oi! Eu sou ${(Personagens[AREA[m.grupo]] || Personagens.calculo).nome}. Mexe nos controles e eu te conto o que acontece.`, "happy");
   const more = $(".more", main), det = $("#detalhes", main);
   more.onclick = () => { const open = det.hidden; det.hidden = !open; more.setAttribute("aria-expanded", open); more.textContent = open ? "Menos detalhes" : "Quero mais detalhes"; };
   const tabs = [...main.querySelectorAll(".tab")], painel = $("#pn-ctx", main), T = CTX_TEXTO[m.id] || {};
