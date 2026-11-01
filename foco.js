@@ -2,7 +2,7 @@
    Sessão completa vira uma planta adulta na horta do Campo Vivo. Sair da página por mais de 1 minuto interrompe a sessão. */
 const Foco = (() => {
   const OPC = {foco: [15, 25, 50], pausa: [5, 10]}, AUSENTE_MS = 60000, CHAVE = "mc-foco";
-  let D = null, el = null, estado = "parado", durMs = 0, acumMs = 0, ultimo = 0, ausenteDesde = 0, suspenso = false, assunto = null, esp = null, timer = 0, aberto = false;
+  let areaAtual = "calculo", chaveCuidador = "", estagioVisto = 0, festaTm = 0, D = null, el = null, estado = "parado", durMs = 0, acumMs = 0, ultimo = 0, ausenteDesde = 0, suspenso = false, assunto = null, esp = null, timer = 0, aberto = false;
   const cfg = {foco: 25, pausa: 5};
   try { Object.assign(cfg, JSON.parse(localStorage.getItem(CHAVE) || "{}")); } catch (e) {}
   const salvarCfg = () => { try { localStorage.setItem(CHAVE, JSON.stringify(cfg)); } catch (e) {} };
@@ -29,7 +29,14 @@ const Foco = (() => {
     const rest = Math.max(0, durMs - acumMs), agora = estado === "parado" ? cfg.foco * 60000 : rest;
     $(".foco-tempo").textContent = mmss(agora); el.dataset.estado = suspenso ? "suspenso" : estado;
     $(".foco-pill").setAttribute("aria-label", `Foco, ${estado === "parado" ? "parado" : estado === "pausa" ? "em pausa" : suspenso ? "pausado" : "em andamento"}, ${mmss(agora)}. ${aberto ? "Fechar" : "Abrir"} o painel`);
-    $(".foco-planta").innerHTML = planta();
+    const m = D.getMod(); if (m) areaAtual = D.area[m.grupo] || areaAtual;
+    if (chaveCuidador !== areaAtual) { chaveCuidador = areaAtual; $(".foco-cuidador").innerHTML = BROTO_SVG(areaAtual); }
+    const cuid = $(".foco-cuidador .broto"), p = planta();
+    if (cuid && !festaTm) cuid.dataset.mood = estado === "pausa" ? "happy" : "neutral";
+    $(".foco-planta").innerHTML = p; $(".foco-minip").innerHTML = p;
+    const max = CAMPO_CONFIG.especies[esp && CAMPO_CONFIG.especies[esp] ? esp : "arvore"].lsystem.iteracoes, est = estado === "foco" ? Math.min(max, Math.floor(Math.min(1, acumMs / durMs) * max)) : 0;
+    if (est > estagioVisto && cuid) { cuid.dataset.mood = "happy"; clearTimeout(festaTm); festaTm = setTimeout(() => { festaTm = 0; }, 3000); }
+    estagioVisto = est;
     const b1 = $(".foco-go"), b2 = $(".foco-stop");
     b1.textContent = estado === "parado" ? "Começar foco" : suspenso ? "Continuar" : estado === "pausa" ? "Pular a pausa" : "Pausar"; b2.hidden = estado === "parado";
     $(".foco-opc").hidden = estado !== "parado";
@@ -80,7 +87,7 @@ const Foco = (() => {
   function init(deps) {
     D = deps; if (el) return;
     el = document.createElement("div"); el.className = "foco"; el.dataset.estado = "parado";
-    el.innerHTML = `<button class="foco-pill" type="button" aria-expanded="false"><span class="foco-icone" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 3h6"/></svg></span><span class="foco-tempo">25:00</span></button>
+    el.innerHTML = `<button class="foco-pill" type="button" aria-expanded="false"><span class="foco-cuidador" aria-hidden="true"></span><span class="foco-gotas" aria-hidden="true"><i></i><i></i><i></i></span><span class="foco-minip" aria-hidden="true"></span><span class="foco-tempo">25:00</span></button>
       <div class="foco-painel" role="group" aria-label="Cronômetro de foco" hidden>
         <div class="foco-topo"><b>Sessão de foco</b><button class="foco-fechar" type="button" aria-label="Fechar o painel de foco">×</button></div>
         <div class="foco-planta"></div><p class="foco-msg" role="status" aria-live="polite">Estude sem sair da página e a muda cresce.</p>

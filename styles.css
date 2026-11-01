@@ -580,3 +580,23 @@ body.cart-aberto { overflow: hidden; }
 .foco-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; min-width: min(100%, 320px); }
 .foco-lista li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 10px; background: var(--card); border: 1.5px solid var(--rule-strong); border-radius: 8px; }
 @media (max-width: 860px) { .foco { bottom: max(64px, env(safe-area-inset-bottom, 0px)); } }
+
+/* ---------- foco: canto direito, opaco, com o guia da matéria cuidando da muda ---------- */
+.foco { left: auto; right: max(12px, env(safe-area-inset-right, 0px)); justify-items: end; }
+.foco-pill { gap: 2px; padding: 4px 14px 4px 6px; background: var(--card); opacity: 1; }
+.foco[data-estado="foco"] .foco-pill { background: var(--note-1); color: var(--ink); }
+.foco[data-estado="pausa"] .foco-pill { background: var(--note-3); }
+.foco-painel { left: auto; right: 0; background: var(--card); opacity: 1; }
+.foco-cuidador .broto { width: 38px; height: auto; display: block; overflow: visible; }
+.foco-minip { display: block; width: 34px; height: 46px; overflow: hidden; align-self: end; }
+.foco-minip .foco-svg { height: 48px; width: auto; }
+.foco-svg .ramos { fill: none; stroke: var(--tronco); stroke-linecap: round; } .foco-svg .folhas { fill: var(--folha); stroke: none; }
+.foco-gotas { position: relative; width: 14px; height: 40px; display: block; align-self: end; margin-bottom: 4px; }
+.foco-gotas i { position: absolute; left: 3px; top: 0; width: 5px; height: 8px; background: var(--water); border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%; opacity: 0; }
+.foco[data-estado="foco"] .foco-gotas i { animation: gota 2.6s ease-in infinite; }
+.foco[data-estado="foco"] .foco-gotas i:nth-child(2) { left: 7px; animation-delay: .9s; }
+.foco[data-estado="foco"] .foco-gotas i:nth-child(3) { left: 1px; animation-delay: 1.7s; }
+@keyframes gota { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 85% { opacity: .9; } 100% { transform: translateY(32px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .foco[data-estado="foco"] .foco-gotas i { animation: none; } .foco-cuidador .broto .sway { animation: none; } }
+.calc { bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 64px); }
+@media (max-width: 860px) { .foco { bottom: max(64px, env(safe-area-inset-bottom, 0px)); } }
