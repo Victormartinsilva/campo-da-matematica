@@ -2,12 +2,12 @@
    Salvo no localStorage; se o armazenamento falhar, o estado vive só em memória. */
 const CampoEstado = (() => {
   const C = CAMPO_CONFIG; let s = null, persiste = true;
-  const novo = () => ({schema: C.schema, ultimaVisita: Date.now(), solo: {fertilidade: 0, sequencia: 0}, plantas: [], biomas: {horta: true}, dias: {rega: {}, adubo: {}}, vistos: {}});
+  const novo = () => ({schema: C.schema, ultimaVisita: Date.now(), solo: {fertilidade: 0, sequencia: 0}, plantas: [], biomas: {horta: true}, dias: {rega: {}, adubo: {}}, vistos: {}, foco: {sessoes: []}});
 
   /* futuras versões do esquema são convertidas aqui */
   function migrar(raw) {
     if (!raw || typeof raw !== "object" || raw.schema !== C.schema) return novo();
-    const base = novo(); return {...base, ...raw, solo: {...base.solo, ...raw.solo}, dias: {rega: {...raw.dias?.rega}, adubo: {...raw.dias?.adubo}}};
+    const base = novo(); return {...base, ...raw, solo: {...base.solo, ...raw.solo}, dias: {rega: {...raw.dias?.rega}, adubo: {...raw.dias?.adubo}}, foco: {sessoes: [...(raw.foco?.sessoes || [])]}};
   }
   function carregar() {
     try { const t = localStorage.getItem(C.chave); s = migrar(t ? JSON.parse(t) : null); } catch (e) { persiste = false; s = novo(); }
@@ -58,6 +58,15 @@ const CampoEstado = (() => {
     if (diaUnico) { if (st.dias.adubo[assunto] === diaUnico) return false; st.dias.adubo[assunto] = diaUnico; }
     p.adubo = 1; p.crescimento = Math.min(maximo(p.especie), p.crescimento + C.crescimento.adubo); salvar(); return true;
   }
+  /* uma sessão de foco completa vira uma planta adulta; o bioma só vale se já estiver aberto */
+  function registrarFoco(assunto, minutos, especie, bioma) {
+    const st = get(), b = st.biomas[bioma] ? bioma : "horta", reg = {id: "foco-" + Date.now(), assunto, minutos, especie, bioma: b, quando: Date.now()};
+    st.foco.sessoes.push(reg); salvar(); return reg;
+  }
+  /* sair da página no meio da sessão: a planta do assunto murcha um pouco, sem perder o estágio já conquistado */
+  function murchar(assunto) {
+    const p = planta(assunto); if (!p) return false; p.crescimento = Math.max(Math.floor(p.crescimento), p.crescimento - 0.3); p.agua = Math.max(0, p.agua - 0.3); salvar(); return true;
+  }
   const marcarVisto = p => { get().vistos[p.id] = estagio(p); };
   const foiVisto = p => get().vistos[p.id] ?? -1;
 
@@ -66,5 +75,5 @@ const CampoEstado = (() => {
     const st = get(), w = C.crescimento, n = Math.min(w.capimMax, Math.floor(st.solo.sequencia / w.capimPorDias)), e = Math.min(maximo("capim"), 1 + Math.floor(st.solo.fertilidade / 30));
     return {n, estagio: e};
   }
-  return {get, carregar, salvar, reset, tick, desbloquear, plantar, regar, adubar, planta, estagio, maximo, marcarVisto, foiVisto, capins, persiste: () => persiste};
+  return {get, carregar, salvar, reset, tick, desbloquear, plantar, regar, adubar, registrarFoco, murchar, planta, estagio, maximo, marcarVisto, foiVisto, capins, persiste: () => persiste};
 })();

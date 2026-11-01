@@ -1368,7 +1368,7 @@ async function copyText(text) {
   let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove(); return ok;
 }
 /* ---------- progresso: salvo no navegador, com cópia em memória se o armazenamento falhar ---------- */
-const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}, notas: {}, videos: {}, trilha: {}, cartoes: {}});
+const emptyProgress = () => ({done: {}, visited: {}, goals: {}, days: [], badges: {}, notas: {}, videos: {}, trilha: {}, cartoes: {}, foco: {}});
 const Progress = (() => {
   let s = emptyProgress(), ok = true;
   try { const raw = localStorage.getItem("mc-progress"); if (raw) s = {...s, ...JSON.parse(raw)}; } catch (e) { ok = false; }
@@ -1471,6 +1471,7 @@ function renderCaderno() {
     <ul class="badges">${badges().map(b => { const got = s.badges[b.id]; return `<li class="badge ${got ? "got" : "lock"}"><span class="stamp-ico" aria-hidden="true">${got ? ICON_SVG(b.icon) : "?"}</span><span class="b-txt"><b>${b.nome}</b><small>${got ? "Conquistado em " + got.split("-").reverse().join("/") : b.desc}</small></span></li>`; }).join("")}</ul>
     ${Progress.persisted() ? "" : `<p class="cad-note">Este navegador não deixou guardar o progresso. Ele vale só enquanto esta aba estiver aberta.</p>`}
     ${cartoesCaderno()}
+    ${focoCaderno()}
     ${notasCaderno(s)}
     <button class="reset" type="button">Zerar progresso</button>`;
   ligarNotasCaderno();
@@ -1622,6 +1623,11 @@ function trilhaHTML(m) {
 /* cartões de revisão: botão do assunto e bloco "Revisar hoje" no Meu caderno */
 function rotuloCartoes(m) { const c = Cartoes.contar([m]); return c.pendentes ? `Cartões deste assunto (${c.pendentes} para rever)` : "Cartões deste assunto (em dia)"; }
 const mapaEmOrdemDeFoco = () => [...MODS].sort((a, b) => (b.grupo === "Machine learning") - (a.grupo === "Machine learning"));
+function focoCaderno() {
+  const f = Progress.get().foco || {}, hoje = (f.dias || {})[today()] || 0, total = f.total || 0, top = Object.entries(f.assuntos || {}).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const nome = id => (MODS.find(m => m.id === id) || {nome: id}).nome, esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+  return `<div class="foco-resumo"><h3 class="py">Tempo de foco</h3><p><b>${hoje}</b> min hoje · <b>${total}</b> min no total · <b>${f.sessoes || 0}</b> ${(f.sessoes || 0) === 1 ? "sessão completa" : "sessões completas"}</p>${top.length ? `<ul class="foco-lista">${top.map(([id, min]) => `<li><span>${esc(nome(id))}</span><b>${min} min</b></li>`).join("")}</ul>` : `<p class="cart-nota">Abra o cronômetro de foco no canto da tela e estude sem sair da página: a muda cresce e vira uma planta na horta.</p>`}</div>`;
+}
 function cartoesCaderno() {
   const c = Cartoes.contar(MODS), msg = c.vencidos ? `<b>${c.vencidos}</b> para rever hoje e ${c.novos} novos.` : c.novos ? `Nenhum atrasado. ${c.novos} cartões novos esperando.` : "Tudo em dia por hoje.";
   return `<div class="cart-resumo"><h3 class="py">Cartões de revisão</h3><p>${msg}</p><p class="cart-nota">Machine learning entra primeiro. Até 10 cartões novos por sessão.</p><button class="btn cart-hoje" type="button" ${c.pendentes ? "" : "disabled"}>Revisar hoje</button></div>`;
@@ -1667,6 +1673,7 @@ function montarTrilha(m, main) {
   main.addEventListener("expl:fim", pintarTrilha);
   pintarTrilha();
 }
+window.addEventListener("mc:foco", () => renderCaderno());
 window.addEventListener("mc:cartoes", () => { renderCaderno(); const b = $(".cart-abrir", $("#main")); if (b && curMod) b.textContent = rotuloCartoes(curMod); });
 window.addEventListener("mc:goal", () => setTimeout(pintarTrilha, 0));
 window.addEventListener("mc:done", () => setTimeout(pintarTrilha, 0));
@@ -1751,6 +1758,7 @@ document.body.insertAdjacentHTML("afterbegin", contourSVG());
   });
 })();
 let first = location.hash.slice(1); try { first = first || localStorage.getItem("mc-mod"); } catch (e) {}
+Foco.init({progress: Progress, getMod: () => curMod, toast, today, area: AREA});
 CampoVivo.init({mods: MODS, progress: Progress, streak, today, toast, area: AREA, abrir: id => { show(id); $("#main").scrollIntoView({block: "start"}); }});
 if (first === "campo") showCampo(); else show(first);
 $("#main").addEventListener("input", e => { touchDay(); if (e.target.matches && e.target.matches(".nota-txt")) return; if (curMod) window.dispatchEvent(new CustomEvent("mc:lab", {detail: {module: curMod.id}})); }, true);

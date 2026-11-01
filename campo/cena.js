@@ -20,6 +20,9 @@ const CampoCena = (() => {
     return svg;
   }
 
+  /* uma planta sozinha (para o cronômetro de foco), com a base na origem */
+  const mini = (esp, estagio, frac) => arte(esp, estagio, frac, 0.9, false);
+
   /* o chão e os enfeites de cada bioma */
   function chao(bioma) {
     const terra = `<rect x="0" y="170" width="${W}" height="${H - 170}" class="terra"/>`;
@@ -39,5 +42,5 @@ const CampoCena = (() => {
     });
     return `<svg viewBox="0 0 ${W} ${H}" class="cena-svg" data-bioma="${bioma}" role="group" aria-label="${descricao}"><rect width="${W}" height="${H}" class="ceu"/>${chao(bioma)}${plantas}</svg>`;
   }
-  return {renderizar};
+  return {renderizar, mini};
 })();

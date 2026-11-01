@@ -29,6 +29,10 @@ const CampoVivo = (() => {
       lista.push({id: p.id, tipo: "planta", esp: p.especie, estagio: e, frac: e >= esp.lsystem.iteracoes ? 0 : p.crescimento - e, animar: e > CampoEstado.foiVisto(p),
         rotulo: `${esp.nome} de ${m ? m.nome : p.assunto}, estágio ${e} de ${esp.lsystem.iteracoes}`, planta: p});
     }
+    for (const r of st.foco.sessoes.filter(r => r.bioma === bioma)) {
+      const esp = C.especies[r.especie]; if (!esp) continue; const m = mod(r.assunto), e = esp.lsystem.iteracoes;
+      lista.push({id: r.id, tipo: "foco", esp: r.especie, estagio: e, frac: 0, animar: false, rotulo: `${esp.nome} de uma sessão de foco de ${r.minutos} min em ${m ? m.nome : "estudo livre"}`, sessao: r});
+    }
     if (st.biomas[bioma]) {
       const {n, estagio} = CampoEstado.capins(), esp = C.especies.capim;
       for (let i = 0; i < n; i++) lista.push({id: `c-${bioma}-${i}`, tipo: "capim", esp: "capim", estagio, frac: 0, animar: false, rotulo: `${esp.nome} nascido do solo vivo, estágio ${estagio} de ${esp.lsystem.iteracoes}`});
@@ -39,6 +43,7 @@ const CampoVivo = (() => {
   function detalhe(it) {
     if (!it) return `<p>Toque numa planta para ver de onde ela veio e como está.</p>`;
     const esp = C.especies[it.esp], max = esp.lsystem.iteracoes;
+    if (it.tipo === "foco") { const r = it.sessao, m = mod(r.assunto); return `<h3>${esp.nome} · plantada pelo foco</h3><p>Sessão de ${r.minutos} min de estudo${m ? " em <b>" + esc(m.nome) + "</b>" : ""}, em ${new Date(r.quando).toLocaleDateString("pt-BR")}. Cada sessão completa, sem sair da página, vira uma planta adulta na horta.</p>`; }
     if (it.tipo === "capim") return `<h3>${esp.nome} · estágio ${it.estagio} de ${max}</h3><p>Nasceu sozinho: o solo está vivo porque você voltou em dias seguidos. ${esp.nome} ${esp.descricao}. Volte amanhã para o solo ficar ainda mais fértil.</p>`;
     const p = it.planta, m = mod(p.assunto), prox = it.estagio >= max ? 1 : p.crescimento - it.estagio;
     const aguaTxt = nivel(p.agua, "bem regada", "vai precisar de água em breve", "seca: mexa num laboratório para regar"), aduboTxt = nivel(p.adubo, "bem adubada", "adubo acabando", "sem adubo: cumpra um desafio ou copie o código");
@@ -59,7 +64,8 @@ const CampoVivo = (() => {
       <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flame"/></svg><b>${seq}</b><span>${seq === 1 ? "dia seguido" : "dias seguidos"}</span></div>
       <div class="stat"><b>${Math.round(st.solo.fertilidade)}/100</b><span>fertilidade do solo</span></div>
       <div class="stat"><b>${especies.size}</b><span>${especies.size === 1 ? "espécie" : "espécies"} no campo</span></div>
-      <div class="stat"><b>${st.plantas.length}</b><span>${st.plantas.length === 1 ? "planta de lição" : "plantas de lições"}</span></div>`;
+      <div class="stat"><b>${st.plantas.length}</b><span>${st.plantas.length === 1 ? "planta de lição" : "plantas de lições"}</span></div>
+      <div class="stat"><b>${st.foco.sessoes.length}</b><span>${st.foco.sessoes.length === 1 ? "planta de foco" : "plantas de foco"}</span></div>`;
     $(".campo-biomas", host).innerHTML = Object.entries(C.biomas).map(([id, bi]) => {
       const aberto = !!st.biomas[id];
       return `<button class="tab" role="tab" type="button" data-bioma="${id}" aria-selected="${id === bioma}" ${aberto ? "" : 'aria-disabled="true"'}>${aberto ? "" : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'}<span>${bi.nome}${aberto ? "" : " (bloqueado)"}</span></button>`;
@@ -105,6 +111,7 @@ const CampoVivo = (() => {
   /* ---------- ligação com o app ---------- */
   function init(deps) {
     D = deps; CampoEstado.carregar(); sincronizar(false); agora();
+    window.addEventListener("mc:foco", () => { if (host) desenhar(); });
     window.addEventListener("mc:done", e => { if (!e.detail.done) return; agora(); sincronizar(true); if (host) desenhar(); });
     window.addEventListener("mc:lab", e => { if (CampoEstado.regar(e.detail.module, D.today()) && host) desenhar(); });
     window.addEventListener("mc:copy", e => { if (CampoEstado.adubar(e.detail.module, D.today())) D.toast("O código adubou a sua planta"); });
