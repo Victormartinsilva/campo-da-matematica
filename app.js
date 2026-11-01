@@ -1440,7 +1440,7 @@ function renderTrail() {
     const ms = MODS.filter(m => m.grupo === g);
     return `<div class="plot" data-area="${AREA[g]}"><span class="plot-name">${g} <b>${ms.filter(m => s.done[m.id]).length}/${ms.length}</b></span><div class="plants">` + ms.map(m => {
       const st = s.done[m.id] ? 2 : s.visited[m.id] ? 1 : 0, lbl = ["ainda não visitado", "visitado", "estudado"][st], cur = curMod && curMod.id === m.id;
-      return `<button class="plant s${st}${cur ? " cur" : ""}" type="button" data-id="${m.id}" title="${m.nome} · ${lbl}" aria-label="${m.nome}: ${lbl}"${cur ? ' aria-current="true"' : ""}><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p${st}"/></svg></button>`;
+      return `<button class="plant s${st}${cur ? " cur" : ""}" type="button" data-id="${m.id}" title="${m.nome} · ${lbl}" aria-label="${m.nome}: ${lbl}"${cur ? ' aria-current="true"' : ""}><svg viewBox="0 0 26 34" aria-hidden="true"><use href="${ICONES.simbolo(m.id, st)}"/></svg></button>`;
     }).join("") + `</div></div>`;
   }).join("") + `<p class="trail-key"><span class="k"><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p0"/></svg>Não visto</span><span class="k"><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p1"/></svg>Visto: você abriu o assunto</span><span class="k"><svg viewBox="0 0 26 34" aria-hidden="true"><use href="#p2"/></svg>Estudado: completou os desafios</span></p>`;
   $("#trail").querySelectorAll(".plant").forEach(b => b.onclick = () => {
