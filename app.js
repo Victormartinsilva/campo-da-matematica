@@ -1690,15 +1690,15 @@ function layoutDidatico(m, main) {
   cp.onclick = async () => { const ok = await copyText((($(".py-code", main)) || {}).value || m.python); if (ok) window.dispatchEvent(new CustomEvent("mc:copy", {detail: {module: m.id}})); cp.textContent = ok ? "Copiado!" : "Não consegui copiar"; clearTimeout(tm); tm = setTimeout(() => { cp.textContent = "Copiar código"; }, 1800); };
 }
 const nav = $("#nav");
-{ /* aba especial: o Campo Vivo cresce com o progresso */
-  const d = document.createElement("div"); d.className = "grp especial"; d.innerHTML = `<h4>Campo Vivo</h4>`;
-  const b = document.createElement("button"); b.textContent = "Meu campo"; b.dataset.id = "campo"; b.onclick = () => { showCampo(); manterNoConteudo(); }; d.appendChild(b); nav.appendChild(d);
-}
 [...new Set(MODS.map(m => m.grupo))].forEach(g => {
   const d = document.createElement("div"); d.className = "grp"; d.dataset.area = AREA[g]; d.innerHTML = `<h4>${g}<span class="cnt"></span></h4>`;
   MODS.filter(m => m.grupo === g).forEach(m => { const b = document.createElement("button"); b.textContent = m.nome; b.dataset.id = m.id; b.onclick = () => { show(m.id); manterNoConteudo(); }; d.appendChild(b); });
   nav.appendChild(d);
 });
+{ /* aba especial: o Campo Vivo cresce com o progresso */
+  const d = document.createElement("div"); d.className = "grp especial"; d.innerHTML = `<h4>Campo Vivo</h4>`;
+  const b = document.createElement("button"); b.textContent = "Meu campo"; b.dataset.id = "campo"; b.onclick = () => { showCampo(); manterNoConteudo(); }; d.appendChild(b); nav.appendChild(d);
+}
 
 /* curvas de nível: campo de altitude com algumas colinas, desenhado por marching squares */
 function contourSVG() {
