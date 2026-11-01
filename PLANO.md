@@ -169,3 +169,56 @@ Trocar "plantação", "espiga", "talhão", "Broto" e semelhantes nas falas do gu
 3. Novo guia de Cálculo e revisão do vocabulário (item 3).
 4. Auditoria de layout página por página (item 5).
 5. Retomar os vídeos que pararam por limite de uso.
+
+---
+
+# Fase 4: fixação, horta com foco e foco em machine learning
+
+## 1. Flashcards (fixação do conteúdo)
+
+- Cada assunto gera cartões automaticamente a partir do que já existe: fórmulas (nome na frente, expressão e significado atrás), perguntas de ouro, erros comuns (a frase errada na frente, a correção atrás) e as questões (pergunta e resposta).
+- Revisão espaçada simples: você marca "errei", "quase" ou "acertei"; os cartões que erra voltam em breve e os que acerta voltam em dias (intervalos 1, 3, 7, 14 dias, guardados no navegador).
+- Onde aparece: um botão "Cartões deste assunto" na revisão de cada assunto e uma área "Revisar hoje" no Meu caderno, com os cartões vencidos de todos os assuntos, começando pelo seu foco (machine learning).
+- Tudo funciona por teclado (espaço vira o cartão, 1, 2, 3 marcam) e no celular.
+
+## 2. Horta com foco (pomodoro que faz crescer)
+
+- Um cronômetro de foco (25 min de estudo, 5 de pausa, ajustável) no Campo Vivo e em um mini-controle no cabeçalho da página.
+- A planta escolhida cresce enquanto a sessão corre com a página aberta e visível; se você troca de aba ou pausa por mais de um minuto, a planta murcha um estágio em vez de crescer. Sessão completa vira uma planta adulta na horta.
+- O tempo estudado por assunto é somado e aparece no Meu caderno (minutos por assunto e por dia).
+- A horta guarda as plantas das sessões completas, e o tema da planta acompanha a matéria estudada.
+
+## 3. Machine learning: vídeos e fontes oficiais
+
+- Os 8 vídeos de ML (regressão, otimizadores, overfitting, classificação, redes, embeddings, atenção, token) seguem a estrutura didática: pergunta, metáfora, mecanismo, números, armadilha, ligação com o trabalho, convite ao laboratório.
+- Cada assunto de ML ganha um bloco **"Para aprofundar (fontes oficiais)"** com links para a documentação e cursos de quem mantém a tecnologia, cada um com uma linha dizendo o que estudar ali e o nível:
+  - Google, Machine Learning Crash Course (regressão, classificação, overfitting, redes, embeddings).
+  - scikit-learn, guia do usuário (regressão, classificação, validação).
+  - PyTorch, tutoriais oficiais (otimizadores, redes, retropropagação).
+  - Hugging Face, cursos de LLM e de NLP (embeddings, atenção, tokens).
+  - Databricks e MLflow, documentação (trabalho com dados, treino e registro de modelos).
+  - Anthropic, documentação e guias de prompts e de uso de LLMs em produção.
+  - DeepLearning.AI e Stanford (CS229, CS224N) para a base teórica.
+- Os links serão verificados um a um antes de entrar no caderno, e o que não puder ser confirmado fica fora. Nada de resumo copiado: só links e a nossa explicação.
+- Uma trilha de estudo de ML ordenada ("Comece aqui") com a sequência dos 9 assuntos e quanto tempo cada um leva.
+
+## 4. Design da página: melhorias propostas
+
+Olhando a página de assunto, há muita informação empilhada. Proposta:
+
+| Ideia | Efeito |
+|---|---|
+| Modo passo a passo | A barra da trilha vira navegação: mostra um passo por vez (Intuição, Mãos na massa, Exemplos, Questões, Revisão) com "Próximo" no fim de cada um, em vez de uma página longa. Quem prefere ver tudo mantém a rolagem. |
+| Seções recolhíveis | Fórmulas, erros comuns, exemplos e Python começam recolhidos com um resumo de uma linha; o que você abre fica lembrado. |
+| Erros comuns em duas colunas | Mais compactos e fáceis de comparar em tela larga. |
+| Hierarquia visual | Um peso único para os títulos de seção, menos molduras duplas, e a cor da matéria só nos destaques. |
+| Ações principais sempre à vista | "Marcar como estudado", cartões e o cronômetro de foco numa faixa fixa. |
+| Tela larga | Aproveitar mais a largura: conteúdo em duas colunas quando fizer sentido (fórmulas ao lado do laboratório). |
+
+## Ordem sugerida
+
+1. Fontes oficiais de ML e retomada dos 6 vídeos de ML que pararam por limite de uso.
+2. Flashcards.
+3. Horta com foco.
+4. Melhorias de design (modo passo a passo primeiro).
+5. Depois: ligação entre matérias e o módulo de políticas públicas com a base de leis.
