@@ -80,9 +80,9 @@ Cenas.limite = {
 <g id="guia" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(0 -42)">
   <g filter="url(#rough)">
     <ellipse cx="118" cy="437" rx="36" ry="6" fill="var(--rule-soft)" stroke="var(--edge)" stroke-width="2"/>
-    <path d="M118 366C102 364 90 352 86 336C104 336 116 348 118 366Z" fill="var(--leaf)" stroke="var(--ink)" stroke-width="3"/>
-    <path d="M118 366C134 364 146 352 150 336C132 336 120 348 118 366Z" fill="var(--leaf)" stroke="var(--ink)" stroke-width="3"/>
-    <ellipse cx="118" cy="400" rx="32" ry="35" fill="var(--a-calculo-fill)" stroke="var(--ink)" stroke-width="3.5"/>
+    <path d="M108 364L92 340" fill="none" stroke="var(--ink)" stroke-width="3.5"/><circle cx="90" cy="337" r="5.5" fill="var(--wheat)" stroke="var(--ink)" stroke-width="3"/>
+    <path d="M128 364Q138 346 154 350M154 350l-7-4M154 350l-5 7" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+    <path d="M118 358L168 434H68Z" fill="var(--a-calculo-fill)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/>
     <ellipse cx="106" cy="384" rx="8" ry="4.5" fill="var(--card)" opacity="0.5" transform="rotate(-25 106 384)"/>
     <ellipse cx="107" cy="400" rx="3.5" ry="4.8" fill="var(--ink)"/><ellipse cx="129" cy="400" rx="3.5" ry="4.8" fill="var(--ink)"/>
     <path d="M111 413Q118 419 125 413" fill="none" stroke="var(--ink)" stroke-width="3"/>

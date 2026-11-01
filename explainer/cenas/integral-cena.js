@@ -114,9 +114,9 @@ Cenas.integral = {
   <g transform="translate(20 168) scale(0.9)">
     <ellipse cx="60" cy="128" rx="38" ry="7" fill="var(--rule-soft)" stroke="var(--ink)" stroke-width="3"/>
     <g filter="url(#rough)">
-      <path d="M60 56C44 54 30 42 26 26C44 26 58 38 60 56Z" fill="var(--a-calculo-ink)" stroke="var(--ink)" stroke-width="3.5"/>
-      <path d="M60 56C76 54 90 42 94 26C76 26 62 38 60 56Z" fill="var(--a-calculo-ink)" stroke="var(--ink)" stroke-width="3.5"/>
-      <ellipse cx="60" cy="90" rx="33" ry="35" fill="var(--a-calculo-fill)" stroke="var(--ink)" stroke-width="4"/>
+      <path d="M50 54L34 30" fill="none" stroke="var(--ink)" stroke-width="3.5"/><circle cx="32" cy="27" r="5.5" fill="var(--wheat)" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M70 54Q80 36 96 40M96 40l-7-4M96 40l-5 7" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+      <path d="M60 48L110 124H10Z" fill="var(--a-calculo-fill)" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
       <ellipse cx="48" cy="72" rx="8" ry="4.5" fill="var(--card)" opacity="0.5" transform="rotate(-25 48 72)"/>
       <ellipse cx="49" cy="86" rx="3.5" ry="4.8" fill="var(--ink)" stroke="none"/><ellipse cx="71" cy="86" rx="3.5" ry="4.8" fill="var(--ink)" stroke="none"/>
       <path d="M52 99Q60 106 68 99" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
@@ -124,7 +124,7 @@ Cenas.integral = {
     </g>
     <g id="guia-braco" filter="url(#rough)">
       <path d="M92 92C104 92 112 84 118 72" fill="none" stroke="var(--ink)" stroke-width="4"/>
-      <path d="M118 72C120 62 128 58 136 58C136 68 130 74 118 72Z" fill="var(--leaf)" stroke="var(--ink)" stroke-width="3"/>
+      <circle cx="127" cy="64" r="7" fill="var(--wheat)" stroke="var(--ink)" stroke-width="3"/>
     </g>
   </g>
 </g>`,

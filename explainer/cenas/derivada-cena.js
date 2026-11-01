@@ -134,10 +134,9 @@ Cenas.derivada = {
 <g id="guia" stroke-linecap="round" stroke-linejoin="round">
   <g filter="url(#rough)">
     <ellipse cx="112" cy="349" rx="34" ry="6" fill="var(--soil)" opacity="0.35" stroke="none"/>
-    <path d="M112 292C99 291 88 282 85 266C99 266 110 276 112 292Z" fill="var(--a-calculo-ink)" stroke="var(--ink)" stroke-width="3"/>
-    <path d="M112 292C125 291 136 282 139 266C125 266 114 276 112 292Z" fill="var(--a-calculo-ink)" stroke="var(--ink)" stroke-width="3"/>
-    <path d="M109 287C103 281 97 275 91 270" fill="none" stroke="var(--ink)" stroke-width="1.8" opacity="0.45"/>
-    <ellipse cx="112" cy="319" rx="27" ry="29" fill="var(--a-calculo-fill)" stroke="var(--ink)" stroke-width="3.5"/>
+    <path d="M104 289L91 270" fill="none" stroke="var(--ink)" stroke-width="3"/><circle cx="89" cy="267" r="4.5" fill="var(--wheat)" stroke="var(--ink)" stroke-width="2.5"/>
+    <path d="M120 289Q128 275 142 278M142 278l-6-3M142 278l-4 6" fill="none" stroke="var(--ink)" stroke-width="3"/>
+    <path d="M112 285L153 347H71Z" fill="var(--a-calculo-fill)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/>
     <ellipse cx="102" cy="305" rx="6" ry="3.5" fill="var(--card)" opacity="0.5" stroke="none" transform="rotate(-25 102 305)"/>
     <ellipse cx="103" cy="317" rx="3" ry="4.2" fill="var(--ink)" stroke="none"/>
     <ellipse cx="121" cy="317" rx="3" ry="4.2" fill="var(--ink)" stroke="none"/>
