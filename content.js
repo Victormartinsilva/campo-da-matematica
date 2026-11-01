@@ -95,7 +95,7 @@ print(total)                                # perto de 22,8`
   },
   multiplas: {
     gancho: "Uma medição num ponto só basta para saber o total de uma região inteira?",
-    resumo: "A integral dupla soma sobre uma região e a tripla soma sobre um volume, como a massa de solo.",
+    resumo: "A integral dupla soma sobre uma região e a tripla soma sobre um volume, como a massa de um solo, a população de uma cidade ou o volume de um reservatório.",
     detalhes: "A chuva não cai igual em toda a área, nem a densidade de pessoas num mapa. Dividir a região em células, medir cada uma e somar dá o total. Com poucas células o erro é grande, e um único ponto de medição pode errar muito. Para a massa de um corpo, soma-se também ao longo da profundidade, com a densidade mudando em cada camada.",
     python: `import numpy as np                          # contas numéricas
 

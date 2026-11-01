@@ -395,7 +395,7 @@ MODS.push({id: "matrizes", grupo: "Álgebra linear", nome: "Matrizes e sistemas"
     return draw;
   }});
 
-MODS.push({id: "estatistica", grupo: "Estatística", nome: "Experimentos de campo",
+MODS.push({id: "estatistica", grupo: "Estatística", nome: "Experimentos e testes A/B",
   build(stage, panel, extra) {
     const c = canvas(stage); const R = readout(panel); let A = [], B = [];
     const ds = ctl(panel, "Diferença real entre cultivares", 0, 15, 0.5, 4, v => fmt(v, 1) + " sc/ha", () => run());
@@ -1557,6 +1557,10 @@ function renderEstudo(m, main) {
   m.formulas.forEach(f => { const card = document.createElement("article"); card.className = "estudo-card"; const h = document.createElement("h4"); h.textContent = f.nome; const eq = document.createElement("p"); eq.className = "estudo-equation"; eq.textContent = f.expressao; const desc = document.createElement("p"); desc.textContent = f.significado; card.append(h, eq, desc); fg.appendChild(card); });
   const examples = section("Exemplos resolvidos", "estudo-examples");
   m.exemplos.forEach((ex, i) => { const card = document.createElement("article"); card.className = "estudo-example"; const h = document.createElement("h4"); h.textContent = `${i + 1}. ${ex.titulo}`; const prompt = document.createElement("p"); prompt.textContent = ex.enunciado; const ol = document.createElement("ol"); ex.passos.forEach(step => { const li = document.createElement("li"); li.textContent = step; ol.appendChild(li); }); const result = document.createElement("p"); result.className = "estudo-result"; result.textContent = ex.resultado; card.append(h, prompt, ol, result); examples.appendChild(card); });
+  if (Array.isArray(m.erros) && m.erros.length) {
+    const erros = section("Erros comuns", "estudo-erros");
+    m.erros.forEach(x => { const card = document.createElement("article"); card.className = "estudo-erro"; const e = document.createElement("p"); e.className = "estudo-erro-t"; const tag = document.createElement("b"); tag.textContent = "Erro"; e.append(tag, " ", x.erro); const c = document.createElement("p"); c.className = "estudo-erro-c"; const tg2 = document.createElement("b"); tg2.textContent = "O certo"; c.append(tg2, " ", x.correcao); card.append(e, c); erros.appendChild(card); });
+  }
   const exercises = section("Teste seu entendimento", "estudo-exercises");
   m.exercicios.forEach((ex, i) => { const card = document.createElement("article"); card.className = "estudo-exercise"; const h = document.createElement("h4"); h.textContent = `Questão ${i + 1}`; const q = document.createElement("p"); q.textContent = ex.pergunta; const details = document.createElement("details"); const summary = document.createElement("summary"); summary.textContent = "Ver resposta e resolução"; const answer = document.createElement("p"); answer.className = "estudo-answer"; answer.textContent = `Resposta: ${ex.resposta}`; const explanation = document.createElement("p"); explanation.textContent = ex.explicacao; details.append(summary, answer, explanation); card.append(h, q, details); exercises.appendChild(card); });
   /* botão de calculadora em cada exemplo e exercício */
