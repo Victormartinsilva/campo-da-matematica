@@ -1328,7 +1328,7 @@ function show(id) {
   const m = MODS.find(x => x.id === id) || MODS[0]; curMod = m; N = 0;
   try { localStorage.setItem("mc-mod", m.id); } catch (e) {}
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === m.id));
-  const main = $("#main"); main.dataset.area = document.documentElement.dataset.area = AREA[m.grupo];
+  const main = $("#main"); main.dataset.area = document.documentElement.dataset.area = AREA[m.grupo]; Fundos.montar(AREA[m.grupo]);
   layoutDidatico(m, main);
   redraw = m.build($(".stage", main), $(".panel", main), $(".extra", main));
   main.insertAdjacentHTML("beforeend", finishHTML(m)); bindFinish();
@@ -1339,7 +1339,7 @@ function show(id) {
 function showCampo() {
   if (onLeave) { onLeave(); onLeave = null; }
   if (broto) { broto.dispose(); broto = null; }
-  curMod = null; redraw = () => {}; try { localStorage.setItem("mc-mod", "campo"); } catch (e) {}
+  curMod = null; redraw = () => {}; try { localStorage.setItem("mc-mod", "campo"); } catch (e) {} Fundos.montar(null); delete document.documentElement.dataset.area;
   document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.id === "campo"));
   const main = $("#main"); main.dataset.area = "calculo"; main.innerHTML = "";
   onLeave = CampoVivo.montar(main); renderAll();

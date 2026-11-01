@@ -492,3 +492,17 @@ nav .grp.especial h4 { font-size: 20px; opacity: .85; }
 .estudo-erro b { display: inline-block; margin-right: 6px; padding: 1px 8px; font: 700 11px var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: #1d140c; background: var(--alert); border-radius: 999px; }
 .estudo-erro-c b { background: var(--leaf); color: var(--paper); }
 .estudo-erro-t { font-weight: 700; }
+
+/* ---------- laboratório: o gráfico acompanha a rolagem enquanto você ajusta os controles ---------- */
+.lab > .stage { position: sticky; top: 68px; z-index: 6; }
+@media (max-width: 860px) { .lab > .stage { top: 60px; } }
+@media (max-width: 860px) and (max-height: 700px) { .lab > .stage { position: static; } }
+
+/* ---------- vídeo: cabe na janela, com os controles à vista ---------- */
+.video-host.expl { max-width: max(420px, calc((100vh - 250px) * 16 / 9)); margin-inline: auto; }
+@media (max-width: 640px) { .video-host.expl { max-width: none; } }
+
+/* ---------- fundo inteiro por matéria ---------- */
+#fundo { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+#fundo[hidden] { display: none; }
+html[data-fundo] .contours { display: none; }
